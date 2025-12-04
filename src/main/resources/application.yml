@@ -2,6 +2,9 @@ project:
   name: Backend API
   version: 1.0.0
 
+cors:
+  allowed-origins: ${FRONTEND_URL:http://localhost:3000}
+
 spring:
   application:
     name: backend
