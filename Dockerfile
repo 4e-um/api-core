@@ -1,12 +1,19 @@
-FROM gradle:8.11-jdk21 AS builder
+FROM eclipse-temurin:21-jdk AS builder
 
 WORKDIR /app
 
-COPY build.gradle settings.gradle ./
-RUN gradle dependencies --no-daemon
+# Gradle wrapper 복사
+COPY gradlew .
+COPY gradle gradle
+RUN chmod +x gradlew
 
+# 의존성 캐싱을 위해 build 파일 먼저 복사
+COPY build.gradle settings.gradle ./
+RUN ./gradlew dependencies --no-daemon
+
+# 소스 복사 및 빌드
 COPY src src
-RUN gradle bootJar --no-daemon
+RUN ./gradlew bootJar --no-daemon
 
 FROM eclipse-temurin:21-jre
 
