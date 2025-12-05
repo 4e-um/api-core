@@ -5,7 +5,6 @@
 
 <!--
     Checkstyle configuration based on Google Java Style Guide
-    https://google.github.io/styleguide/javaguide.html
 -->
 <module name="Checker">
     <property name="charset" value="UTF-8"/>
@@ -29,7 +28,10 @@
         <module name="LocalFinalVariableName"/>
         <module name="LocalVariableName"/>
         <module name="MemberName"/>
-        <module name="MethodName"/>
+        <module name="MethodName">
+            <!-- 테스트 메서드에서 언더스코어 허용 (예: should_Return_When) -->
+            <property name="format" value="^[a-z][a-zA-Z0-9_]*$"/>
+        </module>
         <module name="PackageName"/>
         <module name="ParameterName"/>
         <module name="StaticVariableName"/>
