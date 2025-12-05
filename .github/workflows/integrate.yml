@@ -90,16 +90,8 @@ jobs:
           name: spring-boot-app
           path: build/libs/*.jar
           
-      - name: Trigger Deployment Workflow
-        if: github.ref == 'refs/heads/main'
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: deploy.yml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          
       - name: Integration Summary
         run: |
           echo "## Integration Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **Branch** : ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit** : ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Deploy Triggered** : ${{ github.ref == 'refs/heads/main' }}" >> $GITHUB_STEP_SUMMARY
