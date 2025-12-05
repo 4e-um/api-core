@@ -11,6 +11,8 @@
 #   - 통합(Integration) 성공 시 deploy.yml 실행
 #
 # GitHub Secrets (Settings > Secrets and variables > Actions > Secrets):
+#   - CODECOV_TOKEN      : Codecov 업로드 토큰 (v4 필수)
+#   - CODECOV_TOKEN      : Codecov 업로드 토큰 (v4 필수)
 #   - SONAR_TOKEN        : SonarQube/SonarCloud Token
 #   - SONAR_HOST_URL     : SonarQube/SonarCloud Host (예: https://sonarcloud.io)
 #
@@ -69,8 +71,10 @@ jobs:
         run: ./gradlew test jacocoTestReport
 
       - name: Upload coverage to Codecov
+        if: hashFiles('build/reports/jacoco/test/jacocoTestReport.xml') != ''
         uses: codecov/codecov-action@v4
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: build/reports/jacoco/test/jacocoTestReport.xml
           flags: unittests
           fail_ci_if_error: false
