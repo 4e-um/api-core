@@ -9,18 +9,19 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerConfig {
 
-    @Value("${project.name:Backend API}")
-    private String projectName;
+  @Value("${project.name:Backend API}")
+  private String projectName;
 
-    @Value("${project.version:1.0.0}")
-    private String projectVersion;
+  @Value("${project.version:1.0.0}")
+  private String projectVersion;
 
-    @Bean
-    public OpenAPI openAPI() {
-        return new OpenAPI()
-                .info(new Info()
-                        .title(projectName)
-                        .description(projectName + " Documentation")
-                        .version(projectVersion));
-    }
+  @Bean
+  public OpenAPI openAPI() {
+    return new OpenAPI()
+        .info(
+            new Info()
+                .title(projectName)
+                .description(projectName + " Documentation")
+                .version(projectVersion));
+  }
 }

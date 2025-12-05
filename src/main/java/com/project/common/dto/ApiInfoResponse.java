@@ -9,15 +9,15 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ApiInfoResponse {
 
-    @Schema(description = "API 서버 상태", example = "ok")
-    private final String status;
+  @Schema(description = "API 서버 상태", example = "ok")
+  private final String status;
 
-    @Schema(description = "API 설명", example = "Backend API is running")
-    private final String message;
+  @Schema(description = "API 설명", example = "Backend API is running")
+  private final String message;
 
-    @Schema(description = "버전 정보", example = "1.0.0")
-    private final String version;
+  @Schema(description = "버전 정보", example = "1.0.0")
+  private final String version;
 
-    @Schema(description = "API 문서 경로", example = "/swagger-ui.html")
-    private final String docs;
+  @Schema(description = "API 문서 경로", example = "/swagger-ui.html")
+  private final String docs;
 }
