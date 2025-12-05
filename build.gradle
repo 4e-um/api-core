@@ -2,6 +2,10 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.0'
     id 'io.spring.dependency-management' version '1.1.6'
+    id 'checkstyle'
+    id 'jacoco'
+    id 'com.diffplug.spotless' version '6.25.0'
+    id 'org.sonarqube' version '5.1.0.4882'
 }
 
 group = 'com.project'
@@ -49,6 +53,60 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// ============================================================================
+// Test
+// ============================================================================
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+// ============================================================================
+// JaCoCo (Code Coverage)
+// ============================================================================
+jacoco {
+    toolVersion = '0.8.12'
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// ============================================================================
+// Checkstyle (Code Style)
+// ============================================================================
+checkstyle {
+    toolVersion = '10.18.2'
+    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+    ignoreFailures = false
+    maxWarnings = 0
+}
+
+// ============================================================================
+// Spotless (Code Formatting)
+// ============================================================================
+spotless {
+    java {
+        target 'src/*/java/**/*.java'
+        googleJavaFormat()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+// ============================================================================
+// SonarQube
+// ============================================================================
+sonar {
+    properties {
+        property 'sonar.projectKey', System.getenv('PROJECT_KEY') ?: 'backend'
+        property 'sonar.projectName', 'Backend API'
+        property 'sonar.java.coveragePlugin', 'jacoco'
+        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
+    }
 }
