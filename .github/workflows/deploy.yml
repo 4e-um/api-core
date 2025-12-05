@@ -1,23 +1,24 @@
 # ============================================================================
 # Backend Deploy Workflow
 # ============================================================================
-# 이 파일을 backend 레포지토리의 .github/workflows/deploy.yml 로 복사하세요
+# 이 파일을 backend 레포지토리의 .github/workflows/deploy.yml 로 저장하세요.
 #
 # GitHub Secrets (Settings > Secrets and variables > Actions > Secrets):
 #   - AWS_ACCESS_KEY_ID: AWS IAM Access Key
 #   - AWS_SECRET_ACCESS_KEY: AWS IAM Secret Key
 #
 # GitHub Variables (Settings > Secrets and variables > Actions > Variables):
-#   - ECR_REPOSITORY: ECR 레포지토리 이름 (예: bj-ranking-api)
-#   - ECS_CLUSTER: ECS 클러스터 이름 (예: bj-ranking-cluster)
-#   - ECS_SERVICE: ECS 서비스 이름 (예: bj-ranking-api-service)
+#   - ECR_REPOSITORY: ECR 레포지토리 이름
+#   - ECS_CLUSTER: ECS 클러스터 이름
+#   - ECS_SERVICE: ECS 서비스 이름
 # ============================================================================
 
 name: Deploy Backend to ECS
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 env:
