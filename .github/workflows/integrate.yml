@@ -1,0 +1,105 @@
+# ============================================================================
+# Backend Integration Workflow
+# ============================================================================
+# 이 파일을 backend 레포지토리의 .github/workflows/integrate.yml 로 저장하세요.
+#
+# 역할:
+#   - 소스 코드 정적 분석(Spotless, Checkstyle)
+#   - 테스트 수행 및 JaCoCo 커버리지 생성
+#   - Codecov 업로드
+#   - SonarQube/SonarCloud 코드 분석
+#   - 통합(Integration) 성공 시 deploy.yml 실행
+#
+# GitHub Secrets (Settings > Secrets and variables > Actions > Secrets):
+#   - SONAR_TOKEN        : SonarQube/SonarCloud Token
+#   - SONAR_HOST_URL     : SonarQube/SonarCloud Host (예: https://sonarcloud.io)
+#
+# GitHub Variables (Settings > Secrets and variables > Actions > Variables):
+#   - PROJECT_KEY : SonarQube 프로젝트 키 (build.gradle에 없으면 필요)
+#
+# 이 Workflow는 main 브랜치에 push되거나 PR될 때 동작합니다.
+# 통합이 성공적으로 끝나면 자동으로 deploy.yml(Continuous Deployment) 를 실행합니다.
+# ============================================================================
+
+name: Integrate Backend
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+env:
+  JAVA_VERSION: '17'
+
+jobs:
+  integrate:
+    name: Backend Integration Pipeline
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      actions: write
+      checks: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: gradle
+
+      - name: Grant execution to Gradle wrapper
+        run: chmod +x gradlew
+
+      - name: Run Spotless Check
+        run: ./gradlew spotlessCheck
+
+      - name: Run Checkstyle
+        run: ./gradlew checkstyleMain checkstyleTest
+
+      - name: Run Tests with JaCoCo
+        run: ./gradlew test jacocoTestReport
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: build/reports/jacoco/test/jacocoTestReport.xml
+          flags: unittests
+          fail_ci_if_error: false
+          
+      - name: SonarQube Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: ./gradlew sonar
+        
+      - name: Build Spring Boot JAR
+        run: ./gradlew bootJar
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: spring-boot-app
+          path: build/libs/*.jar
+          
+      - name: Trigger Deployment Workflow
+        if: github.ref == 'refs/heads/main'
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: deploy.yml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Integration Summary
+        run: |
+          echo "## Integration Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch** : ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit** : ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deploy Triggered** : ${{ github.ref == 'refs/heads/main' }}" >> $GITHUB_STEP_SUMMARY
