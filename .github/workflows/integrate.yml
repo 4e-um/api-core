@@ -2,17 +2,15 @@
 # Backend Integration Workflow
 # ============================================================================
 # 역할:
-#   - 소스 코드 정적 분석(Spotless, Checkstyle)
+#   - 소스 코드 정적 분석 (Spotless, Checkstyle)
 #   - 테스트 수행 및 JaCoCo 커버리지 생성
-#   - Codecov 업로드
-#   - SonarCloud 코드 분석
+#   - SonarCloud 코드 품질/커버리지/보안 분석
 #
 # GitHub Secrets:
-#   - CODECOV_TOKEN      : Codecov 업로드 토큰 (v4 필수)
-#   - SONAR_HOST_URL     : SonarQube/SonarCloud Host (예: https://sonarcloud.io)
 #   - SONAR_TOKEN        : SonarCloud Token
 #   - SONAR_ORGANIZATION : SonarCloud Organization Key
 #   - SONAR_PROJECT      : SonarCloud Project Key
+#   - SONAR_HOST_URL     : SonarCloud Host (https://sonarcloud.io)
 # ============================================================================
 
 name: Integrate Backend
@@ -42,6 +40,8 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # SonarCloud 분석을 위해 전체 히스토리 필요
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -61,15 +61,6 @@ jobs:
 
       - name: Run Tests with JaCoCo
         run: ./gradlew test jacocoTestReport
-
-      - name: Upload coverage to Codecov
-        if: hashFiles('build/reports/jacoco/test/jacocoTestReport.xml') != ''
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: build/reports/jacoco/test/jacocoTestReport.xml
-          flags: unittests
-          fail_ci_if_error: false
 
       - name: SonarCloud Scan
         env:
