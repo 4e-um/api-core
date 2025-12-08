@@ -1,26 +1,18 @@
 # ============================================================================
 # Backend Integration Workflow
 # ============================================================================
-# 이 파일을 backend 레포지토리의 .github/workflows/integrate.yml 로 저장하세요.
-#
 # 역할:
 #   - 소스 코드 정적 분석(Spotless, Checkstyle)
 #   - 테스트 수행 및 JaCoCo 커버리지 생성
 #   - Codecov 업로드
-#   - SonarQube/SonarCloud 코드 분석
-#   - 통합(Integration) 성공 시 deploy.yml 실행
+#   - SonarCloud 코드 분석
 #
-# GitHub Secrets (Settings > Secrets and variables > Actions > Secrets):
+# GitHub Secrets:
 #   - CODECOV_TOKEN      : Codecov 업로드 토큰 (v4 필수)
-#   - CODECOV_TOKEN      : Codecov 업로드 토큰 (v4 필수)
-#   - SONAR_TOKEN        : SonarQube/SonarCloud Token
 #   - SONAR_HOST_URL     : SonarQube/SonarCloud Host (예: https://sonarcloud.io)
-#
-# GitHub Variables (Settings > Secrets and variables > Actions > Variables):
-#   - PROJECT_KEY : SonarQube 프로젝트 키 (build.gradle에 없으면 필요)
-#
-# 이 Workflow는 main 브랜치에 push되거나 PR될 때 동작합니다.
-# 통합이 성공적으로 끝나면 자동으로 deploy.yml(Continuous Deployment) 를 실행합니다.
+#   - SONAR_TOKEN        : SonarCloud Token
+#   - SONAR_ORGANIZATION : SonarCloud Organization Key
+#   - SONAR_PROJECT      : SonarCloud Project Key
 # ============================================================================
 
 name: Integrate Backend
@@ -78,13 +70,17 @@ jobs:
           files: build/reports/jacoco/test/jacocoTestReport.xml
           flags: unittests
           fail_ci_if_error: false
-          
-      - name: SonarQube Scan
+
+      - name: SonarCloud Scan
+        if: ${{ secrets.SONAR_TOKEN != '' }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: ./gradlew sonar
-        
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+          SONAR_PROJECT: ${{ secrets.SONAR_PROJECT }}
+          SONAR_HOST_URL : ${{ secrets.SONAR_HOST_URL }}
+        run: ./gradlew sonar -Dsonar.host.url=$SONAR_HOST_URL
+        continue-on-error: true
+
       - name: Build Spring Boot JAR
         run: ./gradlew bootJar
 
@@ -93,7 +89,7 @@ jobs:
         with:
           name: spring-boot-app
           path: build/libs/*.jar
-          
+
       - name: Integration Summary
         run: |
           echo "## Integration Summary" >> $GITHUB_STEP_SUMMARY
