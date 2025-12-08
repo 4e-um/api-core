@@ -58,7 +58,7 @@ dependencies {
 // ============================================================================
 tasks.named('test') {
     useJUnitPlatform()
-    finalizedBy jacocoTestReport
+    finalizedBy jacocoTestReport, jacocoTestCoverageVerification
 }
 
 // ============================================================================
@@ -81,6 +81,27 @@ jacocoTestReport {
                 '**/exception/**',   // Exception 클래스 제외
                 '**/dto/**',         // DTO 클래스 제외
                 '**/Application.class'  // 메인 클래스 제외
+            ])
+        }))
+    }
+}
+
+jacocoTestCoverageVerification {
+    dependsOn jacocoTestReport
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.75  // 75% 미만이면 빌드 실패
+            }
+        }
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/config/**',
+                '**/exception/**',
+                '**/dto/**',
+                '**/Application.class'
             ])
         }))
     }
