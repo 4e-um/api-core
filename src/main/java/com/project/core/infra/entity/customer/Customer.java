@@ -1,4 +1,4 @@
-package com.project.core.infra.entity.user;
+package com.project.core.infra.entity.customer;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,7 +8,7 @@ import java.util.List;
 import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.entity.subscription.SubscriptionPlan;
 import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
-import com.project.core.infra.entity.user.enums.Grade;
+import com.project.core.infra.entity.customer.enums.Grade;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "customer")
-public class User {
+public class Customer {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "customer_id")

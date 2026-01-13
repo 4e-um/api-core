@@ -1,6 +1,6 @@
 package com.project.core.infra.entity.subscription;
 
-import com.project.core.infra.entity.user.User;
+import com.project.core.infra.entity.customer.Customer;
 
 import jakarta.persistence.*;
 
