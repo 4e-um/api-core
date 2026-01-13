@@ -1,7 +1,10 @@
 package com.project.core.infra.entity.subscription;
 
+import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -9,6 +12,8 @@ import java.util.List;
 
 @Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "subscription")
 public class Subscription {
 
 	@Id
