@@ -1,4 +1,7 @@
 spring:
+  profiles:
+    include: secret
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5433/${POSTGRES_DB:app_db}
@@ -13,7 +16,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop   # 개발 중이면 update, 초기 테스트면 create-drop 등으로 변경
+      ddl-auto: update   # 개발 중이면 update, 초기 테스트면 create-drop 등으로 변경
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect

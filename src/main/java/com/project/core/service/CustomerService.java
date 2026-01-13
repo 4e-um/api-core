@@ -3,8 +3,8 @@ package com.project.core.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.core.controller.dto.Request.ChangeEmailRequest;
-import com.project.core.controller.dto.Request.ChangeGradeRequest;
+import com.project.core.controller.dto.request.ChangeEmailRequest;
+import com.project.core.controller.dto.request.ChangeGradeRequest;
 import com.project.core.controller.dto.response.ChangeEmailResponse;
 import com.project.core.controller.dto.response.ChangeGradeResponse;
 import com.project.core.infra.entity.customer.Customer;
