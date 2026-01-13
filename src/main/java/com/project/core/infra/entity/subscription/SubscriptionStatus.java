@@ -1,4 +1,4 @@
-package com.project.core.infra.entity;
+package com.project.core.infra.entity.subscription;
 
 public enum SubscriptionStatus {
 	ACTIVE,		// 사용중
