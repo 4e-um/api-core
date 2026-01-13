@@ -1,4 +1,4 @@
-package com.project.core.controller.dto;
+package com.project.core.controller.dto.Request;
 
 public record SaveExampleRequest(
         String exampleName,
