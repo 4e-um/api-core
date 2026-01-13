@@ -1,11 +1,13 @@
 package com.project.core.infra.entity.user;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.entity.subscription.SubscriptionPlan;
+import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 import com.project.core.infra.entity.user.enums.Grade;
 
 import jakarta.persistence.CascadeType;
@@ -17,15 +19,20 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "customer")
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "user_id")
-	private Long userId;
+	@Column(name = "customer_id")
+	private Long customerId;
 
 	@Column(name = "name", nullable = false)
 	private String name;

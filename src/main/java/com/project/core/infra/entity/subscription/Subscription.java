@@ -25,7 +25,7 @@ public class Subscription {
 	private Long subId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", nullable = false)
+	@JoinColumn(name = "customer_id", nullable = false)
 	private User user;
 
 	@Column(name = "phone_number", nullable = false)
