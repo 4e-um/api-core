@@ -11,46 +11,40 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 
+import org.springframework.http.ProblemDetail;
+
 @Slf4j
 @RestControllerAdvice
 public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
-    /**
-     * BaseException - 도메인 예외 (ex: ApplicationException)
-     */
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<Object> handleBaseException(BaseException e, HttpServletRequest request) {
         BaseErrorCode code = e.getCode();
         log.error("[BaseException] {} - {}", code.name(), code.getMessage());
 
-        ErrorResponse response = new ErrorResponse(
-                code.getHttpStatus().value(),
-                code.getCustomCode(),
-                code.getMessage()
-        );
+        ProblemDetail problem = ProblemDetail.forStatus(code.getHttpStatus());
+        problem.setTitle(code.name());
+        problem.setDetail(code.getMessage());
+        problem.setProperty("code", code.getCustomCode());
 
         return ResponseEntity
                 .status(code.getHttpStatus())
-                .body(response);
+                .body(problem);
     }
 
-    /**
-     * 그 외 모든 예외
-     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleUnhandledException(Exception e, WebRequest request) {
-        log.error("[Exception] Unhandled: {}", e.getMessage(), e);
+        log.error("[Exception] Unhandled", e);
 
         GlobalErrorCode code = GlobalErrorCode.INTERNAL_SERVER_ERROR;
 
-        ErrorResponse response = new ErrorResponse(
-                code.getHttpStatus().value(),
-                code.getCustomCode(),
-                code.getMessage()
-        );
+        ProblemDetail problem = ProblemDetail.forStatus(code.getHttpStatus());
+        problem.setTitle(code.name());
+        problem.setDetail(code.getMessage());
+        problem.setProperty("code", code.getCustomCode());
 
         return ResponseEntity
                 .status(code.getHttpStatus())
-                .body(response);
+                .body(problem);
     }
 }
