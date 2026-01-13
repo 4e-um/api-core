@@ -1,8 +1,10 @@
 package com.project.core.infra.entity.subscription;
 
+import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.entity.plan.SubscriptionPlan;
 import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 import com.project.core.infra.entity.vas.SubscriptionVas;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,8 +25,9 @@ public class Subscription {
 	@Column(name = "sub_id")
 	private Long subId;
 
-	@Column(name = "user_id", nullable = false)
-	private Long userId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "customer_id", nullable = false)
+	private Customer customer;
 
 	@Column(name = "phone_number", nullable = false)
 	private String phoneNumber;
@@ -38,7 +41,9 @@ public class Subscription {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false, length = 10)
 	private SubscriptionStatus status;
-
+	
+//---------------------------------------------------------------------
+	
 	// 요금제 이력 (1:N)
 	@OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
 	private List<SubscriptionPlan> planHistory = new ArrayList<>();

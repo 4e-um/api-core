@@ -1,55 +1,26 @@
-project:
-  name: Backend API
-  version: 1.0.0
-
-cors:
-  allowed-origins: ${FRONTEND_URL:http://localhost:3000}
-
 spring:
-  application:
-    name: backend
-
   datasource:
     driver-class-name: org.postgresql.Driver
-    # docker-compose: postgres-primary ports "5433:5432"
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5433}/${POSTGRES_DB:app_db}
+    url: jdbc:postgresql://localhost:5433/${POSTGRES_DB:app_db}
     username: ${POSTGRES_USER:app_user}
     password: ${POSTGRES_PASSWORD:app_password}
 
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 3000
+      validation-timeout: 2000
+
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: create-drop   # 개발 중이면 update, 초기 테스트면 create-drop 등으로 변경
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-    # (선택) 최신 Hibernate는 dialect 자동추론 가능
-    # database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
 
-  data:
-    mongodb:
-      uri: ${MONGO_URI:mongodb://localhost:27017}
-      database: ${MONGO_DATABASE:app}
-
-    redis:
-      url: redis://${REDIS_USERNAME:default}:${REDIS_PASSWORD:}@${REDIS_ENDPOINT:localhost:6379}
-
-server:
-  port: 8080
-
-springdoc:
-  api-docs:
-    enabled: true
-    path: /v3/api-docs
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-  endpoint:
-    health:
-      show-details: always
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace

@@ -1,10 +1,13 @@
-package com.project.core.infra.entity.user;
+package com.project.core.infra.entity.customer;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.project.core.infra.entity.subscription.Subscription;
+import com.project.core.infra.entity.customer.enums.Grade;
 
-import com.project.core.infra.entity.user.enums.Grade;
-
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,15 +15,21 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-public class User {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "customer")
+public class Customer {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "user_id")
-	private Long userId;
+	@Column(name = "customer_id")
+	private Long customerId;
 
 	@Column(name = "name", nullable = false)
 	private String name;
@@ -40,4 +49,15 @@ public class User {
 	
 	@Column(name = "is_deleted", nullable = false)
 	private Boolean isDeleted;
+	
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+	private List<Subscription> subscriptionHistory = new ArrayList<>();
+
+	
+	public void changeEmailEnc(String emailEnc) {
+		this.emailEnc = emailEnc;
+	}
+	public void changeGrade(Grade grade) {
+		this.grade = grade;
+	}
 }
