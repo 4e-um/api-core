@@ -1,9 +1,7 @@
 package com.project.core.infra.entity.plan;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.project.core.infra.entity.plan.enums.AllowancePeriod;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,6 +25,7 @@ public class Plan {
 	@Column(name = "allowance_amount", nullable = false)
 	private Long allowanceAmount; // MB 단위, -1은 무제한
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "allowance_period", nullable = false, length = 10)
-	private String allowancePeriod; // MONTH / DAY
+	private AllowancePeriod allowancePeriod; // MONTH / DAY
 }

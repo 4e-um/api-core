@@ -1,6 +1,6 @@
-package com.project.core.infra.entity.subscription;
+package com.project.core.infra.entity.plan;
 
-import com.project.core.infra.entity.plan.Plan;
+import com.project.core.infra.entity.subscription.Subscription;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
