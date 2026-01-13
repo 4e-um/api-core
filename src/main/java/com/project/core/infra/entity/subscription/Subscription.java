@@ -1,5 +1,6 @@
 package com.project.core.infra.entity.subscription;
 
+import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
