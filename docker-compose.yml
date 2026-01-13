@@ -1,74 +1,67 @@
+networks:
+  local-4eum-network:
+    name: local-4eum-network
+    driver: bridge
+
 services:
-  backend:
-    build: .
+  postgres-primary:
+    image: postgres:15
+    container_name: local-postgres-primary
+    restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "5433:5432"
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DATABASE: app
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      MONGO_HOST: mongodb
-      MONGO_PORT: 27017
-      MONGO_DB: app
-      MONGO_USER: mongo
-      MONGO_PASSWORD: mongo
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      POSTGRES_USER: ${POSTGRES_USER:-app_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app_password}
+      POSTGRES_DB: ${POSTGRES_DB:-app_db}
+    command: >
+      postgres
+      -c wal_level=replica
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c hot_standby=on
+    volumes:
+      - primary-data:/var/lib/postgresql/data
+      - ./primary/init:/docker-entrypoint-initdb.d
+    networks:
+      - local-4eum-network
+
+  postgres-replica:
+    image: postgres:15
+    container_name: local-postgres-replica
+    restart: unless-stopped
+    ports:
+      - "5434:5432"
     depends_on:
-      postgres:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-  postgres:
-    image: postgres:17
-    ports:
-      - "5432:5432"
+      - postgres-primary
     environment:
-      POSTGRES_DB: app
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-app_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app_password}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-app_password}
+    command:
+      - bash
+      - -c
+      - |
+        rm -rf /var/lib/postgresql/data/*
+        until pg_basebackup \
+          --pgdata=/var/lib/postgresql/data \
+          --write-recovery-conf \
+          --slot=replica_slot \
+          --host=postgres-primary \
+          --port=5432 \
+          --username=$$POSTGRES_USER
+        do
+          echo 'Waiting for primary...'
+          sleep 3
+        done
+        chown -R postgres:postgres /var/lib/postgresql/data
+        chmod 700 /var/lib/postgresql/data
+        exec gosu postgres postgres
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  mongodb:
-    image: mongo:8.0
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: mongo
-      MONGO_INITDB_ROOT_PASSWORD: mongo
-      MONGO_INITDB_DATABASE: app
-    volumes:
-      - mongodb_data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:8
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - replica-data:/var/lib/postgresql/data
+    networks:
+      - local-4eum-network
 
 volumes:
-  postgres_data:
-  mongodb_data:
-  redis_data:
+  primary-data:
+  replica-data:
