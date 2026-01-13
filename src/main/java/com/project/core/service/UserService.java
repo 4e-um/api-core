@@ -30,7 +30,7 @@ public class UserService {
 	}
 	
 	@Transactional
-	public ChangeGradeResponse ChangeUserGrade(Long userId, ChangeGradeRequest request) {
+	public ChangeGradeResponse changeUserGrade(Long userId, ChangeGradeRequest request) {
 		Customer customer = userRepository.findById(userId).orElseThrow(()->new IllegalArgumentException("사용자를 찾을 수 없습니다"));
 
 		customer.changeGrade(request.grade());

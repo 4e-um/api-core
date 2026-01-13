@@ -1,13 +1,10 @@
 package com.project.core.infra.entity.customer;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.project.core.infra.entity.subscription.Subscription;
-import com.project.core.infra.entity.subscription.SubscriptionPlan;
-import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 import com.project.core.infra.entity.customer.enums.Grade;
 
 import jakarta.persistence.CascadeType;
@@ -53,7 +50,7 @@ public class Customer {
 	@Column(name = "is_deleted", nullable = false)
 	private Boolean isDeleted;
 	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
 	private List<Subscription> subscriptionHistory = new ArrayList<>();
 
 	
