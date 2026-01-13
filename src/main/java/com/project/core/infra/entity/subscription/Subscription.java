@@ -7,6 +7,7 @@ import com.project.core.infra.entity.vas.SubscriptionVas;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -41,6 +42,9 @@ public class Subscription {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false, length = 10)
 	private SubscriptionStatus status;
+
+	@Column(name = "send_day", nullable = false)
+	private Integer sendDay;
 	
 //---------------------------------------------------------------------
 	
@@ -53,4 +57,19 @@ public class Subscription {
 	private List<SubscriptionVas> vasHistory = new ArrayList<>();
 
 	// 할인 이력 (1:N)
+
+	@Builder
+	public Subscription(Customer customer, String phoneNumber) {
+		this.customer = customer;
+		this.phoneNumber = phoneNumber;
+		this.startDate = LocalDateTime.now();
+		this.status = SubscriptionStatus.ACTIVE;
+		this.sendDay = 20;
+	}
+
+	// 서비스 해지 처리 메서드
+	public void terminate() {
+		this.status = SubscriptionStatus.TERMINATED;
+		this.endDate = LocalDateTime.now();
+	}
 }

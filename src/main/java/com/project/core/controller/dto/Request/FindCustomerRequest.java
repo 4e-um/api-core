@@ -1,6 +1,6 @@
 package com.project.core.controller.dto.Request;
 
-public record FindUserRequest(
+public record FindCustomerRequest(
         String contactEnc
 ) {
 }
