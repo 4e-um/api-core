@@ -1,4 +1,4 @@
-package com.project.core.infra.entity.subscription;
+package com.project.core.infra.entity.vas;
 
 import jakarta.persistence.*;
 

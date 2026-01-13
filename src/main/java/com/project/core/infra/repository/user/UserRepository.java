@@ -1,4 +1,4 @@
-package com.project.core.infra.repository;
+package com.project.core.infra.repository.user;
 
 import java.util.Optional;
 

@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.project.core.infra.entity.user.User;
-import com.project.core.infra.repository.UserRepository;
+import com.project.core.infra.repository.user.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
