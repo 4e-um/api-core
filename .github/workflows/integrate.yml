@@ -172,7 +172,7 @@ jobs:
           # ------------------------------------------------------------------
           CE_TASK_ID=$(grep '^ceTaskId=' $REPORT_FILE | cut -d'=' -f2)
           PROJECT_KEY=$(grep '^projectKey=' $REPORT_FILE | cut -d'=' -f2)
-          DASHBOARD_URL=$(grep '^dashboardUrl=' $REPORT_FILE | cut -d'=' -f2)
+          DASHBOARD_URL=$(grep '^dashboardUrl=' $REPORT_FILE | cut -d'=' -f2-)
 
           echo "ProjectKey: $PROJECT_KEY"
           echo "Branch: $BRANCH"
