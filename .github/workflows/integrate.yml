@@ -5,6 +5,11 @@
 #   - 소스 코드 정적 분석 (Spotless, Checkstyle)
 #   - 테스트 수행 및 JaCoCo 커버리지 생성
 #   - SonarCloud 코드 품질/커버리지/보안 분석
+#   - JAR artifact 생성 (deploy workflow에서 사용)
+#
+# Job 구조:
+#   lint ──┬──> analyze ──> build
+#   test ──┘
 #
 # GitHub Secrets:
 #   - SONAR_TOKEN        : SonarCloud Token
@@ -27,21 +32,16 @@ env:
   JAVA_VERSION: '17'
 
 jobs:
-  integrate:
-    name: Backend Integration Pipeline
+  # ==========================================================================
+  # Lint Job - 코드 스타일 검사
+  # ==========================================================================
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      actions: write
-      checks: write
-      pull-requests: write
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # SonarCloud 분석을 위해 전체 히스토리 필요
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -59,8 +59,80 @@ jobs:
       - name: Run Checkstyle
         run: ./gradlew checkstyleMain checkstyleTest
 
+  # ==========================================================================
+  # Test Job - 테스트 및 커버리지
+  # ==========================================================================
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: gradle
+
+      - name: Grant execution to Gradle wrapper
+        run: chmod +x gradlew
+
       - name: Run Tests with JaCoCo
         run: ./gradlew test jacocoTestReport
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            build/test-results/
+            build/reports/jacoco/
+
+  # ==========================================================================
+  # Analyze Job - SonarCloud 분석
+  # ==========================================================================
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # SonarCloud 분석을 위해 전체 히스토리 필요
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: gradle
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Download test results
+        uses: actions/download-artifact@v4
+        with:
+          name: test-results
+          path: build/
+
+      - name: Grant execution to Gradle wrapper
+        run: chmod +x gradlew
 
       - name: SonarCloud Scan
         env:
@@ -68,7 +140,33 @@ jobs:
           SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
           SONAR_PROJECT: ${{ secrets.SONAR_PROJECT }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: ./gradlew sonar -Dsonar.host.url=$SONAR_HOST_URL
+        run: ./gradlew sonar -Dsonar.host.url=$SONAR_HOST_URL --info
+
+  # ==========================================================================
+  # Build Job - JAR 빌드 및 Artifact 업로드
+  # ==========================================================================
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [analyze]
+
+    permissions:
+      contents: read
+      actions: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: gradle
+
+      - name: Grant execution to Gradle wrapper
+        run: chmod +x gradlew
 
       - name: Build Spring Boot JAR
         run: ./gradlew bootJar

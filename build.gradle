@@ -33,6 +33,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    // Monitoring & Observability
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+    implementation 'io.micrometer:micrometer-tracing-bridge-otel'
+    implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
+
     // Database
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     runtimeOnly 'org.postgresql:postgresql'
@@ -85,7 +91,7 @@ jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = 0.75  // 75% 미만이면 빌드 실패
+                minimum = 0.8
             }
         }
     }
@@ -105,7 +111,7 @@ jacocoTestCoverageVerification {
 // Checkstyle (Code Style)
 // ============================================================================
 checkstyle {
-    toolVersion = '10.18.2'
+    toolVersion = '10.21.4'
     configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
     ignoreFailures = false
     maxWarnings = 0
