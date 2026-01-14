@@ -113,6 +113,9 @@ jacocoTestCoverageVerification {
 checkstyle {
     toolVersion = '10.21.4'
     configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+    configProperties = [
+        'org.checkstyle.google.suppressionfilter.config': file("${rootDir}/config/checkstyle/checkstyle-suppressions.xml").absolutePath
+    ]
     ignoreFailures = false
     maxWarnings = 0
 }
