@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -25,6 +27,7 @@ public class PlanService {
 	private final SubscriptionPlanRepository subscriptionPlanRepository;
 	private final CustomerRepository customerRepository;
 	private final AESUtil aesUtil;
+	private final Clock clock;
 
 	/**
 	 * 요금제 가입 (신규 개통)
@@ -46,6 +49,7 @@ public class PlanService {
 		Subscription newSub = Subscription.builder()
 				.customer(customer)
 				.phoneNumber(phoneNumberEnc)
+				.clock(clock)
 				.build();
 		subscriptionRepository.save(newSub);
 
@@ -139,7 +143,7 @@ public class PlanService {
 			throw new IllegalStateException("이미 해지된 회선입니다.");
 		}
 
-		sub.terminate();
+		sub.terminate(clock);
 
 		subscriptionPlanRepository.findActivePlanBySubId(subId)
 				.ifPresent(SubscriptionPlan::expire);

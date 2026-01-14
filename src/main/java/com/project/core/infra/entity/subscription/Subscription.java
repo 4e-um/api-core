@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,17 +60,17 @@ public class Subscription {
 	// 할인 이력 (1:N)
 
 	@Builder
-	public Subscription(Customer customer, String phoneNumber) {
+	public Subscription(Customer customer, String phoneNumber, Clock clock) {
 		this.customer = customer;
 		this.phoneNumber = phoneNumber;
-		this.startDate = LocalDateTime.now();
+		this.startDate = LocalDateTime.now(clock);
 		this.status = SubscriptionStatus.ACTIVE;
 		this.sendDay = 20;
 	}
 
 	// 서비스 해지 처리 메서드
-	public void terminate() {
+	public void terminate(Clock clock) {
 		this.status = SubscriptionStatus.TERMINATED;
-		this.endDate = LocalDateTime.now();
+		this.endDate = LocalDateTime.now(clock);
 	}
 }
