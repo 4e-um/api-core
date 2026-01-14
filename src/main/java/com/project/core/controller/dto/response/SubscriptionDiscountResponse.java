@@ -30,7 +30,6 @@ public class SubscriptionDiscountResponse {
 
     public static SubscriptionDiscountResponse from(SubscriptionDiscount sd) {
 
-        // ⚠️ Subscription 엔티티 실제 getter명으로 수정
         String phone = sd.getSubscription().getPhoneNumber();
 
         return SubscriptionDiscountResponse.builder()
