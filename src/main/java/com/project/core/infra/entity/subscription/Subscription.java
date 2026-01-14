@@ -73,5 +73,4 @@ public class Subscription {
     this.status = SubscriptionStatus.TERMINATED;
     this.endDate = LocalDateTime.now(clock);
   }
-  
 }
