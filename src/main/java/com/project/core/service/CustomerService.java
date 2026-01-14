@@ -1,5 +1,7 @@
 package com.project.core.service;
 
+import com.project.global.exception.code.domain.core.CoreErrorCode;
+import com.project.global.exception.core.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,12 +20,12 @@ public class CustomerService {
 	
 	@Transactional
 	public Customer loadByContactEnc(String contactEnc) {
-		return customerRepository.findByContactEnc(contactEnc).orElseThrow(()->new IllegalArgumentException("사용자를 찾을 수 없습니다"));
+		return customerRepository.findByContactEnc(contactEnc).orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
 	}
 	
 	@Transactional
 	public ChangeEmailResponse changeEmailEnc(Long userId, ChangeEmailRequest request) {
-		Customer customer = customerRepository.findById(userId).orElseThrow(()->new IllegalArgumentException("사용자를 찾을 수 없습니다"));
+		Customer customer = customerRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
 
 		customer.changeEmailEnc(request.emailEnc());
 	    return new ChangeEmailResponse(customer.getEmailEnc());
@@ -31,7 +33,7 @@ public class CustomerService {
 	
 	@Transactional
 	public ChangeGradeResponse changeUserGrade(Long userId, ChangeGradeRequest request) {
-		Customer customer = customerRepository.findById(userId).orElseThrow(()->new IllegalArgumentException("사용자를 찾을 수 없습니다"));
+		Customer customer = customerRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
 
 		customer.changeGrade(request.grade());
 	    return new ChangeGradeResponse(customer.getGrade());

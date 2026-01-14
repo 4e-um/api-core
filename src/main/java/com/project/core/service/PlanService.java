@@ -10,6 +10,10 @@ import com.project.core.infra.repository.plan.PlanRepository;
 import com.project.core.infra.repository.plan.SubscriptionPlanRepository;
 import com.project.core.infra.repository.subscription.SubscriptionRepository;
 import com.project.core.util.PhoneUtil;
+import com.project.global.exception.code.domain.core.CoreErrorCode;
+import com.project.global.exception.core.EntityNotFoundException;
+import com.project.global.exception.core.InvalidStateException;
+import com.project.global.exception.core.OperationFailedException;
 import com.project.global.util.AESUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +33,8 @@ public class PlanService {
 	private final AESUtil aesUtil;
 	private final Clock clock;
 
+	private static int MAX_PHONE_NUMBER_GENERATION_ATTEMPTS = 0;
+
 	/**
 	 * 요금제 가입 (신규 개통)
 	 * 1. 활성 회선이 0개면 -> Customer의 연락처 사용 시도
@@ -37,10 +43,10 @@ public class PlanService {
 	public void joinSubscription(Long customerId, Long planId) {
 		// 고객, 요금제 조회
 		Customer customer = customerRepository.findById(customerId)
-				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 고객입니다."));
+				.orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
 
 		Plan plan = planRepository.findById(planId)
-				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요금제입니다."));
+				.orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.PLAN_NOT_FOUND));
 
 		// 전화번호 결정 로직
 		String phoneNumberEnc = determinePhoneNumber(customer);
@@ -88,19 +94,19 @@ public class PlanService {
 		String randomPhoneEnc;
 
 		// 무한 루프 방지를 위한 최대 시도 횟수
-		int retryCount = 0;
+		MAX_PHONE_NUMBER_GENERATION_ATTEMPTS = 0;
 
 		do {
-			if (retryCount > 10) throw new RuntimeException("사용 가능한 전화번호를 찾을 수 없습니다.");
+			if (MAX_PHONE_NUMBER_GENERATION_ATTEMPTS > 10) throw new OperationFailedException(CoreErrorCode.PHONE_NUMBER_GENERATION_FAILED);
 
 			randomPhone = PhoneUtil.generateRandomPhoneNumber();
 			try {
 				randomPhoneEnc = aesUtil.encrypt(randomPhone);
 			} catch (Exception e) {
-				throw new RuntimeException("암호화 실패", e);
+				throw new OperationFailedException(CoreErrorCode.ENCRYPTION_FAILED);
 			}
 
-			retryCount++;
+			MAX_PHONE_NUMBER_GENERATION_ATTEMPTS++;
 		} while (subscriptionRepository.existsByPhoneNumber(randomPhoneEnc)); // DB에 이미 있는지(해지된 것 포함) 체크
 
 		return randomPhoneEnc;
@@ -113,7 +119,7 @@ public class PlanService {
 
 		// 회선 존재 여부 확인
 		Subscription sub = subscriptionRepository.findById(subId)
-				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회선입니다."));
+				.orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
 
 		// 현재 사용 중인 요금제 찾아서 종료 처리
 		subscriptionPlanRepository.findActivePlanBySubId(subId)
@@ -121,7 +127,7 @@ public class PlanService {
 
 		// 변경할 새 요금제 정보 조회
 		Plan newPlan = planRepository.findById(newPlanId)
-				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요금제입니다."));
+				.orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.PLAN_NOT_FOUND));
 
 		// 새 요금제 가입 이력 생성 및 저장
 		SubscriptionPlan newHistory = SubscriptionPlan.builder()
@@ -137,10 +143,10 @@ public class PlanService {
 	 */
 	public void terminateSubscription(Long subId) {
 		Subscription sub = subscriptionRepository.findById(subId)
-				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회선입니다."));
+				.orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
 
 		if (sub.getStatus() == SubscriptionStatus.TERMINATED) {
-			throw new IllegalStateException("이미 해지된 회선입니다.");
+			throw new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
 		}
 
 		sub.terminate(clock);
