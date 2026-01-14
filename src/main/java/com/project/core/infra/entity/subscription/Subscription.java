@@ -74,7 +74,4 @@ public class Subscription {
     this.endDate = LocalDateTime.now(clock);
   }
   
-  public void setPhoneNumber(String maskedNum) {
-  	this.phoneNumber = maskedNum;
-  }
 }

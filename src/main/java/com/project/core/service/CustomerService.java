@@ -13,13 +13,16 @@ import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.repository.customer.CustomerRepository;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
+import com.project.global.util.AESUtil;
 
 import lombok.RequiredArgsConstructor;
 
 @Service @RequiredArgsConstructor
 public class CustomerService {
-	private final CustomerRepository customerRepository;
 	
+	private final CustomerRepository customerRepository;
+  private final AESUtil aesUtil;
+
 	@Transactional
 	public List<Customer> loadByContactEnc(String contactEnc) {//유저 조회
 		List<Customer> customers = customerRepository.findByContactEnc(contactEnc);
@@ -34,7 +37,8 @@ public class CustomerService {
 	public ChangeEmailResponse changeEmailEnc(Long userId, ChangeEmailRequest request) {//이메일 변경
 		Customer customer = customerRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
 
-		customer.changeEmailEnc(request.emailEnc());
+		String emailEnc = aesUtil.encrypt(request.email());
+		customer.changeEmailEnc(emailEnc);
 	    return new ChangeEmailResponse(customer.getEmailEnc());
 	}
 	

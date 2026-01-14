@@ -12,6 +12,8 @@ import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.repository.discount.DiscountPolicyRepository;
 import com.project.core.infra.repository.discount.SubscriptionDiscountRepository;
 import com.project.core.infra.repository.subscription.SubscriptionRepository;
+import com.project.global.exception.code.domain.core.CoreErrorCode;
+import com.project.global.exception.core.EntityNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -40,11 +42,11 @@ public class DiscountService {
 
 	    Subscription subscription =
 	        subscriptionRepository.findById(subId)
-	            .orElseThrow(() -> new IllegalArgumentException("회선이 존재하지 않습니다"));
+	            .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
 
 	    DiscountPolicy policy =
 	        discountPolicyRepository.findById(discountId)
-	            .orElseThrow(() -> new IllegalArgumentException("할인 정책이 존재하지 않습니다"));
+	            .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.DISCOUNT_POLICY_NOT_FOUND));
 
 	    SubscriptionDiscount discount =
 	        SubscriptionDiscount.builder()
@@ -66,7 +68,7 @@ public class DiscountService {
 	public Long changeDiscount(Long discountId,Long sdId) {	//할인 변경
 		SubscriptionDiscount discount = 
 				subscriptionDiscountRepository.findBySdId(sdId)
-					.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 할인입니다."));
+					.orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.DISCOUNT_NOT_FOUND));
 		//내부 정보 수정 - 기존 할인 종료
 		discount.setEndDate(LocalDateTime.now());
 		discount.setStatusTerminated();
