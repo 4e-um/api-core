@@ -22,6 +22,8 @@ import java.util.List;
 @Table(name = "subscription")
 public class Subscription {
 
+	private static final int DEFAULT_SEND_DAY = 20;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "sub_id")
@@ -65,7 +67,7 @@ public class Subscription {
 		this.phoneNumber = phoneNumber;
 		this.startDate = LocalDateTime.now(clock);
 		this.status = SubscriptionStatus.ACTIVE;
-		this.sendDay = 20;
+		this.sendDay = DEFAULT_SEND_DAY;
 	}
 
 	// 서비스 해지 처리 메서드
