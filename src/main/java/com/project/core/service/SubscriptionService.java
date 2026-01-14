@@ -20,7 +20,7 @@ public class SubscriptionService {
 	private final AESUtil aesUtil;
 
 	@Transactional
-	public List<Subscription> findSubscription(Long customerId) throws Exception {
+	public List<Subscription> findSubscription(Long customerId) {
 	    List<Subscription> subscriptions =
 	            subscriptionRepository.findByCustomer_CustomerId(customerId);
 
