@@ -48,7 +48,6 @@ public class DiscountPolicy {
 	
 	@Column(name = "active", nullable = false)
 	private Active active;
-//------------------------------------------------------------------
-	@OneToMany(mappedBy = "discountPolicy", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "discountPolicy")
 	private List<SubscriptionDiscount> discountHistory = new ArrayList<>();
 }
