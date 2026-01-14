@@ -205,23 +205,23 @@ jobs:
           QG_STATUS=$(echo "$QG_JSON" | jq -r '.projectStatus.status')
 
           # ------------------------------------------------------------------
-          # Branch-level Issues
+          # Branch-level Issues (SAFE)
           # ------------------------------------------------------------------
           ISSUES_JSON=$(curl -s -u "$SONAR_TOKEN:" \
             "$SONAR_HOST_URL/api/issues/search?projectKeys=$PROJECT_KEY&branch=$BRANCH&resolved=false")
 
-          BUGS=$(echo "$ISSUES_JSON" | jq '[.issues[] | select(.type=="BUG")] | length')
-          VULNS=$(echo "$ISSUES_JSON" | jq '[.issues[] | select(.type=="VULNERABILITY")] | length')
-          SMELLS=$(echo "$ISSUES_JSON" | jq '[.issues[] | select(.type=="CODE_SMELL")] | length')
+          BUGS=$(echo "$ISSUES_JSON" | jq '[ (.issues // [])[] | select(.type=="BUG") ] | length')
+          VULNS=$(echo "$ISSUES_JSON" | jq '[ (.issues // [])[] | select(.type=="VULNERABILITY") ] | length')
+          SMELLS=$(echo "$ISSUES_JSON" | jq '[ (.issues // [])[] | select(.type=="CODE_SMELL") ] | length')
 
           # ------------------------------------------------------------------
-          # Branch-level Measures
+          # Branch-level Measures (SAFE)
           # ------------------------------------------------------------------
           MEASURES_JSON=$(curl -s -u "$SONAR_TOKEN:" \
             "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&branch=$BRANCH&metricKeys=coverage,duplicated_lines_density")
 
-          COVERAGE=$(echo "$MEASURES_JSON" | jq -r '.component.measures[] | select(.metric=="coverage") | .value // "0"')
-          DUPLICATION=$(echo "$MEASURES_JSON" | jq -r '.component.measures[] | select(.metric=="duplicated_lines_density") | .value // "0"')
+          COVERAGE=$(echo "$MEASURES_JSON" | jq -r '.component.measures // [] | map(select(.metric=="coverage")) | .[0].value // "0"')
+          DUPLICATION=$(echo "$MEASURES_JSON" | jq -r '.component.measures // [] | map(select(.metric=="duplicated_lines_density")) | .[0].value // "0"')
 
           # ------------------------------------------------------------------
           # Result formatting
