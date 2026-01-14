@@ -4,7 +4,7 @@ import com.project.global.exception.code.domain.BaseErrorCode;
 
 public class ApplicationException extends BaseException {
 
-    public ApplicationException(BaseErrorCode code) {
-        super(code);
-    }
+  public ApplicationException(BaseErrorCode code) {
+    super(code);
+  }
 }

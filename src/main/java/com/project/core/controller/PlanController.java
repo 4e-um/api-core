@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/plan")
 public class PlanController {
 
-	private final PlanService planService;
+  private final PlanService planService;
 
-	@PostMapping("/change")
-	public ResponseEntity<Void> changePlan(@RequestBody PlanChangeRequest request) {
-		planService.changePlan(request.subId(), request.planId());
-		return ResponseEntity.ok().build();
-	}
+  @PostMapping("/change")
+  public ResponseEntity<Void> changePlan(@RequestBody PlanChangeRequest request) {
+    planService.changePlan(request.subId(), request.planId());
+    return ResponseEntity.ok().build();
+  }
 }

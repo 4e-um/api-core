@@ -1,6 +1,3 @@
 package com.project.core.controller.dto;
 
-public record PlanChangeRequest(
-		Long subId,
-		Long planId
-) {}
+public record PlanChangeRequest(Long subId, Long planId) {}

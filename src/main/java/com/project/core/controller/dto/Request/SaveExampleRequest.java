@@ -1,7 +1,3 @@
-package com.project.core.controller.dto.Request;
+package com.project.core.controller.dto.request;
 
-public record SaveExampleRequest(
-        String exampleName,
-        String exampleContent
-) {
-}
+public record SaveExampleRequest(String exampleName, String exampleContent) {}

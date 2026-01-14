@@ -15,33 +15,32 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class PlanService {
 
-	private final SubscriptionRepository subscriptionRepository;
-	private final PlanRepository planRepository;
-	private final SubscriptionPlanRepository subscriptionPlanRepository;
+  private final SubscriptionRepository subscriptionRepository;
+  private final PlanRepository planRepository;
+  private final SubscriptionPlanRepository subscriptionPlanRepository;
 
-	/**
-	 * 요금제 변경 (기존 요금제 해지 -> 신규 요금제 가입
-	 */
-	public void changePlan(Long subId, Long newPlanId) {
+  /** 요금제 변경 (기존 요금제 해지 -> 신규 요금제 가입 */
+  public void changePlan(Long subId, Long newPlanId) {
 
-		// 회선 존재 여부 확인
-		Subscription sub = subscriptionRepository.findById(subId)
-				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회선입니다."));
+    // 회선 존재 여부 확인
+    Subscription sub =
+        subscriptionRepository
+            .findById(subId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회선입니다."));
 
-		// 현재 사용 중인 요금제 찾아서 종료 처리
-		subscriptionPlanRepository.findActivePlanBySubId(subId)
-				.ifPresent(SubscriptionPlan::expire);
+    // 현재 사용 중인 요금제 찾아서 종료 처리
+    subscriptionPlanRepository.findActivePlanBySubId(subId).ifPresent(SubscriptionPlan::expire);
 
-		// 변경할 새 요금제 정보 조회
-		Plan newPlan = planRepository.findById(newPlanId)
-				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요금제입니다."));
+    // 변경할 새 요금제 정보 조회
+    Plan newPlan =
+        planRepository
+            .findById(newPlanId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요금제입니다."));
 
-		// 새 요금제 가입 이력 생성 및 저장
-		SubscriptionPlan newHistory = SubscriptionPlan.builder()
-				.subscription(sub)
-				.plan(newPlan)
-				.build();
+    // 새 요금제 가입 이력 생성 및 저장
+    SubscriptionPlan newHistory =
+        SubscriptionPlan.builder().subscription(sub).plan(newPlan).build();
 
-		subscriptionPlanRepository.save(newHistory);
-	}
+    subscriptionPlanRepository.save(newHistory);
+  }
 }
