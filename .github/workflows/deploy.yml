@@ -1,7 +1,18 @@
 # ============================================================================
 # Backend Deploy Workflow
 # ============================================================================
-# 이 파일을 backend 레포지토리의 .github/workflows/deploy.yml 로 저장하세요.
+# 역할:
+#   - Integrate workflow 성공 후 자동 실행
+#   - integrate에서 생성된 JAR artifact 사용 (빌드 재수행 없음)
+#   - Docker 이미지 빌드 및 ECR 푸시
+#   - ECS 서비스 배포
+#
+# Job 구조:
+#   prepare ──> build-image ──> deploy
+#
+# 트리거:
+#   - Integrate Backend workflow가 main 브랜치에서 성공적으로 완료된 후
+#   - 수동 실행 (workflow_dispatch) - 최근 성공한 integrate run의 artifact 사용
 #
 # GitHub Secrets (Settings > Secrets and variables > Actions > Secrets):
 #   - AWS_ACCESS_KEY_ID: AWS IAM Access Key
@@ -16,7 +27,10 @@
 name: Deploy Backend to ECS
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Integrate Backend"]
+    types:
+      - completed
     branches:
       - main
   workflow_dispatch:
@@ -25,13 +39,103 @@ env:
   AWS_REGION: ap-northeast-2
 
 jobs:
-  deploy:
-    name: Build and Deploy
+  # ==========================================================================
+  # Prepare Job - Artifact 준비
+  # ==========================================================================
+  prepare:
+    name: Prepare
     runs-on: ubuntu-latest
+    # workflow_run 트리거일 경우 integrate 성공 및 push 이벤트일 때만 실행
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+
+    outputs:
+      run_id: ${{ steps.get-run-info.outputs.run_id }}
+      head_sha: ${{ steps.get-run-info.outputs.head_sha }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Get workflow run info
+        id: get-run-info
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "Manual trigger detected. Finding latest successful integrate run..."
+
+            # 최근 성공한 Integrate Backend workflow run 조회
+            RUN_INFO=$(gh run list \
+              --workflow "Integrate Backend" \
+              --branch main \
+              --status success \
+              --event push \
+              --limit 1 \
+              --json databaseId,headSha)
+
+            RUN_ID=$(echo "$RUN_INFO" | jq -r '.[0].databaseId')
+            HEAD_SHA=$(echo "$RUN_INFO" | jq -r '.[0].headSha')
+
+            if [ "$RUN_ID" == "null" ] || [ -z "$RUN_ID" ]; then
+              echo "::error::No successful integrate workflow run found"
+              exit 1
+            fi
+
+            echo "Found run ID: $RUN_ID, commit: $HEAD_SHA"
+          else
+            echo "workflow_run trigger detected"
+            RUN_ID="${{ github.event.workflow_run.id }}"
+            HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
+          fi
+
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "head_sha=$HEAD_SHA" >> $GITHUB_OUTPUT
+
+      - name: Download artifact from Integrate workflow
+        uses: actions/download-artifact@v4
+        with:
+          name: spring-boot-app
+          path: build/libs
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ steps.get-run-info.outputs.run_id }}
+
+      - name: Verify and upload artifact
+        run: |
+          echo "Downloaded artifacts:"
+          ls -la build/libs/
+          JAR_FILE=$(ls build/libs/*.jar | head -1)
+          echo "JAR file: $JAR_FILE"
+
+      - name: Upload artifact for next jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-artifact
+          path: build/libs/*.jar
+          retention-days: 1
+
+  # ==========================================================================
+  # Build Image Job - Docker 빌드 및 ECR 푸시
+  # ==========================================================================
+  build-image:
+    name: Build Image
+    runs-on: ubuntu-latest
+    needs: [prepare]
+
+    outputs:
+      image_tag: ${{ needs.prepare.outputs.head_sha }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: deploy-artifact
+          path: build/libs
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -51,12 +155,29 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: Dockerfile.deploy
           push: true
           tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ needs.prepare.outputs.head_sha }}
             ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # ==========================================================================
+  # Deploy Job - ECS 배포
+  # ==========================================================================
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: [prepare, build-image]
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy to ECS
         run: |
@@ -76,7 +197,9 @@ jobs:
       - name: Deployment Summary
         run: |
           echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Image Tag**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image Tag**: ${{ needs.prepare.outputs.head_sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Source Run ID**: ${{ needs.prepare.outputs.run_id }}" >> $GITHUB_STEP_SUMMARY
           echo "- **ECS Cluster**: ${{ vars.ECS_CLUSTER }}" >> $GITHUB_STEP_SUMMARY
           echo "- **ECS Service**: ${{ vars.ECS_SERVICE }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Region**: ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
