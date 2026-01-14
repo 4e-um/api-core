@@ -1,5 +1,6 @@
 package com.project.core.infra.entity.discount;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.project.core.infra.entity.discount.enums.DiscountType;
@@ -44,7 +45,7 @@ public class SubscriptionDiscount {
 	private DiscountType discountType;
 	
 	@Column(name = "value", nullable = false)
-	private Double value;
+	private BigDecimal value;
 	
 	@Column(name = "target_scope", nullable = false)
 	private TargetScope targetScope;
@@ -70,7 +71,7 @@ public class SubscriptionDiscount {
             DiscountPolicy discountPolicy,
             Subscription subscription,
             DiscountType discountType,
-            Double value,
+            BigDecimal value,
             TargetScope targetScope,
             LocalDateTime startDate
     ) {

@@ -1,5 +1,6 @@
 package com.project.core.infra.entity.discount;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class DiscountPolicy {
 	private DiscountType discountType;
 	
 	@Column(name = "value", nullable = false)
-	private Double value;
+	private BigDecimal value;
 	
 	@Column(name = "category", nullable = false)
 	private Category category;
