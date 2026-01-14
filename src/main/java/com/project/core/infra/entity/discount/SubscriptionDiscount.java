@@ -8,15 +8,7 @@ import com.project.core.infra.entity.discount.enums.Status;
 import com.project.core.infra.entity.discount.enums.TargetScope;
 import com.project.core.infra.entity.subscription.Subscription;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -55,8 +47,9 @@ public class SubscriptionDiscount {
 
 	@Column(name = "end_date")
 	private LocalDateTime endDate;
-	
-	@Column(name = "status", nullable = false)
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "status", nullable = false, length = 10)
 	private Status status;
 	
 	public void setEndDate(LocalDateTime endDate) {

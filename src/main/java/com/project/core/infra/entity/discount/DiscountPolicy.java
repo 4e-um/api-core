@@ -9,14 +9,7 @@ import com.project.core.infra.entity.discount.enums.Category;
 import com.project.core.infra.entity.discount.enums.DiscountType;
 import com.project.core.infra.entity.discount.enums.TargetScope;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,9 +38,11 @@ public class DiscountPolicy {
 	
 	@Column(name = "target_scope", nullable = false)
 	private TargetScope targetScope;
-	
-	@Column(name = "active", nullable = false)
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "active", nullable = false, length = 10)
 	private Active active;
+
 	@OneToMany(mappedBy = "discountPolicy")
 	private List<SubscriptionDiscount> discountHistory = new ArrayList<>();
 }
