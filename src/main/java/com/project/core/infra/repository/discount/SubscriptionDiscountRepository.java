@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.project.core.infra.entity.discount.SubscriptionDiscount;
 
 public interface SubscriptionDiscountRepository extends JpaRepository<SubscriptionDiscount, Long> {
-	List<SubscriptionDiscount> findBySubId(Long subId);
+	List<SubscriptionDiscount> findBySubscription_SubId(Long subId);
 	Optional<SubscriptionDiscount> findBySdId(Long sdId);
 }

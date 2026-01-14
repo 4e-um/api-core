@@ -2,13 +2,9 @@ package com.project.core.infra.entity.discount;
 
 import java.time.LocalDateTime;
 
-import com.project.core.infra.entity.discount.enums.Active;
-import com.project.core.infra.entity.discount.enums.Category;
 import com.project.core.infra.entity.discount.enums.DiscountType;
 import com.project.core.infra.entity.discount.enums.Status;
 import com.project.core.infra.entity.discount.enums.TargetScope;
-import com.project.core.infra.entity.plan.Plan;
-import com.project.core.infra.entity.plan.SubscriptionPlan;
 import com.project.core.infra.entity.subscription.Subscription;
 
 import jakarta.persistence.Column;

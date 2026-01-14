@@ -1,12 +1,8 @@
 package com.project.core.infra.repository.customer;
 
 import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.project.core.infra.entity.customer.Customer;
-
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
     List<Customer> findByContactEnc(String contactEnc);

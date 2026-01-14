@@ -8,9 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.project.core.infra.entity.discount.DiscountPolicy;
 import com.project.core.infra.entity.discount.SubscriptionDiscount;
-import com.project.core.infra.entity.discount.enums.DiscountType;
-import com.project.core.infra.entity.discount.enums.Status;
-import com.project.core.infra.entity.discount.enums.TargetScope;
 import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.repository.discount.DiscountPolicyRepository;
 import com.project.core.infra.repository.discount.SubscriptionDiscountRepository;
@@ -29,7 +26,7 @@ public class DiscountService {
 	public List<SubscriptionDiscount> loadRequiredBySubId(Long subId) {
 
 	    List<SubscriptionDiscount> discounts =
-	            subscriptionDiscountRepository.findBySubId(subId);
+	            subscriptionDiscountRepository.findBySubscription_SubId(subId);
 
 	    if (discounts.isEmpty()) {
 	        throw new IllegalStateException("해당 회선에 적용된 할인이 없습니다");

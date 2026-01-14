@@ -3,6 +3,14 @@ package com.project.core.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+
+import com.project.core.controller.dto.request.ChangeEmailRequest;
+import com.project.core.controller.dto.request.ChangeGradeRequest;
+import com.project.core.controller.dto.response.ChangeEmailResponse;
+import com.project.core.controller.dto.response.ChangeGradeResponse;
+import com.project.core.infra.entity.customer.Customer;
+import com.project.core.service.CustomerService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,14 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.core.controller.dto.request.ChangeEmailRequest;
-import com.project.core.controller.dto.request.ChangeGradeRequest;
-import com.project.core.controller.dto.response.ChangeEmailResponse;
-import com.project.core.controller.dto.response.ChangeGradeResponse;
-import com.project.core.infra.entity.customer.Customer;
-import com.project.core.service.CustomerService;
 
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/user")
@@ -63,5 +64,5 @@ public class CustomerController {
                 customerService.changeUserGrade(userId, request);
         return ResponseEntity.ok(response);
     }
-  
+
 }

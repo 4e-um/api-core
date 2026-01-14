@@ -10,37 +10,37 @@ import com.project.core.controller.dto.request.ChangeGradeRequest;
 import com.project.core.controller.dto.response.ChangeEmailResponse;
 import com.project.core.controller.dto.response.ChangeGradeResponse;
 import com.project.core.infra.entity.customer.Customer;
-import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.repository.customer.CustomerRepository;
-import com.project.global.util.AESUtil;
+import com.project.global.exception.code.domain.core.CoreErrorCode;
+import com.project.global.exception.core.EntityNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
 @Service @RequiredArgsConstructor
 public class CustomerService {
 	private final CustomerRepository customerRepository;
-	private final AESUtil aesUtil;
 	
 	@Transactional
 	public List<Customer> loadByContactEnc(String contactEnc) {//유저 조회
 		List<Customer> customers = customerRepository.findByContactEnc(contactEnc);
 		if(customers.isEmpty()) {
-			throw new IllegalStateException("해당하는 사용자가 없습니다");
+      throw new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND);
+
 		}
 		return customers;
 	}
 	
 	@Transactional
-	public ChangeEmailResponse changeEmailEnc(Long userId, ChangeEmailRequest request) throws Exception {//이메일 변경
-		Customer customer = customerRepository.findById(userId).orElseThrow(()->new IllegalArgumentException("사용자를 찾을 수 없습니다"));
-		String encEmail = aesUtil.encrypt(request.emailEnc());
-		customer.changeEmailEnc(encEmail);
-	    return new ChangeEmailResponse(encEmail);
+	public ChangeEmailResponse changeEmailEnc(Long userId, ChangeEmailRequest request) {//이메일 변경
+		Customer customer = customerRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
+
+		customer.changeEmailEnc(request.emailEnc());
+	    return new ChangeEmailResponse(customer.getEmailEnc());
 	}
 	
 	@Transactional
 	public ChangeGradeResponse changeUserGrade(Long userId, ChangeGradeRequest request) {//등급 변경
-		Customer customer = customerRepository.findById(userId).orElseThrow(()->new IllegalArgumentException("사용자를 찾을 수 없습니다"));
+		Customer customer = customerRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
 
 		customer.changeGrade(request.grade());
 	    return new ChangeGradeResponse(customer.getGrade());

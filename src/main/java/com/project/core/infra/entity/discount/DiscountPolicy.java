@@ -7,7 +7,6 @@ import com.project.core.infra.entity.discount.enums.Active;
 import com.project.core.infra.entity.discount.enums.Category;
 import com.project.core.infra.entity.discount.enums.DiscountType;
 import com.project.core.infra.entity.discount.enums.TargetScope;
-import com.project.core.infra.entity.vas.SubscriptionVas;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -49,6 +48,6 @@ public class DiscountPolicy {
 	@Column(name = "active", nullable = false)
 	private Active active;
 //------------------------------------------------------------------
-	@OneToMany(mappedBy = "discount_policy", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "discountPolicy", cascade = CascadeType.ALL)
 	private List<SubscriptionDiscount> discountHistory = new ArrayList<>();
 }

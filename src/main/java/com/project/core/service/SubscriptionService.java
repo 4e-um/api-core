@@ -5,9 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.core.infra.entity.discount.SubscriptionDiscount;
 import com.project.core.infra.entity.subscription.Subscription;
-import com.project.core.infra.repository.discount.SubscriptionDiscountRepository;
 import com.project.core.infra.repository.subscription.SubscriptionRepository;
 import com.project.global.util.AESUtil;
 
@@ -22,7 +20,7 @@ public class SubscriptionService {
 	@Transactional
 	public List<Subscription> findSubscription(Long customerId) throws Exception {
 	    List<Subscription> subscriptions =
-	            subscriptionRepository.findByCostomerId(customerId);
+	            subscriptionRepository.findByCustomer_CustomerId(customerId);
 
 	    if (subscriptions.isEmpty()) {
 	        throw new IllegalStateException("보유중인 회선이 없습니다.");
