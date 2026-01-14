@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AESUtil {
+public class AesUtil {
 
   @Value("${ureca.secret-key}")
   private String secretKey;
@@ -34,7 +34,9 @@ public class AESUtil {
 
   // 암호화 (Encrypt)
   public String encrypt(String plainText) {
-    if (plainText == null) return null;
+    if (plainText == null) {
+      return null;
+    }
 
     try {
       // 1. 랜덤 IV(Initialization Vector) 생성 (16바이트)
@@ -67,7 +69,9 @@ public class AESUtil {
 
   // 복호화 (Decrypt)
   public String decrypt(String cipherText) {
-    if (cipherText == null) return null;
+    if (cipherText == null) {
+      return null;
+    }
 
     try {
       // 1. Base64 디코딩
