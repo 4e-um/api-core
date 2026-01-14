@@ -46,7 +46,9 @@ public class SubscriptionDiscountResponse {
 
   /** 010-1234-1212 -> 010-**12-**12 01012341212 -> 010-**12-**12 */
   private static String maskPhone(String phone) {
-    if (phone == null || phone.isBlank()) return null;
+    if (phone == null || phone.isBlank()) {
+      return null;
+    }
 
     // 숫자만 추출
     String digits = phone.replaceAll("\\D", "");

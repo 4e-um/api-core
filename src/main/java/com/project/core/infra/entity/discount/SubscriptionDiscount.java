@@ -73,11 +73,21 @@ public class SubscriptionDiscount {
       BigDecimal value,
       TargetScope targetScope,
       LocalDateTime startDate) {
-    if (discountPolicy == null) throw new IllegalArgumentException("discountPolicy는 필수입니다.");
-    if (subscription == null) throw new IllegalArgumentException("subscription은 필수입니다.");
-    if (discountType == null) throw new IllegalArgumentException("discountType는 필수입니다.");
-    if (value == null) throw new IllegalArgumentException("value는 필수입니다.");
-    if (targetScope == null) throw new IllegalArgumentException("targetScope는 필수입니다.");
+    if (discountPolicy == null) {
+      throw new IllegalArgumentException("discountPolicy는 필수입니다.");
+    }
+    if (subscription == null) {
+      throw new IllegalArgumentException("subscription은 필수입니다.");
+    }
+    if (discountType == null) {
+      throw new IllegalArgumentException("discountType는 필수입니다.");
+    }
+    if (value == null) {
+      throw new IllegalArgumentException("value는 필수입니다.");
+    }
+    if (targetScope == null) {
+      throw new IllegalArgumentException("targetScope는 필수입니다.");
+    }
 
     this.discountPolicy = discountPolicy;
     this.subscription = subscription;

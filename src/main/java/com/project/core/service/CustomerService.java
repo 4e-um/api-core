@@ -8,7 +8,7 @@ import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.repository.customer.CustomerRepository;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
-import com.project.global.util.AESUtil;
+import com.project.global.util.AesUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomerService {
 
   private final CustomerRepository customerRepository;
-  private final AESUtil aesUtil;
+  private final AesUtil aesUtil;
 
   @Transactional
   public List<Customer> loadByContactEnc(String contactEnc) { // 유저 조회
