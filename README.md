@@ -98,79 +98,100 @@ flowchart LR
     style History_Management fill:#R,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5
 ```
 ### 시스템 작동 흐름도 설명
+```mermaid
+flowchart LR
 
-flowchart TB
-  %% =========================
-  %% STEP 1: 관리자 유저 선택
-  %% =========================
-  subgraph STEP1["STEP 1 : 관리자 유저 선택"]
-    direction LR
-    S1A["유저 검색(전화번호)"] -->|조회| S1B["Customer Repository"]
-    S1B --> S1C["유저 id만 반환"]
+  %% STEP 1
+  subgraph STEP1[STEP 1. 관리 대상 고객 선택]
+    A[전화번호로 고객 검색]
+    B[Customer Repository 조회]
+    C[고객 userId 반환]
+
+    A --> B --> C
   end
 
-  %% =========================
-  %% STEP 2: 기능 수행
-  %% =========================
-  subgraph STEP2["STEP 2 : 기능 수행"]
-    direction TB
+  %% STEP 2
+  subgraph STEP2[STEP 2. 기능 수행]
+    D[Customer 기능]
+    E[Subscription 기능]
+    F[Discount 기능]
 
-    %% ---- Customer ----
-    subgraph CUST["Customer"]
-      direction TB
-
-      C1["이메일 변경"] -->|조회| C2["Customer Repository"] --> C3["이메일 변경/저장"]
-      C4["유저 등급 변경<br/>(general,vip,vvip)"] -->|조회| C5["Customer Repository"] --> C6["유저등급 변경/저장"]
-    end
-
-    %% ---- Subscription ----
-    subgraph SUBS["subscription"]
-      direction LR
-      S2A["회선 상태 변경"] -->|조회| S2B["Subscription Repository"]
-      S2B --> S2C["보유중인 회선 반환<br/>(클라이언트)"]
-      S2C --> S2D["상태를 변경할<br/>회선 선택"]
-      S2D -->|조회| S2E["Subscription Repository"]
-      S2E --> S2F["회선 상태 변경/저장"]
-    end
-
-    %% ---- Subscription Discount ----
-    subgraph DISC["subscription_discount"]
-      direction LR
-      D1["할인 등록/해지"] -->|조회| D2["Subscription Repository"]
-      D2 --> D3["보유중인 회선 반환<br/>(클라이언트)"]
-      D3 --> D4["상태를 변경할<br/>회선 선택"]
-      D4 -->|조회| D5["subscription_discount Repository"]
-      D5 --> D6["할인 등록 / 해지"]
-    end
+    C --> D
+    C --> E
+    C --> F
   end
 
-  %% STEP1 -> STEP2 연결(선택된 유저로 기능 수행)
-  S1C --> STEP2
+  %% Customer
+  D --> D1[이메일 변경]
+  D --> D2[고객 등급 변경]
+  D1 --> DR1[Customer Repository 저장]
+  D2 --> DR1
+
+  %% Subscription
+  E --> E1[회선 조회]
+  E1 --> ER1[Subscription Repository]
+  ER1 --> E2[보유 회선 반환]
+  E2 --> E3[회선 선택]
+  E3 --> E4[회선 상태 변경 저장]
+
+  %% Discount
+  F --> F1[할인 등록 또는 해지]
+  F1 --> FR1[Subscription Repository 조회]
+  FR1 --> F2[대상 회선 선택]
+  F2 --> FR2[SubscriptionDiscount Repository]
+  FR2 --> F3[할인 이력 처리]
+  ```
 
 
-본 다이어그램은 관리자 시스템에서 고객을 선택한 후,
-Customer / Subscription / Subscription Discount 도메인별 관리 기능이
-어떤 순서로 동작하는지를 나타낸 흐름도이다.
+### 고객 정보 관리 프로세스
 
-전체 흐름은 크게 두 단계로 구성된다.
+관리자가 고객의 기본 정보를 변경할 때 수행되는 로직입니다.
 
-STEP 1은 관리 대상 고객 선택 단계로,
-관리자가 전화번호로 고객을 검색하면 CustomerRepository를 통해
-고객을 조회하고, 이후 단계에서는 고객 식별을 위해 userId만 반환한다.
-이를 통해 개인정보 노출을 최소화하고,
-모든 관리 기능이 동일한 진입 흐름을 가지도록 설계되었다.
+1. 고객 조회:
+   - 전화번호 검색을 통해 고객을 식별하고, 내부적으로는 userId 기준으로 관리합니다.
 
-STEP 2는 실제 관리 기능 수행 단계로,
-선택된 고객을 기준으로 도메인별 기능이 분리되어 실행된다.
+2. 이메일 변경:
+   - 기존 고객 정보를 조회한 뒤 이메일을 변경하여 저장합니다.
 
-Customer 영역에서는 이메일 변경과 고객 등급 변경 기능을 제공하며,
-모든 변경은 CustomerRepository를 통해 조회 후 저장된다.
+3. 고객 등급 변경:
+   - 고객 등급(GENERAL, VIP, VVIP)을 정책에 따라 변경하고 저장합니다.
+     
+### 회선 상태 변경 프로세스
 
-Subscription 영역에서는 고객이 보유한 회선 목록을 조회한 뒤,
-관리자가 상태를 변경할 회선을 선택하여
-회선 상태를 변경하고 저장하는 흐름으로 구성된다.
+고객이 보유한 회선의 상태를 관리자가 변경하는 로직입니다.
 
-Subscription Discount 영역에서는
-고객의 회선을 기준으로 할인 적용 또는 해지 대상을 선택하고,
-SubscriptionDiscountRepository를 통해
-할인 이력을 등록하거나 종료 처리한다.
+1. 회선 조회:
+   - 고객이 보유한 모든 회선을 조회합니다.
+
+2. 대상 회선 선택:
+   - 관리자가 상태를 변경할 회선을 선택합니다.
+
+3. 상태 변경:
+   - 선택된 회선의 상태(사용중, 일시정지, 해지 등)를 변경하여 저장합니다.
+
+### 할인 서비스 관리 프로세스
+
+회선 단위로 할인 서비스를 등록하거나 해지하는 로직입니다.
+
+1. 회선 조회:
+   - 고객이 보유한 회선을 조회합니다.
+
+2. 할인 대상 선택:
+   - 할인 적용 또는 해지를 수행할 회선을 선택합니다.
+
+3. 할인 처리:
+   - 할인 등록 시 새로운 할인 이력을 생성하고,
+     해지 시 기존 할인 이력을 종료 처리합니다.
+
+### 요금제 변경 프로세스
+
+단순 업데이트가 아닌 이력 관리 기반으로 요금제를 변경하는 로직입니다.
+
+1. 회선 상태 검증:
+   - 변경 대상 회선이 존재하고, 해지 상태가 아닌지 확인합니다.
+
+2. 기존 요금제 이력 만료:
+   - 현재 적용 중인 요금제 이력의 종료일을 현재 시점으로 갱신합니다.
+
+3. 신규 요금제 이력 생성:
+   - 변경할 요금제 정보를 새로운 이력으로 생성하여 저장합니다.
