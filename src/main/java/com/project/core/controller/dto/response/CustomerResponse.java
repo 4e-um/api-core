@@ -17,8 +17,8 @@ public class CustomerResponse {
 
     public static CustomerResponse from(Customer c) {
         return CustomerResponse.builder()
-                .customerId(c.getCustomerId())   // ✅ 실제 PK getter명으로 맞추기
-                .name(c.getName())               // ✅ 실제 필드명으로 맞추기
+                .customerId(c.getCustomerId())
+                .name(c.getName())
                 .grade(String.valueOf(c.getGrade())) // grade가 enum이면 적절히 변환
                 // maskedContact는 "복호화 가능한 원본"이 있을 때만 넣는 걸 권장
                 .maskedContact(null)
