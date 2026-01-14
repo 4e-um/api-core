@@ -1,5 +1,6 @@
 package com.project.core.controller.dto.response;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.project.core.infra.entity.discount.SubscriptionDiscount;
@@ -20,7 +21,7 @@ public class SubscriptionDiscountResponse {
 
     private Long discountId;
     private DiscountType discountType;
-    private Double value;
+    private BigDecimal value;
     private TargetScope targetScope;
 
     private LocalDateTime startDate;
