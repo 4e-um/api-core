@@ -107,6 +107,11 @@ public class PlanService {
             .findById(subId)
             .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
 
+    // 이미 해지된 회선인지 확인
+    if (sub.getStatus() == SubscriptionStatus.TERMINATED) {
+      throw new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
+    }
+
     // 현재 사용 중인 요금제 찾아서 종료 처리
     subscriptionPlanRepository.findActivePlanBySubId(subId).ifPresent(SubscriptionPlan::expire);
 
