@@ -1,14 +1,13 @@
 package com.project.core.util;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class PhoneUtil {
-	private static final Random random = new Random();
 
 	// 010-XXXX-XXXX 형식의 랜덤 번호 생성
 	public static String generateRandomPhoneNumber() {
-		int mid = random.nextInt(9000) + 1000;	// 1000 ~ 9999
-		int last = random.nextInt(9000) + 1000;
+		int mid = ThreadLocalRandom.current().nextInt(1000, 10000);
+		int last = ThreadLocalRandom.current().nextInt(1000, 10000);
 		return String.format("010-%d-%d", mid, last);
 	}
 }
