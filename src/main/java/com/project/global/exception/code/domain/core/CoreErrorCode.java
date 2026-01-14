@@ -13,10 +13,10 @@ public enum CoreErrorCode implements BaseErrorCode {
   
   // 할인정책
   DISCOUNT_POLICY_NOT_FOUND(HttpStatus.NOT_FOUND, "DISCOUNT_POLICY_001", "존재하지 않는 할인 정책입니다."),
-  
+
   // 할인
   DISCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "DISCOUNT_001", "존재하지 않는 할인입니다."),
-  
+
   // 요금제
   PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "PLAN_001", "존재하지 않는 요금제입니다."),
 
