@@ -12,23 +12,23 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/plan")
 public class PlanController {
 
-	private final PlanService planService;
+  private final PlanService planService;
 
-	@PostMapping("/join")
-	public ResponseEntity<Void> joinSubscription(@RequestBody SubscriptionJoinRequest request) {
-		planService.joinSubscription(request.customerId(), request.planId());
-		return ResponseEntity.ok().build();
-	}
+  @PostMapping("/join")
+  public ResponseEntity<Void> joinSubscription(@RequestBody SubscriptionJoinRequest request) {
+    planService.joinSubscription(request.customerId(), request.planId());
+    return ResponseEntity.ok().build();
+  }
 
-	@PostMapping("/change")
-	public ResponseEntity<Void> changePlan(@RequestBody PlanChangeRequest request) {
-		planService.changePlan(request.subId(), request.planId());
-		return ResponseEntity.ok().build();
-	}
+  @PostMapping("/change")
+  public ResponseEntity<Void> changePlan(@RequestBody PlanChangeRequest request) {
+    planService.changePlan(request.subId(), request.planId());
+    return ResponseEntity.ok().build();
+  }
 
-	@PostMapping("/{subId}/terminate")
-	public ResponseEntity<Void> terminateSubscription(@PathVariable Long subId) {
-		planService.terminateSubscription(subId);
-		return ResponseEntity.ok().build();
-	}
+  @PostMapping("/{subId}/terminate")
+  public ResponseEntity<Void> terminateSubscription(@PathVariable Long subId) {
+    planService.terminateSubscription(subId);
+    return ResponseEntity.ok().build();
+  }
 }
