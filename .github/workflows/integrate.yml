@@ -148,7 +148,7 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: ./gradlew sonar --info
 
-      - name: SonarQube Quality Gate + PR Comment
+      - name: SonarQube Quality Gate + PR Comment (Community)
         if: github.event_name == 'pull_request'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -156,13 +156,30 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
+          BRANCH: ${{ github.head_ref }}
         run: |
-          echo "Waiting for SonarQube Quality Gate result..."
+          set -e
 
-          # 분석 task id 추출
-          CE_TASK_ID=$(grep -oP 'ceTaskId=\K.*' build/sonar/report-task.txt)
+          REPORT_FILE="build/sonar/report-task.txt"
 
-          # Quality Gate 결과 polling
+          if [ ! -f "$REPORT_FILE" ]; then
+            echo "report-task.txt not found"
+            exit 1
+          fi
+
+          # ------------------------------------------------------------------
+          # Basic info from report-task.txt
+          # ------------------------------------------------------------------
+          CE_TASK_ID=$(grep '^ceTaskId=' $REPORT_FILE | cut -d'=' -f2)
+          PROJECT_KEY=$(grep '^projectKey=' $REPORT_FILE | cut -d'=' -f2)
+          DASHBOARD_URL=$(grep '^dashboardUrl=' $REPORT_FILE | cut -d'=' -f2)
+
+          echo "ProjectKey: $PROJECT_KEY"
+          echo "Branch: $BRANCH"
+
+          # ------------------------------------------------------------------
+          # Wait for CE task
+          # ------------------------------------------------------------------
           for i in {1..30}; do
             STATUS_JSON=$(curl -s -u "$SONAR_TOKEN:" \
               "$SONAR_HOST_URL/api/ce/task?id=$CE_TASK_ID")
@@ -173,22 +190,42 @@ jobs:
               break
             fi
 
-            echo "SonarQube task status: $TASK_STATUS (retry $i)"
+            echo "Waiting for SonarQube task... ($i)"
             sleep 5
           done
 
           ANALYSIS_ID=$(echo "$STATUS_JSON" | jq -r '.task.analysisId')
 
+          # ------------------------------------------------------------------
+          # Quality Gate
+          # ------------------------------------------------------------------
           QG_JSON=$(curl -s -u "$SONAR_TOKEN:" \
             "$SONAR_HOST_URL/api/qualitygates/project_status?analysisId=$ANALYSIS_ID")
 
           QG_STATUS=$(echo "$QG_JSON" | jq -r '.projectStatus.status')
 
-          PROJECT_KEY=$(echo "$QG_JSON" | jq -r '.projectStatus.projectKey')
+          # ------------------------------------------------------------------
+          # Branch-level Issues
+          # ------------------------------------------------------------------
+          ISSUES_JSON=$(curl -s -u "$SONAR_TOKEN:" \
+            "$SONAR_HOST_URL/api/issues/search?projectKeys=$PROJECT_KEY&branch=$BRANCH&resolved=false")
 
-          DASHBOARD_URL="$SONAR_HOST_URL/dashboard?id=$PROJECT_KEY"
-          QG_URL="$SONAR_HOST_URL/dashboard?id=$PROJECT_KEY&branch=${{ github.head_ref }}"
+          BUGS=$(echo "$ISSUES_JSON" | jq '[.issues[] | select(.type=="BUG")] | length')
+          VULNS=$(echo "$ISSUES_JSON" | jq '[.issues[] | select(.type=="VULNERABILITY")] | length')
+          SMELLS=$(echo "$ISSUES_JSON" | jq '[.issues[] | select(.type=="CODE_SMELL")] | length')
 
+          # ------------------------------------------------------------------
+          # Branch-level Measures
+          # ------------------------------------------------------------------
+          MEASURES_JSON=$(curl -s -u "$SONAR_TOKEN:" \
+            "$SONAR_HOST_URL/api/measures/component?component=$PROJECT_KEY&branch=$BRANCH&metricKeys=coverage,duplicated_lines_density")
+
+          COVERAGE=$(echo "$MEASURES_JSON" | jq -r '.component.measures[] | select(.metric=="coverage") | .value // "0"')
+          DUPLICATION=$(echo "$MEASURES_JSON" | jq -r '.component.measures[] | select(.metric=="duplicated_lines_density") | .value // "0"')
+
+          # ------------------------------------------------------------------
+          # Result formatting
+          # ------------------------------------------------------------------
           if [ "$QG_STATUS" = "OK" ]; then
             ICON="✅"
             RESULT="PASSED"
@@ -198,26 +235,42 @@ jobs:
           fi
 
           BODY=$(cat <<EOF
-          ## SonarQube Quality Gate Result
+          ## SonarQube Quality Summary (Community)
 
           ${ICON} **Quality Gate ${RESULT}**
 
-          - 🔗 [SonarQube Dashboard](${DASHBOARD_URL})
-          - 🔗 [Quality Gate Details](${QG_URL})
+          **Branch:** \`${BRANCH}\`  
+          **Compared to:** default branch
 
-          _This comment is generated automatically._
+          ### Issues
+          - 🐞 Bugs: ${BUGS}
+          - 🔐 Vulnerabilities: ${VULNS}
+          - 📎 Code Smells: ${SMELLS}
+
+          ### Measures
+          - Coverage: ${COVERAGE}%
+          - Duplication: ${DUPLICATION}%
+
+          🔗 Dashboard: ${DASHBOARD_URL}&branch=${BRANCH}
+
+          _Generated automatically by GitHub Actions._
           EOF
           )
 
-          # PR comment 작성
+          # ------------------------------------------------------------------
+          # PR comment
+          # ------------------------------------------------------------------
           gh api repos/$REPO/issues/$PR_NUMBER/comments \
             -f body="$BODY"
 
-          # 실패 시 job 실패 처리
+          # ------------------------------------------------------------------
+          # Fail workflow if Quality Gate failed
+          # ------------------------------------------------------------------
           if [ "$QG_STATUS" != "OK" ]; then
             echo "Quality Gate FAILED"
             exit 1
           fi
+
 
   # ==========================================================================
   # Build Job - JAR 빌드 및 Artifact 업로드
