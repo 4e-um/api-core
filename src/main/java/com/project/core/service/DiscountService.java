@@ -31,7 +31,7 @@ public class DiscountService {
 	            subscriptionDiscountRepository.findBySubscription_SubId(subId);
 
 	    if (discounts.isEmpty()) {
-	        throw new IllegalStateException("해당 회선에 적용된 할인이 없습니다");
+	        throw new EntityNotFoundException(CoreErrorCode.DISCOUNT_NOT_FOUND);
 	    }
 
 	    return discounts;
