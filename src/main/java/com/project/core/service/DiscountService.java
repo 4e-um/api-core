@@ -64,8 +64,14 @@ public class DiscountService {
 	}
 
 	
+	/**
+	 * 기존 할인을 종료하고 새로운 할인으로 교체합니다.
+	 * @param discountId 새로 적용할 할인 정책 ID
+	 * @param sdId 종료할 기존 구독 할인 ID
+	 * @return 새로 생성된 구독 할인 ID
+	 */
 	@Transactional
-	public Long changeDiscount(Long discountId,Long sdId) {	//할인 변경
+	public Long changeDiscount(Long discountId, Long sdId) {
 		SubscriptionDiscount discount = 
 				subscriptionDiscountRepository.findBySdId(sdId)
 					.orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.DISCOUNT_NOT_FOUND));
