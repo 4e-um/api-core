@@ -32,7 +32,7 @@ public class PlanService {
   private final AESUtil aesUtil;
   private final Clock clock;
 
-  private static int MAX_PHONE_NUMBER_GENERATION_ATTEMPTS = 0;
+  private static final int PHONE_NUMBER_GENERATION_ATTEMPT_LIMIT = 11;
 
   /**
    * 요금제 가입 (신규 개통) 1. 활성 회선이 0개면 -> Customer의 연락처 사용 시도 2. 활성 회선이 있거나 위 번호가 이미 사용 중이면 -> 랜덤 번호 생성
@@ -88,22 +88,14 @@ public class PlanService {
 
   // 중복 없는 랜덤 번호 생성 (암호화된 값 반환)
   private String generateUniqueRandomPhoneNumberEnc() {
-    String randomPhone;
-    String randomPhoneEnc;
-
-    // 무한 루프 방지를 위한 최대 시도 횟수
-    MAX_PHONE_NUMBER_GENERATION_ATTEMPTS = 0;
-
-    do {
-      if (MAX_PHONE_NUMBER_GENERATION_ATTEMPTS > 10)
-        throw new OperationFailedException(CoreErrorCode.PHONE_NUMBER_GENERATION_FAILED);
-
-      randomPhone = PhoneUtil.generateRandomPhoneNumber();
-      randomPhoneEnc = aesUtil.encrypt(randomPhone);
-      MAX_PHONE_NUMBER_GENERATION_ATTEMPTS++;
-    } while (subscriptionRepository.existsByPhoneNumber(randomPhoneEnc)); // DB에 이미 있는지(해지된 것 포함) 체크
-
-    return randomPhoneEnc;
+    for (int i = 0; i < PHONE_NUMBER_GENERATION_ATTEMPT_LIMIT; i++) {
+      String randomPhone = PhoneUtil.generateRandomPhoneNumber();
+      String randomPhoneEnc = aesUtil.encrypt(randomPhone);
+      if (!subscriptionRepository.existsByPhoneNumber(randomPhoneEnc)) {
+        return randomPhoneEnc;
+      }
+    }
+    throw new OperationFailedException(CoreErrorCode.PHONE_NUMBER_GENERATION_FAILED);
   }
 
   /** 요금제 변경 (기존 요금제 해지 -> 신규 요금제 가입 */
