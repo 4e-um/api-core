@@ -19,7 +19,14 @@
 
 고객(Customer)은 여러 회선(Subscription)을 가질 수 있으며 각 회선은 요금제(PLAN), 부가서비스(VAS), 소액결제(MICRO), 할인(DISCOUNT)의 이력을 관리합니다.
 
-<img width="1318" height="569" alt="mermaid-diagram-2026-01-14-004755" src="https://github.com/user-attachments/assets/6fb58842-c9c6-41eb-932f-8b9c9772d955" />
+```mermaid
+erDiagram
+    CUSTOMER ||--|{ SUBSCRIPTION : "1:N (보유)"
+    SUBSCRIPTION ||--|{ SUBSCRIPTION_PLAN : "1:N (이력 관리)"
+    SUBSCRIPTION ||--o{ SUBSCRIPTION_VAS : "1:N (이력 관리)"
+    SUBSCRIPTION ||--o{ MICRO_PAYMENT : "1:N (결제 내역)"
+    SUBSCRIPTION ||--o{ SUBSCRIPTION_DISCOUNT : "1:N (이력 관리)"
+```
 
 ## 4. 핵심 로직
 
@@ -40,7 +47,24 @@
 4. 초기 요금제 연결:
    - 회선 생성과 동시에, 선택한 요금제에 대한 첫 번째 이력 데이터를 관련 테이블에 생성합니다.
 
-<img width="1318" height="228" alt="mermaid-diagram-2026-01-14-005843" src="https://github.com/user-attachments/assets/43a7bf14-3f10-4ad5-8b1c-c3c9b6393a7b" />
+```mermaid
+flowchart LR
+    
+    
+    C[신규 개통] -->|1. 활성 회선 조회| D[Repository]
+    
+    D -- 0개 (첫 가입) --> E{기존 번호 중복체크}
+    D -- 1개 이상 (추가 개통) --> F[랜덤 신규번호 생성]
+    
+    E -- 사용 가능 --> G[기존 연락처로 번호 확정]
+    E -- 사용 중 --> F
+    
+    F -->|암호화| H[AES-256 Encrypt]
+    G -->|암호화| H
+    
+    H --> I[회선 저장]
+    I --> J[요금제 이력 생성]
+```
 
 ### 요금제 변경 프로세스
 
@@ -57,4 +81,19 @@
    - 변경할 새로운 요금제 정보를 담은 **새로운 레코드를 INSERT**합니다.
    - 이 레코드의 시작일(created_date)은 현재 시점으로 설정되어 현재 유효한 요금제가 됩니다.
 
-<img width="1318" height="250" alt="mermaid-diagram-2026-01-14-010543" src="https://github.com/user-attachments/assets/d56af37c-7e08-4dff-8c7d-a1bf6bf4e46d" />
+```mermaid
+flowchart LR
+    C[요금제 변경] -->|1. 회선 조회 & 상태 체크| D{회선 상태}
+    
+    D -- 해지됨(Terminated) --> E[Error: 해지된 회선]
+    D -- 사용중(Active) --> G[기존 요금제 조회]
+
+    subgraph History_Management [이력 관리 로직]
+        direction TB
+        G --> H[기존 이력 만료 처리]
+        H --> I[신규 요금제 이력 생성]
+    end
+
+    
+    style History_Management fill:#R,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5
+```
