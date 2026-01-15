@@ -2,8 +2,8 @@ package com.project.core.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -13,10 +13,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.core.controller.dto.request.PlanChangeRequest;
 import com.project.core.controller.dto.request.SubscriptionJoinRequest;
+import com.project.core.controller.dto.response.PlanChangeResponse;
+import com.project.core.controller.dto.response.SubscriptionJoinResponse;
+import com.project.core.controller.dto.response.SubscriptionTerminateResponse;
+import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 import com.project.core.service.PlanService;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
 import com.project.global.exception.core.InvalidStateException;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +41,17 @@ class PlanControllerTest {
   @DisplayName("[가입/성공] 요금제 가입 요청 성공")
   void joinSubscriptionSuccess() throws Exception {
     SubscriptionJoinRequest request = new SubscriptionJoinRequest(1L, 1L);
-    doNothing().when(planService).joinSubscription(any(Long.class), any(Long.class));
+    SubscriptionJoinResponse response =
+        SubscriptionJoinResponse.builder()
+            .subId(100L)
+            .customerId(1L)
+            .planId(1L)
+            .phoneNumber("010-1234-5678")
+            .status(SubscriptionStatus.ACTIVE)
+            .startDate(LocalDateTime.now())
+            .build();
+
+    when(planService.joinSubscription(any(Long.class), any(Long.class))).thenReturn(response);
 
     mockMvc
         .perform(
@@ -45,7 +60,9 @@ class PlanControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andDo(print())
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.subId").value(100L))
+        .andExpect(jsonPath("$.phoneNumber").value("010-1234-5678"));
   }
 
   @Test
@@ -71,7 +88,10 @@ class PlanControllerTest {
   @DisplayName("[변경/성공] 요금제 변경 요청 성공")
   void changePlanSuccess() throws Exception {
     PlanChangeRequest request = new PlanChangeRequest(1L, 2L);
-    doNothing().when(planService).changePlan(any(Long.class), any(Long.class));
+    PlanChangeResponse response =
+        PlanChangeResponse.builder().subId(1L).newPlanId(2L).changedAt(LocalDateTime.now()).build();
+
+    when(planService.changePlan(any(Long.class), any(Long.class))).thenReturn(response);
 
     mockMvc
         .perform(
@@ -80,7 +100,9 @@ class PlanControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andDo(print())
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.subId").value(1L))
+        .andExpect(jsonPath("$.newPlanId").value(2L));
   }
 
   @Test
@@ -107,12 +129,21 @@ class PlanControllerTest {
   @DisplayName("[해지/성공] 요금제 해지 요청 성공")
   void terminateSubscriptionSuccess() throws Exception {
     Long subId = 1L;
-    doNothing().when(planService).terminateSubscription(eq(subId));
+    SubscriptionTerminateResponse response =
+        SubscriptionTerminateResponse.builder()
+            .subId(subId)
+            .status(SubscriptionStatus.TERMINATED)
+            .terminatedAt(LocalDateTime.now())
+            .build();
+
+    when(planService.terminateSubscription(eq(subId))).thenReturn(response);
 
     mockMvc
         .perform(post("/plan/{subId}/terminate", subId).with(csrf()))
         .andDo(print())
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.subId").value(subId))
+        .andExpect(jsonPath("$.status").value("TERMINATED"));
   }
 
   @Test
