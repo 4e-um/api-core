@@ -20,6 +20,12 @@ public enum CoreErrorCode implements BaseErrorCode {
   // 요금제
   PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "PLAN_001", "존재하지 않는 요금제입니다."),
 
+  // 소액결제
+  INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "MICRO_001", "유효하지 않은 금액입니다."),
+  MICRO_PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "MICRO_002", "존재하지 않는 결제 내역입니다."),
+  MICRO_PAYMENT_ALREADY_CANCELED(HttpStatus.BAD_REQUEST, "MICRO_003", "이미 취소된 결제 내역입니다."),
+  MICRO_PAYMENT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "MICRO_004", "잘못된 접근입니다."),
+
   // 회선/가입
   SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "SUB_001", "존재하지 않는 회선입니다."),
   SUBSCRIPTION_ALREADY_TERMINATED(HttpStatus.BAD_REQUEST, "SUB_002", "이미 해지된 회선입니다."),
