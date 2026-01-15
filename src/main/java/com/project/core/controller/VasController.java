@@ -22,9 +22,10 @@ public class VasController {
 
   private final VasService vasService;
 
-  @PostMapping("/join")
-  public ResponseEntity<VasJoinResponse> joinVas(@RequestBody VasJoinRequest request) {
-    VasJoinResponse response = vasService.joinVas(request.subId(), request.vasId());
+  @PostMapping("/{subId}/join")
+  public ResponseEntity<VasJoinResponse> joinVas(
+          @PathVariable Long subId, @RequestBody VasJoinRequest request) {
+    VasJoinResponse response = vasService.joinVas(subId, request.vasId());
     return ResponseEntity.ok(response);
   }
 

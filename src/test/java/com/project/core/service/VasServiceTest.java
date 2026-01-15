@@ -253,7 +253,9 @@ class VasServiceTest {
   void terminateVasBulkFailSubNotFound() {
     given(subscriptionRepository.existsById(any(Long.class))).willReturn(false);
 
-    assertThatThrownBy(() -> vasService.terminateVasBulk(1L, List.of(1L)))
+    List<Long> vasIds = List.of(1L);
+
+    assertThatThrownBy(() -> vasService.terminateVasBulk(1L, vasIds))
         .isInstanceOf(EntityNotFoundException.class)
         .extracting("code")
         .isEqualTo(CoreErrorCode.SUBSCRIPTION_NOT_FOUND);

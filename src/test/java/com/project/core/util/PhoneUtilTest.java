@@ -37,6 +37,6 @@ class PhoneUtilTest {
 
     // then
     // 100번 생성했을 때 모든 번호가 고유할 것으로 기대
-    assertThat(generatedNumbers.size()).isEqualTo(Attempts);
+    assertThat(generatedNumbers).hasSize(Attempts);
   }
 }

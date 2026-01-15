@@ -136,7 +136,7 @@ class PlanControllerTest {
             .terminatedAt(LocalDateTime.now())
             .build();
 
-    when(planService.terminateSubscription(eq(subId))).thenReturn(response);
+    when(planService.terminateSubscription(subId)).thenReturn(response);
 
     mockMvc
         .perform(post("/plan/{subId}/terminate", subId).with(csrf()))
