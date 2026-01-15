@@ -1,14 +1,14 @@
 package com.project.global.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.project.global.exception.core.InvalidStateException;
 import com.project.global.exception.core.OperationFailedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AesUtilTest {
 
@@ -64,8 +64,7 @@ class AesUtilTest {
 		ReflectionTestUtils.setField(invalidAesUtil, "secretKey", "shortKey");
 
 		// when & then
-		assertThatThrownBy(invalidAesUtil::init)
-						.isInstanceOf(InvalidStateException.class);
+		assertThatThrownBy(invalidAesUtil::init).isInstanceOf(InvalidStateException.class);
 	}
 
 	@Test
