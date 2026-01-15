@@ -1,15 +1,19 @@
 package com.project.core.infra.entity.discount;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.project.core.infra.entity.discount.enums.Active;
 import com.project.core.infra.entity.discount.enums.Category;
 import com.project.core.infra.entity.discount.enums.DiscountType;
 import com.project.core.infra.entity.discount.enums.TargetScope;
-
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
