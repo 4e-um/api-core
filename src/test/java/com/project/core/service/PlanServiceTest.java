@@ -2,11 +2,14 @@ package com.project.core.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.entity.plan.Plan;
@@ -60,7 +63,7 @@ class PlanServiceTest {
 
   @Test
   @DisplayName("[가입] 활성회선 0개이고 기존 번호 미사용 중이면 기존 번호 복구")
-  void joinSubscription_ReuseNumber() {
+  void joinSubscriptionReuseNumber() {
     // given
     Long customerId = 1L;
     Customer customer = mock(Customer.class);
@@ -93,7 +96,7 @@ class PlanServiceTest {
 
   @Test
   @DisplayName("[가입] 활성회선 0개지만 기존 번호가 사용 중이면 새 번호 채번")
-  void joinSubscription_NewNumber_WhenOldNumberUsed() {
+  void joinSubscriptionNewNumberWhenOldNumberUsed() {
     try (MockedStatic<PhoneUtil> phoneUtilMock = Mockito.mockStatic(PhoneUtil.class)) {
       // given
       Customer customer = mock(Customer.class);
@@ -128,7 +131,7 @@ class PlanServiceTest {
 
   @Test
   @DisplayName("[가입] 활성회선 이미 있으면 새 번호 채번")
-  void joinSubscription_NewNumber_WhenHasActiveLines() {
+  void joinSubscriptionNewNumberWhenHasActiveLines() {
     try (MockedStatic<PhoneUtil> phoneUtilMock = Mockito.mockStatic(PhoneUtil.class)) {
       // given
       Customer customer = mock(Customer.class);
@@ -156,7 +159,7 @@ class PlanServiceTest {
 
   @Test
   @DisplayName("[가입] 실패 - 고객 정보 없음")
-  void joinSubscription_Fail_CustomerNotFound() {
+  void joinSubscriptionFailCustomerNotFound() {
     given(customerRepository.findById(any(Long.class))).willReturn(Optional.empty());
 
     assertThatThrownBy(() -> planService.joinSubscription(1L, 1L))
@@ -167,7 +170,7 @@ class PlanServiceTest {
 
   @Test
   @DisplayName("[가입] 실패 - 번호 생성 11회 모두 중복")
-  void joinSubscription_Fail_NumberGeneration() {
+  void joinSubscriptionFailNumberGeneration() {
     try (MockedStatic<PhoneUtil> phoneUtilMock = Mockito.mockStatic(PhoneUtil.class)) {
       // given
       given(customerRepository.findById(any(Long.class)))
@@ -195,7 +198,7 @@ class PlanServiceTest {
 
   @Test
   @DisplayName("[변경] 성공 - 기존 요금제 만료 처리 후 새 요금제 등록")
-  void changePlan_Success() {
+  void changePlanSuccess() {
     // given
     Subscription sub = mock(Subscription.class);
     given(sub.getStatus()).willReturn(SubscriptionStatus.ACTIVE);
@@ -216,7 +219,7 @@ class PlanServiceTest {
 
   @Test
   @DisplayName("[변경] 실패 - 회선 없음")
-  void changePlan_Fail_SubNotFound() {
+  void changePlanFailSubNotFound() {
     given(subscriptionRepository.findById(any(Long.class))).willReturn(Optional.empty());
 
     assertThatThrownBy(() -> planService.changePlan(1L, 2L))
@@ -227,7 +230,7 @@ class PlanServiceTest {
 
   @Test
   @DisplayName("[변경] 실패 - 새 요금제 정보 없음")
-  void changePlan_Fail_PlanNotFound() {
+  void changePlanFailPlanNotFound() {
     // 회선 조회는 성공한다고 가정
     Subscription sub = mock(Subscription.class);
     given(subscriptionRepository.findById(any(Long.class))).willReturn(Optional.of(sub));
@@ -249,7 +252,7 @@ class PlanServiceTest {
 
   @Test
   @DisplayName("[변경] 실패 - 이미 해지된 회선은 변경 불가")
-  void changePlan_Fail_AlreadyTerminated() {
+  void changePlanFailAlreadyTerminated() {
     // given
     Subscription sub = new Subscription(null, "phone", clock);
     ReflectionTestUtils.setField(sub, "status", SubscriptionStatus.TERMINATED); // 해지 상태
@@ -265,7 +268,7 @@ class PlanServiceTest {
 
   @Test
   @DisplayName("[해지] 성공 - 상태 변경 및 요금제 만료")
-  void terminateSubscription_Success() {
+  void terminateSubscriptionSuccess() {
     // given
     Subscription sub = new Subscription(null, "phone", clock);
     ReflectionTestUtils.setField(sub, "status", SubscriptionStatus.ACTIVE);
@@ -285,7 +288,7 @@ class PlanServiceTest {
 
   @Test
   @DisplayName("[해지] 실패 - 이미 해지된 회선")
-  void terminateSubscription_Fail_AlreadyTerminated() {
+  void terminateSubscriptionFailAlreadyTerminated() {
     // given
     Subscription sub = new Subscription(null, "phone", clock);
     ReflectionTestUtils.setField(sub, "status", SubscriptionStatus.TERMINATED);

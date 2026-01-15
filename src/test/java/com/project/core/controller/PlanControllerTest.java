@@ -34,7 +34,7 @@ class PlanControllerTest {
 
   @Test
   @DisplayName("[가입/성공] 요금제 가입 요청 성공")
-  void joinSubscription_Success() throws Exception {
+  void joinSubscriptionSuccess() throws Exception {
     SubscriptionJoinRequest request = new SubscriptionJoinRequest(1L, 1L);
     doNothing().when(planService).joinSubscription(any(Long.class), any(Long.class));
 
@@ -50,7 +50,7 @@ class PlanControllerTest {
 
   @Test
   @DisplayName("[가입/실패] 존재하지 않는 고객이나 요금제로 가입 시도 시 404 반환")
-  void joinSubscription_Fail_NotFound() throws Exception {
+  void joinSubscriptionFailNotFound() throws Exception {
     SubscriptionJoinRequest request = new SubscriptionJoinRequest(999L, 999L);
     doThrow(new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND))
         .when(planService)
@@ -69,7 +69,7 @@ class PlanControllerTest {
 
   @Test
   @DisplayName("[변경/성공] 요금제 변경 요청 성공")
-  void changePlan_Success() throws Exception {
+  void changePlanSuccess() throws Exception {
     PlanChangeRequest request = new PlanChangeRequest(1L, 2L);
     doNothing().when(planService).changePlan(any(Long.class), any(Long.class));
 
@@ -85,7 +85,7 @@ class PlanControllerTest {
 
   @Test
   @DisplayName("[변경/실패] 이미 해지된 회선은 변경 불가")
-  void changePlan_Fail_AlreadyTerminated() throws Exception {
+  void changePlanFailAlreadyTerminated() throws Exception {
     PlanChangeRequest request = new PlanChangeRequest(1L, 2L);
     doThrow(new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED))
         .when(planService)
@@ -105,7 +105,7 @@ class PlanControllerTest {
 
   @Test
   @DisplayName("[해지/성공] 요금제 해지 요청 성공")
-  void terminateSubscription_Success() throws Exception {
+  void terminateSubscriptionSuccess() throws Exception {
     Long subId = 1L;
     doNothing().when(planService).terminateSubscription(eq(subId));
 
@@ -117,7 +117,7 @@ class PlanControllerTest {
 
   @Test
   @DisplayName("[해지/실패] 이미 해지된 회선을 다시 해지 시도 시 400 반환")
-  void terminateSubscription_Fail_AlreadyTerminated() throws Exception {
+  void terminateSubscriptionFailAlreadyTerminated() throws Exception {
     Long subId = 1L;
     doThrow(new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED))
         .when(planService)

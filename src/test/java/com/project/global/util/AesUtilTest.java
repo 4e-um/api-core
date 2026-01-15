@@ -58,7 +58,7 @@ class AesUtilTest {
 
   @Test
   @DisplayName("키 길이가 32바이트가 아니면 init() 시 예외가 발생한다")
-  void init_InvalidKeyLength() {
+  void initInvalidKeyLength() {
     // given
     AesUtil invalidAesUtil = new AesUtil();
     ReflectionTestUtils.setField(invalidAesUtil, "secretKey", "shortKey");
@@ -69,7 +69,7 @@ class AesUtilTest {
 
   @Test
   @DisplayName("복호화 중 잘못된 키나 데이터로 인해 예외 발생 시 OperationFailedException을 던진다")
-  void decrypt_Fail_ThrowsException() {
+  void decryptFailThrowsException() {
     // given
     String invalidText = "NotBase64!!";
 

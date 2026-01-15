@@ -2,6 +2,7 @@ package com.project.core.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Set;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,19 +23,20 @@ class PhoneUtilTest {
     assertThat(PHONE_PATTERN.matcher(phoneNumber).matches()).isTrue();
   }
 
+  @Test
   @DisplayName("생성된 번호는 매번 다른 값을 가질 확률이 높다 (100번 시도)")
-  void generateRandomPhoneNumber_Unique() {
+  void generateRandomPhoneNumberUnique() {
     // given
-    final int ATTEMPTS = 100;
-    java.util.Set<String> generatedNumbers = new java.util.HashSet<>();
+    final int Attempts = 100;
+    Set<String> generatedNumbers = new java.util.HashSet<>();
 
     // when
-    for (int i = 0; i < ATTEMPTS; i++) {
+    for (int i = 0; i < Attempts; i++) {
       generatedNumbers.add(PhoneUtil.generateRandomPhoneNumber());
     }
 
     // then
     // 100번 생성했을 때 모든 번호가 고유할 것으로 기대
-    assertThat(generatedNumbers.size()).isEqualTo(ATTEMPTS);
+    assertThat(generatedNumbers.size()).isEqualTo(Attempts);
   }
 }
