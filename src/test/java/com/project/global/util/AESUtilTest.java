@@ -10,14 +10,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class AESUtilTest {
+class AesUtilTest {
 
 	private static final String TEST_SECRET_KEY = "12345678901234567890123456789012";
-	private AESUtil aesUtil;
+	private AesUtil aesUtil;
 
 	@BeforeEach
 	void setUp() {
-		aesUtil = new AESUtil();
+		aesUtil = new AesUtil();
 		ReflectionTestUtils.setField(aesUtil, "secretKey", TEST_SECRET_KEY);
 		aesUtil.init();
 	}
@@ -60,7 +60,7 @@ class AESUtilTest {
 	@DisplayName("키 길이가 32바이트가 아니면 init() 시 예외가 발생한다")
 	void init_InvalidKeyLength() {
 		// given
-		AESUtil invalidAesUtil = new AESUtil();
+		AesUtil invalidAesUtil = new AesUtil();
 		ReflectionTestUtils.setField(invalidAesUtil, "secretKey", "shortKey");
 
 		// when & then
