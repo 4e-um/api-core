@@ -69,10 +69,10 @@ class PlanServiceTest {
 		Plan plan = mock(Plan.class);
 
 		given(customerRepository.findById(customerId)).willReturn(Optional.of(customer));
-		given(planRepository.findById(any())).willReturn(Optional.of(plan));
+		given(planRepository.findById(any(Long.class))).willReturn(Optional.of(plan));
 
 		// 활성 회선 0개
-		given(subscriptionRepository.countByCustomerAndStatus(any(), eq(SubscriptionStatus.ACTIVE))).willReturn(0L);
+		given(subscriptionRepository.countByCustomerAndStatus(any(Customer.class), eq(SubscriptionStatus.ACTIVE))).willReturn(0L);
 
 		// 기존 번호 가져오기 & 사용 여부 체크 (미사용)
 		given(customer.getContactEnc()).willReturn("oldPhoneEnc");
@@ -94,11 +94,11 @@ class PlanServiceTest {
 		try (MockedStatic<PhoneUtil> phoneUtilMock = Mockito.mockStatic(PhoneUtil.class)) {
 			// given
 			Customer customer = mock(Customer.class);
-			given(customerRepository.findById(any())).willReturn(Optional.of(customer));
-			given(planRepository.findById(any())).willReturn(Optional.of(mock(Plan.class)));
+			given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(customer));
+			given(planRepository.findById(any(Long.class))).willReturn(Optional.of(mock(Plan.class)));
 
 			// 활성 회선 0개
-			given(subscriptionRepository.countByCustomerAndStatus(any(), eq(SubscriptionStatus.ACTIVE))).willReturn(0L);
+			given(subscriptionRepository.countByCustomerAndStatus(any(Customer.class), eq(SubscriptionStatus.ACTIVE))).willReturn(0L);
 
 			// 기존 번호 사용중
 			given(customer.getContactEnc()).willReturn("oldPhoneEnc");
@@ -124,11 +124,11 @@ class PlanServiceTest {
 		try (MockedStatic<PhoneUtil> phoneUtilMock = Mockito.mockStatic(PhoneUtil.class)) {
 			// given
 			Customer customer = mock(Customer.class);
-			given(customerRepository.findById(any())).willReturn(Optional.of(customer));
-			given(planRepository.findById(any())).willReturn(Optional.of(mock(Plan.class)));
+			given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(customer));
+			given(planRepository.findById(any(Long.class))).willReturn(Optional.of(mock(Plan.class)));
 
 			// 활성 회선 1개 존재
-			given(subscriptionRepository.countByCustomerAndStatus(any(), any())).willReturn(1L);
+			given(subscriptionRepository.countByCustomerAndStatus(any(Customer.class), eq(SubscriptionStatus.ACTIVE))).willReturn(1L);
 
 			// 랜덤 번호 생성
 			phoneUtilMock.when(PhoneUtil::generateRandomPhoneNumber).thenReturn("010-9999-8888");
@@ -146,7 +146,7 @@ class PlanServiceTest {
 	@Test
 	@DisplayName("[가입] 실패 - 고객 정보 없음")
 	void joinSubscription_Fail_CustomerNotFound() {
-		given(customerRepository.findById(any())).willReturn(Optional.empty());
+		given(customerRepository.findById(any(Long.class))).willReturn(Optional.empty());
 
 		assertThatThrownBy(() -> planService.joinSubscription(1L, 1L))
 						.isInstanceOf(EntityNotFoundException.class)
@@ -158,9 +158,9 @@ class PlanServiceTest {
 	void joinSubscription_Fail_NumberGeneration() {
 		try (MockedStatic<PhoneUtil> phoneUtilMock = Mockito.mockStatic(PhoneUtil.class)) {
 			// given
-			given(customerRepository.findById(any())).willReturn(Optional.of(mock(Customer.class)));
-			given(planRepository.findById(any())).willReturn(Optional.of(mock(Plan.class)));
-			given(subscriptionRepository.countByCustomerAndStatus(any(), any())).willReturn(1L);
+			given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(mock(Customer.class)));
+			given(planRepository.findById(any(Long.class))).willReturn(Optional.of(mock(Plan.class)));
+			given(subscriptionRepository.countByCustomerAndStatus(any(Customer.class), eq(SubscriptionStatus.ACTIVE))).willReturn(1L);
 
 			phoneUtilMock.when(PhoneUtil::generateRandomPhoneNumber).thenReturn("01000000000");
 			given(aesUtil.encrypt(anyString())).willReturn("dupEnc");
@@ -181,6 +181,7 @@ class PlanServiceTest {
 	void changePlan_Success() {
 		// given
 		Subscription sub = mock(Subscription.class);
+		given(sub.getStatus()).willReturn(SubscriptionStatus.ACTIVE);
 		SubscriptionPlan oldHistory = mock(SubscriptionPlan.class);
 		Plan newPlan = mock(Plan.class);
 
@@ -199,7 +200,7 @@ class PlanServiceTest {
 	@Test
 	@DisplayName("[변경] 실패 - 회선 없음")
 	void changePlan_Fail_SubNotFound() {
-		given(subscriptionRepository.findById(any())).willReturn(Optional.empty());
+		given(subscriptionRepository.findById(any(Long.class))).willReturn(Optional.empty());
 
 		assertThatThrownBy(() -> planService.changePlan(1L, 2L))
 						.isInstanceOf(EntityNotFoundException.class)
@@ -211,15 +212,15 @@ class PlanServiceTest {
 	void changePlan_Fail_PlanNotFound() {
 		// 회선 조회는 성공한다고 가정
 		Subscription sub = mock(Subscription.class);
-		given(subscriptionRepository.findById(any())).willReturn(Optional.of(sub));
+		given(subscriptionRepository.findById(any(Long.class))).willReturn(Optional.of(sub));
 		// 회선 상태 체크 통과
 		given(sub.getStatus()).willReturn(SubscriptionStatus.ACTIVE);
 
 		// 요금제 조회 실패
-		given(planRepository.findById(any())).willReturn(Optional.empty());
+		given(planRepository.findById(any(Long.class))).willReturn(Optional.empty());
 
 		// 요금제 이력 조회 (mocking)
-		given(subscriptionPlanRepository.findActivePlanBySubId(any())).willReturn(Optional.of(mock(SubscriptionPlan.class)));
+		given(subscriptionPlanRepository.findActivePlanBySubId(any(Long.class))).willReturn(Optional.of(mock(SubscriptionPlan.class)));
 
 		assertThatThrownBy(() -> planService.changePlan(1L, 2L))
 						.isInstanceOf(EntityNotFoundException.class)

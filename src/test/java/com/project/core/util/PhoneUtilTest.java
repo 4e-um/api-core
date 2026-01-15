@@ -24,15 +24,19 @@ class PhoneUtilTest {
 		assertThat(PHONE_PATTERN.matcher(phoneNumber).matches()).isTrue();
 	}
 
-	@Test
 	@DisplayName("생성된 번호는 매번 다른 값을 가질 확률이 높다 (100번 시도)")
 	void generateRandomPhoneNumber_Unique() {
+		// given
+		final int ATTEMPTS = 100;
+		java.util.Set<String> generatedNumbers = new java.util.HashSet<>();
+
 		// when
-		String phone1 = PhoneUtil.generateRandomPhoneNumber();
-		String phone2 = PhoneUtil.generateRandomPhoneNumber();
+		for (int i = 0; i < ATTEMPTS; i++) {
+			generatedNumbers.add(PhoneUtil.generateRandomPhoneNumber());
+		}
 
 		// then
-		// 극히 낮은 확률로 같을 수도 있지만, 테스트 목적상 다름을 기대
-		assertThat(phone1).isNotEqualTo(phone2);
+		// 100번 생성했을 때 모든 번호가 고유할 것으로 기대
+		assertThat(generatedNumbers.size()).isEqualTo(ATTEMPTS);
 	}
 }

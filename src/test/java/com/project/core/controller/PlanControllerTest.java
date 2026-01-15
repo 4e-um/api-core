@@ -39,7 +39,7 @@ class PlanControllerTest {
 	@DisplayName("[가입/성공] 요금제 가입 요청 성공")
 	void joinSubscription_Success() throws Exception {
 			SubscriptionJoinRequest request = new SubscriptionJoinRequest(1L, 1L);
-			doNothing().when(planService).joinSubscription(any(), any());
+			doNothing().when(planService).joinSubscription(any(Long.class), any(Long.class));
 
 			mockMvc
 							.perform(
@@ -56,7 +56,7 @@ class PlanControllerTest {
 	void joinSubscription_Fail_NotFound() throws Exception {
 		SubscriptionJoinRequest request = new SubscriptionJoinRequest(999L, 999L);
 		doThrow(new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND))
-						.when(planService).joinSubscription(any(), any());
+						.when(planService).joinSubscription(any(Long.class), any(Long.class));
 
 		mockMvc
 						.perform(
@@ -73,7 +73,7 @@ class PlanControllerTest {
 	@DisplayName("[변경/성공] 요금제 변경 요청 성공")
 	void changePlan_Success() throws Exception {
 		PlanChangeRequest request = new PlanChangeRequest(1L, 2L);
-		doNothing().when(planService).changePlan(any(), any());
+		doNothing().when(planService).changePlan(any(Long.class), any(Long.class));
 
 		mockMvc
 						.perform(
@@ -90,7 +90,7 @@ class PlanControllerTest {
 	void changePlan_Fail_AlreadyTerminated() throws Exception {
 		PlanChangeRequest request = new PlanChangeRequest(1L, 2L);
 		doThrow(new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED))
-						.when(planService).changePlan(any(), any());
+						.when(planService).changePlan(any(Long.class), any(Long.class));
 
 		mockMvc
 						.perform(
@@ -120,7 +120,7 @@ class PlanControllerTest {
 	void terminateSubscription_Fail_AlreadyTerminated() throws Exception {
 		Long subId = 1L;
 		doThrow(new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED))
-						.when(planService).terminateSubscription(any());
+						.when(planService).terminateSubscription(any(Long.class));
 
 		mockMvc
 						.perform(post("/plan/{subId}/terminate", subId).with(csrf()))
