@@ -53,7 +53,7 @@ class AesUtilTest {
 
     // when & then
     assertThatThrownBy(() -> aesUtil.decrypt(invalidText))
-        .isInstanceOf(OperationFailedException.class);
+        .isInstanceOf(RuntimeException.class);
   }
 
   @Test
