@@ -6,6 +6,8 @@ import com.project.core.infra.entity.discount.enums.TargetScope;
 import com.project.core.infra.entity.subscription.Subscription;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -39,13 +41,15 @@ public class SubscriptionDiscount {
   @JoinColumn(name = "sub_id", nullable = false)
   private Subscription subscription;
 
-  @Column(name = "discount_type", nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "discount_type", nullable = false, length = 10)
   private DiscountType discountType;
 
   @Column(name = "value", nullable = false)
   private BigDecimal value;
 
-  @Column(name = "target_scope", nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "target_scope", nullable = false, length = 20)
   private TargetScope targetScope;
 
   @Column(name = "start_date", nullable = false)
@@ -54,7 +58,8 @@ public class SubscriptionDiscount {
   @Column(name = "end_date")
   private LocalDateTime endDate;
 
-  @Column(name = "status", nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status", nullable = false, length = 10)
   private Status status;
 
   public void setEndDate(LocalDateTime endDate) {

@@ -6,6 +6,8 @@ import com.project.core.infra.entity.discount.enums.DiscountType;
 import com.project.core.infra.entity.discount.enums.TargetScope;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,19 +33,23 @@ public class DiscountPolicy {
   @Column(name = "name", nullable = false)
   private String name;
 
-  @Column(name = "discount_type", nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "discount_type", nullable = false, length = 10)
   private DiscountType discountType;
 
   @Column(name = "value", nullable = false)
   private BigDecimal value;
 
-  @Column(name = "category", nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "category", nullable = false, length = 10)
   private Category category;
 
-  @Column(name = "target_scope", nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "target_scope", nullable = false, length = 20)
   private TargetScope targetScope;
 
-  @Column(name = "active", nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "active", nullable = false, length = 10)
   private Active active;
 
   @OneToMany(mappedBy = "discountPolicy")
