@@ -2,6 +2,7 @@ package com.project.core.controller;
 
 import com.project.core.controller.dto.request.ChangeEmailRequest;
 import com.project.core.controller.dto.request.ChangeGradeRequest;
+import com.project.core.controller.dto.request.PhoneSearchRequest;
 import com.project.core.controller.dto.response.ChangeEmailResponse;
 import com.project.core.controller.dto.response.ChangeGradeResponse;
 import com.project.core.controller.dto.response.CustomerResponse;
@@ -15,8 +16,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 
 @RestController
 @RequestMapping("/user")
@@ -26,9 +27,10 @@ public class CustomerController {
   private final CustomerService customerService;
 
   /** 고객 조회 (전화번호 기준) */
-  @GetMapping
-  public ResponseEntity<List<CustomerResponse>> loadByContactEnc(@RequestParam String contactEnc) {
-    List<Customer> customers = customerService.loadByContactEnc(contactEnc);
+  @GetMapping("/search")
+  public ResponseEntity<List<CustomerResponse>> loadByContactEnc( @RequestBody PhoneSearchRequest request) {
+    List<Customer> customers = customerService.loadByContactEnc(request.contactEnc());
+
 
     List<CustomerResponse> response = customers.stream().map(CustomerResponse::from).toList();
 

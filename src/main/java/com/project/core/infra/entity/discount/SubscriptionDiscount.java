@@ -50,6 +50,7 @@ public class SubscriptionDiscount {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "target_scope", nullable = false, length = 20)
+
   private TargetScope targetScope;
 
   @Column(name = "start_date", nullable = false)
@@ -60,6 +61,7 @@ public class SubscriptionDiscount {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false, length = 10)
+
   private Status status;
 
   public void setEndDate(LocalDateTime endDate) {
