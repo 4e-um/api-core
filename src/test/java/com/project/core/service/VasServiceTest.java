@@ -185,8 +185,7 @@ class VasServiceTest {
 
     List<Long> vasIds = List.of(1L);
     EntityNotFoundException ex =
-        assertThrows(
-            EntityNotFoundException.class, () -> vasService.terminateVasBulk(1L, vasIds));
+        assertThrows(EntityNotFoundException.class, () -> vasService.terminateVasBulk(1L, vasIds));
     assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_NOT_FOUND);
   }
 
