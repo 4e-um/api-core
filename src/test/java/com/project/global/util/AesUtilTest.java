@@ -52,8 +52,7 @@ class AesUtilTest {
     String invalidText = "NotEncryptedText";
 
     // when & then
-    assertThatThrownBy(() -> aesUtil.decrypt(invalidText))
-        .isInstanceOf(RuntimeException.class);
+    assertThatThrownBy(() -> aesUtil.decrypt(invalidText)).isInstanceOf(RuntimeException.class);
   }
 
   @Test
