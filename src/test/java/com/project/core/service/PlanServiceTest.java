@@ -11,6 +11,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.project.core.controller.dto.response.PlanChangeResponse;
+import com.project.core.controller.dto.response.SubscriptionJoinResponse;
+import com.project.core.controller.dto.response.SubscriptionTerminateResponse;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.entity.plan.Plan;
 import com.project.core.infra.entity.plan.SubscriptionPlan;
@@ -28,6 +31,7 @@ import com.project.global.exception.core.OperationFailedException;
 import com.project.global.util.AesUtil;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,10 +57,8 @@ class PlanServiceTest {
   @Mock private AesUtil aesUtil;
   @Mock private Clock clock;
 
-  // 모든 테스트 실행 전에 Clock 동작 정의
   @BeforeEach
   void setup() {
-    // Clock이 null을 반환하지 않도록 설정
     lenient().when(clock.getZone()).thenReturn(ZoneId.of("Asia/Seoul"));
     lenient().when(clock.instant()).thenReturn(Instant.parse("2026-01-01T00:00:00Z"));
   }
@@ -85,11 +87,13 @@ class PlanServiceTest {
                 "oldPhoneEnc", SubscriptionStatus.ACTIVE))
         .willReturn(false);
 
+    given(aesUtil.decrypt(anyString())).willReturn("010-1234-5678");
+
     // when
-    planService.joinSubscription(customerId, 1L);
+    SubscriptionJoinResponse response = planService.joinSubscription(customerId, 1L);
 
     // then
-    // 기존 번호로 저장되었는지 확인
+    assertThat(response.getPhoneNumber()).isEqualTo("010-1234-5678");
     verify(subscriptionRepository).save(any(Subscription.class));
     verify(subscriptionPlanRepository).save(any(SubscriptionPlan.class));
   }
@@ -103,28 +107,27 @@ class PlanServiceTest {
       given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(customer));
       given(planRepository.findById(any(Long.class))).willReturn(Optional.of(mock(Plan.class)));
 
-      // 활성 회선 0개
       given(
               subscriptionRepository.countByCustomerAndStatus(
                   any(Customer.class), eq(SubscriptionStatus.ACTIVE)))
           .willReturn(0L);
 
-      // 기존 번호 사용중
       given(customer.getContactEnc()).willReturn("oldPhoneEnc");
       given(
               subscriptionRepository.existsByPhoneNumberAndStatus(
                   "oldPhoneEnc", SubscriptionStatus.ACTIVE))
           .willReturn(true);
 
-      // 랜덤 번호 생성
       phoneUtilMock.when(PhoneUtil::generateRandomPhoneNumber).thenReturn("010-1234-5678");
       given(aesUtil.encrypt("010-1234-5678")).willReturn("newPhoneEnc");
       given(subscriptionRepository.existsByPhoneNumber("newPhoneEnc")).willReturn(false);
+      given(aesUtil.decrypt("newPhoneEnc")).willReturn("010-1234-5678");
 
       // when
-      planService.joinSubscription(1L, 1L);
+      SubscriptionJoinResponse response = planService.joinSubscription(1L, 1L);
 
       // then
+      assertThat(response.getPhoneNumber()).isEqualTo("010-1234-5678");
       verify(subscriptionRepository).save(any(Subscription.class));
     }
   }
@@ -138,21 +141,21 @@ class PlanServiceTest {
       given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(customer));
       given(planRepository.findById(any(Long.class))).willReturn(Optional.of(mock(Plan.class)));
 
-      // 활성 회선 1개 존재
       given(
               subscriptionRepository.countByCustomerAndStatus(
                   any(Customer.class), eq(SubscriptionStatus.ACTIVE)))
           .willReturn(1L);
 
-      // 랜덤 번호 생성
       phoneUtilMock.when(PhoneUtil::generateRandomPhoneNumber).thenReturn("010-9999-8888");
       given(aesUtil.encrypt("010-9999-8888")).willReturn("randomEnc");
       given(subscriptionRepository.existsByPhoneNumber("randomEnc")).willReturn(false);
+      given(aesUtil.decrypt("randomEnc")).willReturn("010-9999-8888");
 
       // when
-      planService.joinSubscription(1L, 1L);
+      SubscriptionJoinResponse response = planService.joinSubscription(1L, 1L);
 
       // then
+      assertThat(response.getPhoneNumber()).isEqualTo("010-9999-8888");
       verify(subscriptionRepository).save(any(Subscription.class));
     }
   }
@@ -197,24 +200,62 @@ class PlanServiceTest {
   }
 
   @Test
-  @DisplayName("[변경] 성공 - 기존 요금제 만료 처리 후 새 요금제 등록")
+  @DisplayName("[변경] 성공 - 기존 요금제 만료 처리 후 새 요금제 등록 (응답 검증 포함)")
   void changePlanSuccess() {
     // given
     Subscription sub = mock(Subscription.class);
     given(sub.getStatus()).willReturn(SubscriptionStatus.ACTIVE);
-    SubscriptionPlan oldHistory = mock(SubscriptionPlan.class);
-    Plan newPlan = mock(Plan.class);
+    given(sub.getSubId()).willReturn(10L);
 
-    given(subscriptionRepository.findById(1L)).willReturn(Optional.of(sub));
-    given(subscriptionPlanRepository.findActivePlanBySubId(1L)).willReturn(Optional.of(oldHistory));
+    // Old Plan mocking
+    Plan oldPlan = mock(Plan.class);
+    given(oldPlan.getPlanId()).willReturn(1L);
+
+    SubscriptionPlan oldHistory = mock(SubscriptionPlan.class);
+    given(oldHistory.getPlan()).willReturn(oldPlan);
+
+    // New Plan mocking
+    Plan newPlan = mock(Plan.class);
+    given(newPlan.getPlanId()).willReturn(2L);
+
+    given(subscriptionRepository.findById(10L)).willReturn(Optional.of(sub));
+    given(subscriptionPlanRepository.findActivePlanBySubId(10L))
+        .willReturn(Optional.of(oldHistory));
     given(planRepository.findById(2L)).willReturn(Optional.of(newPlan));
 
     // when
-    planService.changePlan(1L, 2L);
+    PlanChangeResponse response = planService.changePlan(10L, 2L);
 
     // then
+    assertThat(response.getOldPlanId()).isEqualTo(1L);
+    assertThat(response.getNewPlanId()).isEqualTo(2L);
     verify(oldHistory).expire();
     verify(subscriptionPlanRepository).save(any(SubscriptionPlan.class));
+  }
+
+  @Test
+  @DisplayName("[변경] 실패 - 동일한 요금제로 변경 시도")
+  void changePlanFailSamePlan() {
+    // given
+    Subscription sub = mock(Subscription.class);
+    given(sub.getStatus()).willReturn(SubscriptionStatus.ACTIVE);
+
+    // Old Plan mocking (ID=2L)
+    Plan oldPlan = mock(Plan.class);
+    given(oldPlan.getPlanId()).willReturn(2L);
+
+    SubscriptionPlan oldHistory = mock(SubscriptionPlan.class);
+    given(oldHistory.getPlan()).willReturn(oldPlan);
+
+    given(subscriptionRepository.findById(10L)).willReturn(Optional.of(sub));
+    given(subscriptionPlanRepository.findActivePlanBySubId(10L))
+        .willReturn(Optional.of(oldHistory));
+
+    // when & then
+    assertThatThrownBy(() -> planService.changePlan(10L, 2L))
+        .isInstanceOf(InvalidStateException.class)
+        .extracting("code")
+        .isEqualTo(CoreErrorCode.PLAN_ALREADY_SUBSCRIBED);
   }
 
   @Test
@@ -231,18 +272,20 @@ class PlanServiceTest {
   @Test
   @DisplayName("[변경] 실패 - 새 요금제 정보 없음")
   void changePlanFailPlanNotFound() {
-    // 회선 조회는 성공한다고 가정
     Subscription sub = mock(Subscription.class);
     given(subscriptionRepository.findById(any(Long.class))).willReturn(Optional.of(sub));
-    // 회선 상태 체크 통과
     given(sub.getStatus()).willReturn(SubscriptionStatus.ACTIVE);
 
-    // 요금제 조회 실패
-    given(planRepository.findById(any(Long.class))).willReturn(Optional.empty());
+    // Old Plan mocking
+    Plan oldPlan = mock(Plan.class);
+    given(oldPlan.getPlanId()).willReturn(1L); // 기존은 1번
+    SubscriptionPlan oldHistory = mock(SubscriptionPlan.class);
+    given(oldHistory.getPlan()).willReturn(oldPlan);
 
-    // 요금제 이력 조회 (mocking)
     given(subscriptionPlanRepository.findActivePlanBySubId(any(Long.class)))
-        .willReturn(Optional.of(mock(SubscriptionPlan.class)));
+        .willReturn(Optional.of(oldHistory));
+
+    given(planRepository.findById(any(Long.class))).willReturn(Optional.empty());
 
     assertThatThrownBy(() -> planService.changePlan(1L, 2L))
         .isInstanceOf(EntityNotFoundException.class)
@@ -253,13 +296,11 @@ class PlanServiceTest {
   @Test
   @DisplayName("[변경] 실패 - 이미 해지된 회선은 변경 불가")
   void changePlanFailAlreadyTerminated() {
-    // given
     Subscription sub = new Subscription(null, "phone", clock);
     ReflectionTestUtils.setField(sub, "status", SubscriptionStatus.TERMINATED); // 해지 상태
 
     given(subscriptionRepository.findById(1L)).willReturn(Optional.of(sub));
 
-    // when & then
     assertThatThrownBy(() -> planService.changePlan(1L, 2L))
         .isInstanceOf(InvalidStateException.class)
         .extracting("code")
@@ -272,6 +313,7 @@ class PlanServiceTest {
     // given
     Subscription sub = new Subscription(null, "phone", clock);
     ReflectionTestUtils.setField(sub, "status", SubscriptionStatus.ACTIVE);
+    ReflectionTestUtils.setField(sub, "endDate", LocalDateTime.now());
 
     SubscriptionPlan activePlan = mock(SubscriptionPlan.class);
 
@@ -279,9 +321,10 @@ class PlanServiceTest {
     given(subscriptionPlanRepository.findActivePlanBySubId(1L)).willReturn(Optional.of(activePlan));
 
     // when
-    planService.terminateSubscription(1L);
+    SubscriptionTerminateResponse response = planService.terminateSubscription(1L);
 
     // then
+    assertThat(response.getStatus()).isEqualTo(SubscriptionStatus.TERMINATED);
     assertThat(sub.getStatus()).isEqualTo(SubscriptionStatus.TERMINATED);
     verify(activePlan).expire();
   }
@@ -289,13 +332,11 @@ class PlanServiceTest {
   @Test
   @DisplayName("[해지] 실패 - 이미 해지된 회선")
   void terminateSubscriptionFailAlreadyTerminated() {
-    // given
     Subscription sub = new Subscription(null, "phone", clock);
     ReflectionTestUtils.setField(sub, "status", SubscriptionStatus.TERMINATED);
 
     given(subscriptionRepository.findById(1L)).willReturn(Optional.of(sub));
 
-    // when & then
     assertThatThrownBy(() -> planService.terminateSubscription(1L))
         .isInstanceOf(InvalidStateException.class)
         .extracting("code")
