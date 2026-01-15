@@ -14,7 +14,7 @@ import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
 import com.project.global.exception.core.InvalidStateException;
 import com.project.global.exception.core.OperationFailedException;
-import com.project.global.util.AESUtil;
+import com.project.global.util.AesUtil;
 import java.time.Clock;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class PlanService {
   private final PlanRepository planRepository;
   private final SubscriptionPlanRepository subscriptionPlanRepository;
   private final CustomerRepository customerRepository;
-  private final AESUtil aesUtil;
+  private final AesUtil aesUtil;
   private final Clock clock;
 
   private static final int PHONE_NUMBER_GENERATION_ATTEMPT_LIMIT = 11;

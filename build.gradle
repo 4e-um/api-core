@@ -5,11 +5,27 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'com.diffplug.spotless' version '6.25.0'
-    id 'org.sonarqube' version '5.1.0.4882'
+    id 'org.sonarqube' version '7.2.0.6526'
 }
 
 group = 'com.project'
 version = '0.0.1-SNAPSHOT'
+description = 'API Core Service'
+
+// ============================================================================
+// Coverage Exclusion Patterns (공통 제외 패턴)
+// ============================================================================
+def coverageExcludePackages = [
+    '**/config/**',      // Config 클래스 제외
+    '**/exception/**',   // Exception 클래스 제외
+    '**/dto/**',         // DTO 클래스 제외
+]
+
+// JaCoCo용 제외 패턴 (클래스 파일)
+def jacocoCoverageExcludes = coverageExcludePackages + ['**/*Application.class']
+
+// Sonar용 제외 패턴 (소스 파일)
+def sonarCoverageExcludes = coverageExcludePackages.collect { it + '/*.java' } + ['**/Application.java']
 
 java {
     toolchain {
@@ -76,34 +92,37 @@ jacocoTestReport {
     }
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                '**/config/**',      // Config 클래스 제외
-                '**/exception/**',   // Exception 클래스 제외
-                '**/dto/**',         // DTO 클래스 제외
-                '**/Application.class'  // 메인 클래스 제외
-            ])
+            fileTree(dir: it, exclude: jacocoCoverageExcludes)
         }))
     }
 }
 
 jacocoTestCoverageVerification {
     dependsOn jacocoTestReport
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: jacocoCoverageExcludes)
+        }))
+    }
+
     violationRules {
         rule {
             limit {
-                minimum = 0.8
+                minimum = 0.80  // 80% 미만이면 빌드 실패
             }
         }
     }
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                '**/config/**',
-                '**/exception/**',
-                '**/dto/**',
-                '**/Application.class'
-            ])
-        }))
+
+    // 검사할 클래스가 없으면 커버리지 검증 건너뛰기
+    doFirst {
+        def hasClasses = classDirectories.files.any { dir ->
+            dir.exists() && fileTree(dir: dir, exclude: jacocoCoverageExcludes).files.size() > 0
+        }
+        if (!hasClasses) {
+            println "No classes to verify coverage. Skipping jacocoTestCoverageVerification."
+            throw new StopExecutionException()
+        }
     }
 }
 
@@ -113,6 +132,9 @@ jacocoTestCoverageVerification {
 checkstyle {
     toolVersion = '10.21.4'
     configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+    configProperties = [
+        'org.checkstyle.google.suppressionfilter.config': file("${rootDir}/config/checkstyle/checkstyle-suppressions.xml").absolutePath
+    ]
     ignoreFailures = false
     maxWarnings = 0
 }
@@ -131,21 +153,18 @@ spotless {
 }
 
 // ============================================================================
-// SonarQube
+// SonarQube (Self-Hosted)
 // ============================================================================
 sonar {
     properties {
-        property 'sonar.organization', System.getenv('SONAR_ORGANIZATION') ?: ''
-        property 'sonar.projectKey', System.getenv('SONAR_PROJECT') ?: 'backend'
-        property 'sonar.projectName', 'Backend API'
+        property 'sonar.projectKey', 'api-core'
+        property 'sonar.projectName', 'api-core'
+        // Java 분석을 위한 바이너리 경로
+        property 'sonar.java.binaries', 'build/classes/java/main'
+        property 'sonar.java.libraries', "${System.getProperty('user.home')}/.gradle/caches/**/modules-*/files-*/**/*.jar"
+        // JaCoCo 커버리지
         property 'sonar.java.coveragePlugin', 'jacoco'
         property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
-        // 커버리지 제외 (JaCoCo와 동일)
-        property 'sonar.coverage.exclusions', [
-            '**/config/**/*.java',
-            '**/exception/**/*.java',
-            '**/dto/**/*.java',
-            '**/Application.java'
-        ].join(',')
+        property 'sonar.coverage.exclusions', sonarCoverageExcludes.join(',')
     }
 }

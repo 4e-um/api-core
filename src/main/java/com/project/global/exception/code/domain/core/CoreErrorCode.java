@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum CoreErrorCode implements BaseErrorCode {
   // 고객
   CUSTOMER_NOT_FOUND(HttpStatus.NOT_FOUND, "CUSTOMER_001", "존재하지 않는 고객입니다."),
-  
+
   // 할인정책
   DISCOUNT_POLICY_NOT_FOUND(HttpStatus.NOT_FOUND, "DISCOUNT_POLICY_001", "존재하지 않는 할인 정책입니다."),
 
@@ -28,7 +28,8 @@ public enum CoreErrorCode implements BaseErrorCode {
 
   // 보안
   ENCRYPTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SEC_001", "암호화/복호화 처리 중 오류가 발생했습니다."),
-  AES_KEY_LENGTH_INCORRECT(HttpStatus.INTERNAL_SERVER_ERROR, "SEC_002", "AES Secret Key는 32바이트여야 합니다."),
+  AES_KEY_LENGTH_INCORRECT(
+      HttpStatus.INTERNAL_SERVER_ERROR, "SEC_002", "AES Secret Key는 32바이트여야 합니다."),
   ;
 
   private final HttpStatus httpStatus;
