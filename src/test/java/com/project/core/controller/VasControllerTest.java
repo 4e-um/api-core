@@ -43,15 +43,16 @@ class VasControllerTest {
   @Test
   @DisplayName("[가입/성공] 부가서비스 가입 요청 성공")
   void joinVasSuccess() throws Exception {
-    VasJoinRequest request = new VasJoinRequest(1L, 1L);
+    Long subId = 1L;
+    VasJoinRequest request = new VasJoinRequest(1L);
     VasJoinResponse response =
         new VasJoinResponse(10L, 1L, 1L, VasStatus.ACTIVE.name(), LocalDateTime.now());
 
-    when(vasService.joinVas(any(Long.class), any(Long.class))).thenReturn(response);
+    when(vasService.joinVas(eq(subId), any(Long.class))).thenReturn(response);
 
     mockMvc
         .perform(
-            post("/vas/join")
+            post("/vas/{subId}/join", subId)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -64,14 +65,15 @@ class VasControllerTest {
   @Test
   @DisplayName("[가입/실패] 존재하지 않는 회선으로 가입 시도 시 404 반환")
   void joinVasFailSubNotFound() throws Exception {
-    VasJoinRequest request = new VasJoinRequest(999L, 1L);
+    Long subId = 999L;
+    VasJoinRequest request = new VasJoinRequest(1L);
     doThrow(new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND))
         .when(vasService)
-        .joinVas(any(Long.class), any(Long.class));
+        .joinVas(eq(subId), any(Long.class));
 
     mockMvc
         .perform(
-            post("/vas/join")
+            post("/vas/{subId}/join", subId)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -83,14 +85,15 @@ class VasControllerTest {
   @Test
   @DisplayName("[가입/실패] 이미 해지된 회선으로 가입 시도 시 400 반환")
   void joinVasFailSubTerminated() throws Exception {
-    VasJoinRequest request = new VasJoinRequest(1L, 1L);
+    Long subId = 1L;
+    VasJoinRequest request = new VasJoinRequest(1L);
     doThrow(new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED))
         .when(vasService)
-        .joinVas(any(Long.class), any(Long.class));
+        .joinVas(eq(subId), any(Long.class));
 
     mockMvc
         .perform(
-            post("/vas/join")
+            post("/vas/{subId}/join", subId)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -103,14 +106,15 @@ class VasControllerTest {
   @Test
   @DisplayName("[가입/실패] 존재하지 않는 부가서비스로 가입 시도 시 404 반환")
   void joinVasFailVasNotFound() throws Exception {
-    VasJoinRequest request = new VasJoinRequest(1L, 999L);
+    Long subId = 1L;
+    VasJoinRequest request = new VasJoinRequest(999L);
     doThrow(new EntityNotFoundException(CoreErrorCode.VAS_NOT_FOUND))
         .when(vasService)
-        .joinVas(any(Long.class), any(Long.class));
+        .joinVas(eq(subId), any(Long.class));
 
     mockMvc
         .perform(
-            post("/vas/join")
+            post("/vas/{subId}/join", subId)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -122,14 +126,15 @@ class VasControllerTest {
   @Test
   @DisplayName("[가입/실패] 이미 가입된 부가서비스 가입 시도 시 400 반환")
   void joinVasFailAlreadySubscribed() throws Exception {
-    VasJoinRequest request = new VasJoinRequest(1L, 1L);
+    Long subId = 1L;
+    VasJoinRequest request = new VasJoinRequest(1L);
     doThrow(new InvalidStateException(CoreErrorCode.VAS_ALREADY_SUBSCRIBED))
         .when(vasService)
-        .joinVas(any(Long.class), any(Long.class));
+        .joinVas(eq(subId), any(Long.class));
 
     mockMvc
         .perform(
-            post("/vas/join")
+            post("/vas/{subId}/join", subId)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))

@@ -70,9 +70,9 @@ public class VasService {
   public VasTerminateResponse terminateVas(Long subId, Long vasId) {
     // 회선 조회 및 활성 상태 체크
     Subscription subscription =
-            subscriptionRepository
-                    .findById(subId)
-                    .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
+        subscriptionRepository
+            .findById(subId)
+            .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
 
     if (subscription.getStatus() != SubscriptionStatus.ACTIVE) {
       throw new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
@@ -99,9 +99,9 @@ public class VasService {
   public VasBulkTerminateResponse terminateVasBulk(Long subId, List<Long> vasIds) {
     // 회선 조회 및 활성 상태 체크
     Subscription subscription =
-            subscriptionRepository
-                    .findById(subId)
-                    .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
+        subscriptionRepository
+            .findById(subId)
+            .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
 
     if (subscription.getStatus() != SubscriptionStatus.ACTIVE) {
       throw new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);

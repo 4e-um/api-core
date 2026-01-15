@@ -24,7 +24,7 @@ public class VasController {
 
   @PostMapping("/{subId}/join")
   public ResponseEntity<VasJoinResponse> joinVas(
-          @PathVariable Long subId, @RequestBody VasJoinRequest request) {
+      @PathVariable Long subId, @RequestBody VasJoinRequest request) {
     VasJoinResponse response = vasService.joinVas(subId, request.vasId());
     return ResponseEntity.ok(response);
   }
