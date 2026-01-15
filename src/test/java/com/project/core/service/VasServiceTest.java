@@ -183,9 +183,10 @@ class VasServiceTest {
   void terminateVasBulkFailSubNotFound() {
     given(subscriptionRepository.findById(any())).willReturn(Optional.empty());
 
+    List<Long> vasIds = List.of(1L);
     EntityNotFoundException ex =
         assertThrows(
-            EntityNotFoundException.class, () -> vasService.terminateVasBulk(1L, List.of(1L)));
+            EntityNotFoundException.class, () -> vasService.terminateVasBulk(1L, vasIds));
     assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_NOT_FOUND);
   }
 
@@ -202,9 +203,10 @@ class VasServiceTest {
                 any(), anyList(), eq(VasStatus.ACTIVE)))
         .willReturn(Collections.emptyList());
 
+    List<Long> vasIds = List.of(1L);
     EntityNotFoundException ex =
         assertThrows(
-            EntityNotFoundException.class, () -> vasService.terminateVasBulk(subId, List.of(1L)));
+            EntityNotFoundException.class, () -> vasService.terminateVasBulk(subId, vasIds));
     assertThat(ex.getCode()).isEqualTo(CoreErrorCode.VAS_NOT_FOUND);
   }
 }
