@@ -15,13 +15,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -71,12 +70,12 @@ public class SubscriptionDiscount {
 
   @Builder
   private SubscriptionDiscount(
-          DiscountPolicy discountPolicy,
-          Subscription subscription,
-          DiscountType discountType,
-          BigDecimal value,
-          TargetScope targetScope,
-          LocalDateTime startDate) {
+      DiscountPolicy discountPolicy,
+      Subscription subscription,
+      DiscountType discountType,
+      BigDecimal value,
+      TargetScope targetScope,
+      LocalDateTime startDate) {
     if (discountPolicy == null) {
       throw new IllegalArgumentException("discountPolicy는 필수입니다.");
     }
