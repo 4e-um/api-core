@@ -12,69 +12,69 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 class AesUtilTest {
 
-	private static final String TEST_SECRET_KEY = "12345678901234567890123456789012";
-	private AesUtil aesUtil;
+  private static final String TEST_SECRET_KEY = "12345678901234567890123456789012";
+  private AesUtil aesUtil;
 
-	@BeforeEach
-	void setUp() {
-		aesUtil = new AesUtil();
-		ReflectionTestUtils.setField(aesUtil, "secretKey", TEST_SECRET_KEY);
-		aesUtil.init();
-	}
+  @BeforeEach
+  void setUp() {
+    aesUtil = new AesUtil();
+    ReflectionTestUtils.setField(aesUtil, "secretKey", TEST_SECRET_KEY);
+    aesUtil.init();
+  }
 
-	@Test
-	@DisplayName("암호화와 복호화가 정상적으로 동작한다")
-	void encryptAndDecrypt() {
-		// given
-		String originalText = "010-1234-5678";
+  @Test
+  @DisplayName("암호화와 복호화가 정상적으로 동작한다")
+  void encryptAndDecrypt() {
+    // given
+    String originalText = "010-1234-5678";
 
-		// when
-		String encrypted = aesUtil.encrypt(originalText);
-		String decrypted = aesUtil.decrypt(encrypted);
+    // when
+    String encrypted = aesUtil.encrypt(originalText);
+    String decrypted = aesUtil.decrypt(encrypted);
 
-		// then
-		assertThat(encrypted).isNotEqualTo(originalText);
-		assertThat(decrypted).isEqualTo(originalText);
-	}
+    // then
+    assertThat(encrypted).isNotEqualTo(originalText);
+    assertThat(decrypted).isEqualTo(originalText);
+  }
 
-	@Test
-	@DisplayName("null 값을 암호화/복호화하면 null을 반환한다")
-	void encryptDecryptNull() {
-		// when & then
-		assertThat(aesUtil.encrypt(null)).isNull();
-		assertThat(aesUtil.decrypt(null)).isNull();
-	}
+  @Test
+  @DisplayName("null 값을 암호화/복호화하면 null을 반환한다")
+  void encryptDecryptNull() {
+    // when & then
+    assertThat(aesUtil.encrypt(null)).isNull();
+    assertThat(aesUtil.decrypt(null)).isNull();
+  }
 
-	@Test
-	@DisplayName("잘못된 형식의 암호문을 복호화하면 예외가 발생한다")
-	void decryptInvalidText() {
-		// given
-		String invalidText = "NotEncryptedText";
+  @Test
+  @DisplayName("잘못된 형식의 암호문을 복호화하면 예외가 발생한다")
+  void decryptInvalidText() {
+    // given
+    String invalidText = "NotEncryptedText";
 
-		// when & then
-		assertThatThrownBy(() -> aesUtil.decrypt(invalidText))
-						.isInstanceOf(OperationFailedException.class);
-	}
+    // when & then
+    assertThatThrownBy(() -> aesUtil.decrypt(invalidText))
+        .isInstanceOf(OperationFailedException.class);
+  }
 
-	@Test
-	@DisplayName("키 길이가 32바이트가 아니면 init() 시 예외가 발생한다")
-	void init_InvalidKeyLength() {
-		// given
-		AesUtil invalidAesUtil = new AesUtil();
-		ReflectionTestUtils.setField(invalidAesUtil, "secretKey", "shortKey");
+  @Test
+  @DisplayName("키 길이가 32바이트가 아니면 init() 시 예외가 발생한다")
+  void init_InvalidKeyLength() {
+    // given
+    AesUtil invalidAesUtil = new AesUtil();
+    ReflectionTestUtils.setField(invalidAesUtil, "secretKey", "shortKey");
 
-		// when & then
-		assertThatThrownBy(invalidAesUtil::init).isInstanceOf(InvalidStateException.class);
-	}
+    // when & then
+    assertThatThrownBy(invalidAesUtil::init).isInstanceOf(InvalidStateException.class);
+  }
 
-	@Test
-	@DisplayName("복호화 중 잘못된 키나 데이터로 인해 예외 발생 시 OperationFailedException을 던진다")
-	void decrypt_Fail_ThrowsException() {
-		// given
-		String invalidText = "NotBase64!!";
+  @Test
+  @DisplayName("복호화 중 잘못된 키나 데이터로 인해 예외 발생 시 OperationFailedException을 던진다")
+  void decrypt_Fail_ThrowsException() {
+    // given
+    String invalidText = "NotBase64!!";
 
-		// when & then
-		assertThatThrownBy(() -> aesUtil.decrypt(invalidText))
-						.isInstanceOf(OperationFailedException.class);
-	}
+    // when & then
+    assertThatThrownBy(() -> aesUtil.decrypt(invalidText))
+        .isInstanceOf(OperationFailedException.class);
+  }
 }
