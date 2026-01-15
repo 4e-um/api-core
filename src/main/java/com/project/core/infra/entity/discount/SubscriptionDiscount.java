@@ -41,13 +41,15 @@ public class SubscriptionDiscount {
   @JoinColumn(name = "sub_id", nullable = false)
   private Subscription subscription;
 
-  @Column(name = "discount_type", nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "discount_type", nullable = false, length = 10)
   private DiscountType discountType;
 
   @Column(name = "value", nullable = false)
   private BigDecimal value;
 
-  @Column(name = "target_scope", nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "target_scope", nullable = false, length = 20)
   private TargetScope targetScope;
 
   @Column(name = "start_date", nullable = false)

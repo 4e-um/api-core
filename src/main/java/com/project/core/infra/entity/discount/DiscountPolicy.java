@@ -33,16 +33,19 @@ public class DiscountPolicy {
   @Column(name = "name", nullable = false)
   private String name;
 
-  @Column(name = "discount_type", nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "discount_type", nullable = false, length = 10)
   private DiscountType discountType;
 
   @Column(name = "value", nullable = false)
   private BigDecimal value;
 
-  @Column(name = "category", nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "category", nullable = false, length = 10)
   private Category category;
 
-  @Column(name = "target_scope", nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "target_scope", nullable = false, length = 20)
   private TargetScope targetScope;
 
   @Enumerated(EnumType.STRING)
