@@ -22,6 +22,7 @@ import com.project.core.infra.repository.vas.SubscriptionVasRepository;
 import com.project.core.infra.repository.vas.VasRepository;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
+import com.project.global.exception.core.InvalidStateException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -98,6 +99,57 @@ class VasServiceTest {
   }
 
   @Test
+  @DisplayName("[가입] 실패 - 이미 해지된 회선")
+  void joinVasFailSubTerminated() {
+    Long subId = 1L;
+    Subscription subscription = mock(Subscription.class);
+    given(subscription.getStatus()).willReturn(SubscriptionStatus.TERMINATED);
+    given(subscriptionRepository.findById(subId)).willReturn(Optional.of(subscription));
+
+    InvalidStateException ex =
+        assertThrows(InvalidStateException.class, () -> vasService.joinVas(subId, 1L));
+    assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
+  }
+
+  @Test
+  @DisplayName("[가입] 실패 - 부가서비스 정보 없음")
+  void joinVasFailVasNotFound() {
+    Long subId = 1L;
+    Subscription subscription = mock(Subscription.class);
+    given(subscription.getStatus()).willReturn(SubscriptionStatus.ACTIVE);
+    given(subscriptionRepository.findById(subId)).willReturn(Optional.of(subscription));
+
+    given(vasRepository.findById(any())).willReturn(Optional.empty());
+
+    EntityNotFoundException ex =
+        assertThrows(EntityNotFoundException.class, () -> vasService.joinVas(subId, 1L));
+    assertThat(ex.getCode()).isEqualTo(CoreErrorCode.VAS_NOT_FOUND);
+  }
+
+  @Test
+  @DisplayName("[가입] 실패 - 이미 가입된 부가서비스")
+  void joinVasFailAlreadySubscribed() {
+    Long subId = 1L;
+    Long vasId = 1L;
+
+    Subscription subscription = mock(Subscription.class);
+    given(subscription.getStatus()).willReturn(SubscriptionStatus.ACTIVE);
+    given(subscriptionRepository.findById(subId)).willReturn(Optional.of(subscription));
+
+    Vas vas = mock(Vas.class);
+    given(vasRepository.findById(vasId)).willReturn(Optional.of(vas));
+
+    given(
+            subscriptionVasRepository.existsBySubscriptionSubIdAndVasVasIdAndStatus(
+                subId, vasId, VasStatus.ACTIVE))
+        .willReturn(true);
+
+    InvalidStateException ex =
+        assertThrows(InvalidStateException.class, () -> vasService.joinVas(subId, vasId));
+    assertThat(ex.getCode()).isEqualTo(CoreErrorCode.VAS_ALREADY_SUBSCRIBED);
+  }
+
+  @Test
   @DisplayName("[해지] 성공 - 부가서비스 해지")
   void terminateVasSuccess() {
     Long subId = 1L;
@@ -122,6 +174,29 @@ class VasServiceTest {
 
     assertThat(response.status()).isEqualTo("TERMINATED");
     assertThat(subVas.getStatus()).isEqualTo(VasStatus.TERMINATED);
+  }
+
+  @Test
+  @DisplayName("[해지] 실패 - 회선 없음")
+  void terminateVasFailSubNotFound() {
+    given(subscriptionRepository.findById(any())).willReturn(Optional.empty());
+
+    EntityNotFoundException ex =
+        assertThrows(EntityNotFoundException.class, () -> vasService.terminateVas(1L, 1L));
+    assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_NOT_FOUND);
+  }
+
+  @Test
+  @DisplayName("[해지] 실패 - 이미 해지된 회선")
+  void terminateVasFailSubTerminated() {
+    Long subId = 1L;
+    Subscription subscription = mock(Subscription.class);
+    given(subscription.getStatus()).willReturn(SubscriptionStatus.TERMINATED);
+    given(subscriptionRepository.findById(subId)).willReturn(Optional.of(subscription));
+
+    InvalidStateException ex =
+        assertThrows(InvalidStateException.class, () -> vasService.terminateVas(subId, 1L));
+    assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
   }
 
   @Test
@@ -176,6 +251,20 @@ class VasServiceTest {
     assertThat(response.count()).isEqualTo(2);
     assertThat(sv1.getStatus()).isEqualTo(VasStatus.TERMINATED);
     assertThat(sv2.getStatus()).isEqualTo(VasStatus.TERMINATED);
+  }
+
+  @Test
+  @DisplayName("[일괄해지] 실패 - 이미 해지된 회선")
+  void terminateVasBulkFailSubTerminated() {
+    Long subId = 1L;
+    Subscription subscription = mock(Subscription.class);
+    given(subscription.getStatus()).willReturn(SubscriptionStatus.TERMINATED);
+    given(subscriptionRepository.findById(subId)).willReturn(Optional.of(subscription));
+
+    List<Long> vasIds = List.of(1L);
+    InvalidStateException ex =
+        assertThrows(InvalidStateException.class, () -> vasService.terminateVasBulk(subId, vasIds));
+    assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
   }
 
   @Test

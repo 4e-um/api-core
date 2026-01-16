@@ -172,6 +172,19 @@ class PlanServiceTest {
   }
 
   @Test
+  @DisplayName("[가입] 실패 - 요금제 정보 없음")
+  void joinSubscriptionFailPlanNotFound() {
+    given(customerRepository.findById(any(Long.class)))
+        .willReturn(Optional.of(mock(Customer.class)));
+    given(planRepository.findById(any(Long.class))).willReturn(Optional.empty());
+
+    assertThatThrownBy(() -> planService.joinSubscription(1L, 1L))
+        .isInstanceOf(EntityNotFoundException.class)
+        .extracting("code")
+        .isEqualTo(CoreErrorCode.PLAN_NOT_FOUND);
+  }
+
+  @Test
   @DisplayName("[가입] 실패 - 번호 생성 11회 모두 중복")
   void joinSubscriptionFailNumberGeneration() {
     try (MockedStatic<PhoneUtil> phoneUtilMock = Mockito.mockStatic(PhoneUtil.class)) {
@@ -294,6 +307,23 @@ class PlanServiceTest {
   }
 
   @Test
+  @DisplayName("[변경] 실패 - 현재 사용 중인 요금제 정보 없음")
+  void changePlanFailCurrentPlanNotFound() {
+    Subscription sub = mock(Subscription.class);
+    given(subscriptionRepository.findById(any(Long.class))).willReturn(Optional.of(sub));
+    given(sub.getStatus()).willReturn(SubscriptionStatus.ACTIVE);
+
+    // Active Plan not found
+    given(subscriptionPlanRepository.findActivePlanBySubId(any(Long.class)))
+        .willReturn(Optional.empty());
+
+    assertThatThrownBy(() -> planService.changePlan(1L, 2L))
+        .isInstanceOf(EntityNotFoundException.class)
+        .extracting("code")
+        .isEqualTo(CoreErrorCode.PLAN_NOT_FOUND);
+  }
+
+  @Test
   @DisplayName("[변경] 실패 - 이미 해지된 회선은 변경 불가")
   void changePlanFailAlreadyTerminated() {
     Subscription sub = new Subscription(null, "phone", clock);
@@ -327,6 +357,17 @@ class PlanServiceTest {
     assertThat(response.getStatus()).isEqualTo(SubscriptionStatus.TERMINATED);
     assertThat(sub.getStatus()).isEqualTo(SubscriptionStatus.TERMINATED);
     verify(activePlan).expire();
+  }
+
+  @Test
+  @DisplayName("[해지] 실패 - 회선 정보 없음")
+  void terminateSubscriptionFailSubNotFound() {
+    given(subscriptionRepository.findById(any(Long.class))).willReturn(Optional.empty());
+
+    assertThatThrownBy(() -> planService.terminateSubscription(1L))
+        .isInstanceOf(EntityNotFoundException.class)
+        .extracting("code")
+        .isEqualTo(CoreErrorCode.SUBSCRIPTION_NOT_FOUND);
   }
 
   @Test
