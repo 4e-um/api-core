@@ -4,7 +4,7 @@
     "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 
 <suppressions>
-    <!-- Spring Data JPA Repository 메서드명 예외 (findBy_Entity_Field 패턴) -->
-    <suppress checks="MethodName"
-              files=".*Repository\.java$"/>
+    <!-- Exception 파라미터명 'e' 허용 (Java 관례: catch(Exception e)) -->
+    <suppress checks="ParameterName"
+              files=".*Exception.*\.java$|.*Advice\.java$"/>
 </suppressions>
