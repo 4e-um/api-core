@@ -8,6 +8,7 @@ import com.project.core.controller.dto.response.VasBulkTerminateResponse;
 import com.project.core.controller.dto.response.VasJoinResponse;
 import com.project.core.controller.dto.response.VasTerminateResponse;
 import com.project.core.service.VasService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,8 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,14 +27,15 @@ public class VasController {
 
   // 부가서비스 이력 조회
   @GetMapping("/{subId}/history")
-  public ResponseEntity<List<SubscriptionVasResponse>> getVasHistory(@PathVariable(name = "subId") Long subId) {
+  public ResponseEntity<List<SubscriptionVasResponse>> getVasHistory(
+      @PathVariable(name = "subId") Long subId) {
     List<SubscriptionVasResponse> history = vasService.getVasHistory(subId);
     return ResponseEntity.ok(history);
   }
 
   @PostMapping("/{subId}/join")
   public ResponseEntity<VasJoinResponse> joinVas(
-      @PathVariable Long subId, @RequestBody VasJoinRequest request) {
+      @PathVariable(name = "subId") Long subId, @RequestBody VasJoinRequest request) {
     VasJoinResponse response = vasService.joinVas(subId, request.vasId());
     return ResponseEntity.ok(response);
   }

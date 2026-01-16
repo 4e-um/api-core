@@ -4,13 +4,24 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.core.controller.dto.request.MicroPaymentCancelRequest;
+import com.project.core.controller.dto.request.MicroPaymentRequest;
+import com.project.core.controller.dto.response.MicroPaymentHistoryResponse;
+import com.project.core.controller.dto.response.MicroPaymentResponse;
+import com.project.core.service.MicroPaymentService;
+import com.project.global.exception.code.domain.GlobalErrorCode;
+import com.project.global.exception.code.domain.core.CoreErrorCode;
+import com.project.global.exception.core.EntityNotFoundException;
+import com.project.global.exception.core.InvalidStateException;
 import java.time.LocalDateTime;
-
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +30,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.core.controller.dto.request.MicroPaymentCancelRequest;
-import com.project.core.controller.dto.request.MicroPaymentRequest;
-import com.project.core.controller.dto.response.MicroPaymentResponse;
-import com.project.core.service.MicroPaymentService;
-import com.project.global.exception.code.domain.GlobalErrorCode;
-import com.project.global.exception.code.domain.core.CoreErrorCode;
-import com.project.global.exception.core.EntityNotFoundException;
-import com.project.global.exception.core.InvalidStateException;
-
 @WebMvcTest(MicroPaymentController.class)
 class MicroPaymentControllerTest {
 
@@ -36,13 +37,34 @@ class MicroPaymentControllerTest {
     @Autowired private ObjectMapper objectMapper;
     @MockitoBean private MicroPaymentService microPaymentService;
 
-    @Test
-    @DisplayName("[결제/성공] 소액결제 요청 성공")
-    void paySuccess() throws Exception {
-        MicroPaymentRequest request = new MicroPaymentRequest(1L, "Game Item", 5000);
-        MicroPaymentResponse response =
-                new MicroPaymentResponse(
-                        100L, 1L, "Game Item", 5000, LocalDateTime.now(), "BILLED");
+  @Test
+  @DisplayName("[조회/성공] 소액결제 이력 조회 성공")
+  void getMicroPaymentHistorySuccess() throws Exception {
+    Long subId = 1L;
+    MicroPaymentHistoryResponse res1 =
+        new MicroPaymentHistoryResponse(
+            1L, "Item A", 1000, LocalDateTime.now().minusDays(1), "BILLED");
+    MicroPaymentHistoryResponse res2 =
+        new MicroPaymentHistoryResponse(2L, "Item B", 2000, LocalDateTime.now(), "CANCELED");
+
+    when(microPaymentService.getMicroPaymentHistory(subId)).thenReturn(List.of(res2, res1));
+
+    mockMvc
+        .perform(get("/micro-payment/{subId}/history", subId).with(csrf()))
+        .andDo(print())
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$.length()").value(2))
+        .andExpect(jsonPath("$[0].name").value("Item B"))
+        .andExpect(jsonPath("$[1].name").value("Item A"));
+  }
+
+  @Test
+  @DisplayName("[결제/성공] 소액결제 요청 성공")
+  void paySuccess() throws Exception {
+    MicroPaymentRequest request = new MicroPaymentRequest(1L, "Game Item", 5000);
+    MicroPaymentResponse response =
+        new MicroPaymentResponse(100L, 1L, "Game Item", 5000, LocalDateTime.now(), "BILLED");
 
         when(microPaymentService.pay(any(Long.class), any(String.class), any(Integer.class)))
                 .thenReturn(response);

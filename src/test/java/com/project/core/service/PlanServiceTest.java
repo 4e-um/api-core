@@ -11,23 +11,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import com.project.core.controller.dto.response.PlanChangeResponse;
 import com.project.core.controller.dto.response.SubscriptionJoinResponse;
 import com.project.core.controller.dto.response.SubscriptionTerminateResponse;
@@ -46,6 +29,21 @@ import com.project.global.exception.core.EntityNotFoundException;
 import com.project.global.exception.core.InvalidStateException;
 import com.project.global.exception.core.OperationFailedException;
 import com.project.global.util.AesUtil;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class PlanServiceTest {
@@ -65,13 +63,47 @@ class PlanServiceTest {
         lenient().when(clock.instant()).thenReturn(Instant.parse("2026-01-01T00:00:00Z"));
     }
 
-    @Test
-    @DisplayName("[가입] 활성회선 0개이고 기존 번호 미사용 중이면 기존 번호 복구")
-    void joinSubscriptionReuseNumber() {
-        // given
-        Long customerId = 1L;
-        Customer customer = mock(Customer.class);
-        Plan plan = mock(Plan.class);
+  @Test
+  @DisplayName("[조회] 성공 - 요금제 이력 조회")
+  void getPlanHistorySuccess() {
+    // given
+    Long subId = 1L;
+    Plan plan1 = mock(Plan.class);
+    given(plan1.getPlanName()).willReturn("Plan A");
+    SubscriptionPlan sp1 = mock(SubscriptionPlan.class);
+    given(sp1.getSpId()).willReturn(10L);
+    given(sp1.getPlan()).willReturn(plan1);
+    given(sp1.getCost()).willReturn(10000);
+    given(sp1.getCreatedDate()).willReturn(LocalDateTime.now().minusDays(30));
+
+    Plan plan2 = mock(Plan.class);
+    given(plan2.getPlanName()).willReturn("Plan B");
+    SubscriptionPlan sp2 = mock(SubscriptionPlan.class);
+    given(sp2.getSpId()).willReturn(11L);
+    given(sp2.getPlan()).willReturn(plan2);
+    given(sp2.getCost()).willReturn(20000);
+    given(sp2.getCreatedDate()).willReturn(LocalDateTime.now());
+
+    given(subscriptionPlanRepository.findBySubscriptionSubIdOrderByCreatedDateDesc(subId))
+        .willReturn(java.util.List.of(sp2, sp1));
+
+    // when
+    java.util.List<com.project.core.controller.dto.response.SubscriptionPlanResponse> result =
+        planService.getPlanHistory(subId);
+
+    // then
+    assertThat(result).hasSize(2);
+    assertThat(result.get(0).planName()).isEqualTo("Plan B");
+    assertThat(result.get(1).planName()).isEqualTo("Plan A");
+  }
+
+  @Test
+  @DisplayName("[가입] 활성회선 0개이고 기존 번호 미사용 중이면 기존 번호 복구")
+  void joinSubscriptionReuseNumber() {
+    // given
+    Long customerId = 1L;
+    Customer customer = mock(Customer.class);
+    Plan plan = mock(Plan.class);
 
         given(customerRepository.findById(customerId)).willReturn(Optional.of(customer));
         given(planRepository.findById(any(Long.class))).willReturn(Optional.of(plan));

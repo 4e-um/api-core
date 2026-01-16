@@ -16,7 +16,7 @@ spring:
     password: ${POSTGRES_PASSWORD:app_password}
 
     hikari:
-      maximum-pool-size: 20
+      maximum-pool-size: 10
       minimum-idle: 2
       connection-timeout: 3000
       validation-timeout: 2000

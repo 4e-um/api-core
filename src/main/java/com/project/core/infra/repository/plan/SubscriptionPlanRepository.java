@@ -1,7 +1,6 @@
 package com.project.core.infra.repository.plan;
 
 import com.project.core.infra.entity.plan.SubscriptionPlan;
-
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -6,6 +6,7 @@ import com.project.core.controller.dto.response.MicroPaymentHistoryResponse;
 import com.project.core.controller.dto.response.MicroPaymentResponse;
 import com.project.core.service.MicroPaymentService;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +27,8 @@ public class MicroPaymentController {
 
   // 소액결제 내역 조회
   @GetMapping("/{subId}/history")
-  public ResponseEntity<List<MicroPaymentHistoryResponse>> getMicroPaymentHistory(@PathVariable(name = "subId") Long subId) {
+  public ResponseEntity<List<MicroPaymentHistoryResponse>> getMicroPaymentHistory(
+      @PathVariable(name = "subId") Long subId) {
     List<MicroPaymentHistoryResponse> history = microPaymentService.getMicroPaymentHistory(subId);
     return ResponseEntity.ok(history);
   }

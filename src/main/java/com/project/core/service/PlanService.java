@@ -21,7 +21,6 @@ import com.project.global.exception.core.OperationFailedException;
 import com.project.global.util.AesUtil;
 import java.time.Clock;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,21 +39,20 @@ public class PlanService {
 
     private static final int PHONE_NUMBER_GENERATION_ATTEMPT_LIMIT = 11;
 
-  /**
-   * 요금제 변경 이력 조회
-   */
+  /** 요금제 변경 이력 조회 */
   @Transactional(readOnly = true)
   public List<SubscriptionPlanResponse> getPlanHistory(Long subId) {
 
     return subscriptionPlanRepository.findBySubscriptionSubIdOrderByCreatedDateDesc(subId).stream()
-            .map(sp -> new SubscriptionPlanResponse(
+        .map(
+            sp ->
+                new SubscriptionPlanResponse(
                     sp.getSpId(),
                     sp.getPlan().getPlanName(),
                     sp.getCost(),
                     sp.getCreatedDate(),
-                    sp.getLeftDate()
-            ))
-            .toList();
+                    sp.getLeftDate()))
+        .toList();
   }
 
   /**
@@ -202,9 +200,9 @@ public class PlanService {
 
   private Subscription findActiveSubscription(Long subId) {
     Subscription subscription =
-            subscriptionRepository
-                    .findById(subId)
-                    .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
+        subscriptionRepository
+            .findById(subId)
+            .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
     if (subscription.getStatus() != SubscriptionStatus.ACTIVE) {
       throw new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
     }

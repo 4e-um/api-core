@@ -12,7 +12,6 @@ import com.project.global.exception.core.EntityNotFoundException;
 import com.project.global.exception.core.InvalidStateException;
 import java.time.Clock;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,21 +25,20 @@ public class MicroPaymentService {
     private final SubscriptionRepository subscriptionRepository;
     private final Clock clock;
 
-  /**
-   * 소액결제 내역 조회
-   */
+  /** 소액결제 내역 조회 */
   @Transactional(readOnly = true)
   public List<MicroPaymentHistoryResponse> getMicroPaymentHistory(Long subId) {
 
     return microPaymentRepository.findBySubscriptionSubIdOrderByPayDateDesc(subId).stream()
-            .map(mp -> new MicroPaymentHistoryResponse(
+        .map(
+            mp ->
+                new MicroPaymentHistoryResponse(
                     mp.getMicroId(),
                     mp.getName(),
                     mp.getAmount(),
                     mp.getPayDate(),
-                    mp.getStatus().name()
-            ))
-            .toList();
+                    mp.getStatus().name()))
+        .toList();
   }
 
   // 소액결제 승인
