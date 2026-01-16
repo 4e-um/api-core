@@ -1,9 +1,9 @@
 package com.project.core.infra.entity.discount;
 
-import com.project.core.infra.entity.discount.enums.Active;
-import com.project.core.infra.entity.discount.enums.Category;
-import com.project.core.infra.entity.discount.enums.DiscountType;
-import com.project.core.infra.entity.discount.enums.TargetScope;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,9 +13,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+
+import com.project.core.infra.entity.discount.enums.Active;
+import com.project.core.infra.entity.discount.enums.Category;
+import com.project.core.infra.entity.discount.enums.DiscountType;
+import com.project.core.infra.entity.discount.enums.TargetScope;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,68 +29,68 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "discount_policy")
 public class DiscountPolicy {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "discount_id")
-  private Long discountId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "discount_id")
+    private Long discountId;
 
-  @Column(name = "name", nullable = false)
-  private String name;
+    @Column(name = "name", nullable = false)
+    private String name;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "discount_type", nullable = false, length = 10)
-  private DiscountType discountType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "discount_type", nullable = false, length = 10)
+    private DiscountType discountType;
 
-  @Column(name = "value", nullable = false)
-  private BigDecimal value;
+    @Column(name = "value", nullable = false)
+    private BigDecimal value;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "category", nullable = false, length = 10)
-  private Category category;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", nullable = false, length = 10)
+    private Category category;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "target_scope", nullable = false, length = 20)
-  private TargetScope targetScope;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "target_scope", nullable = false, length = 20)
+    private TargetScope targetScope;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "active", nullable = false, length = 10)
-  private Active active;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "active", nullable = false, length = 10)
+    private Active active;
 
-  @OneToMany(mappedBy = "discountPolicy")
-  private List<SubscriptionDiscount> discountHistory = new ArrayList<>();
+    @OneToMany(mappedBy = "discountPolicy")
+    private List<SubscriptionDiscount> discountHistory = new ArrayList<>();
 
-  @Builder
-  private DiscountPolicy(
-      String name,
-      DiscountType discountType,
-      BigDecimal value,
-      Category category,
-      TargetScope targetScope,
-      Active active) {
-    if (name == null || name.isBlank()) {
-      throw new IllegalArgumentException("DiscountPolicy.name must not be null or blank");
+    @Builder
+    private DiscountPolicy(
+            String name,
+            DiscountType discountType,
+            BigDecimal value,
+            Category category,
+            TargetScope targetScope,
+            Active active) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("DiscountPolicy.name must not be null or blank");
+        }
+        if (discountType == null) {
+            throw new IllegalArgumentException("DiscountPolicy.discountType must not be null");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("DiscountPolicy.value must not be null");
+        }
+        if (category == null) {
+            throw new IllegalArgumentException("DiscountPolicy.category must not be null");
+        }
+        if (targetScope == null) {
+            throw new IllegalArgumentException("DiscountPolicy.targetScope must not be null");
+        }
+        if (active == null) {
+            throw new IllegalArgumentException("DiscountPolicy.active must not be null");
+        }
+
+        this.name = name;
+        this.discountType = discountType;
+        this.value = value;
+        this.category = category;
+        this.targetScope = targetScope;
+        this.active = active;
     }
-    if (discountType == null) {
-      throw new IllegalArgumentException("DiscountPolicy.discountType must not be null");
-    }
-    if (value == null) {
-      throw new IllegalArgumentException("DiscountPolicy.value must not be null");
-    }
-    if (category == null) {
-      throw new IllegalArgumentException("DiscountPolicy.category must not be null");
-    }
-    if (targetScope == null) {
-      throw new IllegalArgumentException("DiscountPolicy.targetScope must not be null");
-    }
-    if (active == null) {
-      throw new IllegalArgumentException("DiscountPolicy.active must not be null");
-    }
-
-    this.name = name;
-    this.discountType = discountType;
-    this.value = value;
-    this.category = category;
-    this.targetScope = targetScope;
-    this.active = active;
-  }
 }
