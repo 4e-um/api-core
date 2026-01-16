@@ -73,8 +73,6 @@ class DiscountControllerTest {
             .build();
 
     ReflectionTestUtils.setField(sd, "sdId", 100L);
-    // status는 builder에서 ACTIVE로 세팅됨. 필요하면 바꿀 수 있음.
-    // ReflectionTestUtils.setField(sd, "status", Status.ACTIVE);
 
     when(discountService.loadRequiredBySubId(eq(subId))).thenReturn(List.of(sd));
 

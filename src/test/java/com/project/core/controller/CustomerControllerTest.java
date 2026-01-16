@@ -96,7 +96,6 @@ class CustomerControllerTest {
     Long customerId = 1L;
     ChangeEmailRequest request = new ChangeEmailRequest("example@example.com");
 
-    // NOTE: 현재 DTO가 emailEnc 하나면 jsonPath는 $.emailEnc 가 맞음
     ChangeEmailResponse response = new ChangeEmailResponse("encrypted-or-masked-email");
 
     when(customerService.changeEmailEnc(eq(customerId), any(ChangeEmailRequest.class)))
@@ -215,7 +214,6 @@ class CustomerControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
         .andDo(print())
         .andExpect(status().isInternalServerError())
-        // ExceptionAdvice를 @Import 했다면 아래도 안정적으로 검증 가능
         .andExpect(jsonPath("$.title").value("INTERNAL_SERVER_ERROR"))
         .andExpect(jsonPath("$.code").value("COMMON_004"));
   }

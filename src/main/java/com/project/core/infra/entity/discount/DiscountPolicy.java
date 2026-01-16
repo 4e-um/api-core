@@ -63,7 +63,26 @@ public class DiscountPolicy {
       BigDecimal value,
       Category category,
       TargetScope targetScope,
-      Active active) {
+      Active active
+  ) {
+    if (name == null || name.isBlank()) {
+      throw new IllegalArgumentException("DiscountPolicy.name must not be null or blank");
+    }
+    if (discountType == null) {
+      throw new IllegalArgumentException("DiscountPolicy.discountType must not be null");
+    }
+    if (value == null) {
+      throw new IllegalArgumentException("DiscountPolicy.value must not be null");
+    }
+    if (category == null) {
+      throw new IllegalArgumentException("DiscountPolicy.category must not be null");
+    }
+    if (targetScope == null) {
+      throw new IllegalArgumentException("DiscountPolicy.targetScope must not be null");
+    }
+    if (active == null) {
+      throw new IllegalArgumentException("DiscountPolicy.active must not be null");
+    }
 
     this.name = name;
     this.discountType = discountType;
@@ -72,4 +91,5 @@ public class DiscountPolicy {
     this.targetScope = targetScope;
     this.active = active;
   }
+
 }
