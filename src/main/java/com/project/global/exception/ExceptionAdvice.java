@@ -48,8 +48,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
   // Validation 에러 처리 핸들러
   @Override
-  @Nullable
-  protected ResponseEntity<Object> handleMethodArgumentNotValid(
+  protected @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(
       MethodArgumentNotValidException ex,
       HttpHeaders headers,
       HttpStatusCode status,
