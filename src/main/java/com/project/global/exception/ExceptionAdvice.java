@@ -2,6 +2,7 @@ package com.project.global.exception;
 
 import com.project.global.exception.code.domain.BaseErrorCode;
 import com.project.global.exception.code.domain.GlobalErrorCode;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -47,6 +48,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
   // Validation 에러 처리 핸들러
   @Override
+  @Nullable
   protected ResponseEntity<Object> handleMethodArgumentNotValid(
       MethodArgumentNotValidException ex,
       HttpHeaders headers,
