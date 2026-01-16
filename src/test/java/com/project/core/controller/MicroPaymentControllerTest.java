@@ -2,7 +2,6 @@ package com.project.core.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,6 +14,7 @@ import com.project.core.controller.dto.request.MicroPaymentCancelRequest;
 import com.project.core.controller.dto.request.MicroPaymentRequest;
 import com.project.core.controller.dto.response.MicroPaymentResponse;
 import com.project.core.service.MicroPaymentService;
+import com.project.global.exception.code.domain.GlobalErrorCode;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
 import com.project.global.exception.core.InvalidStateException;
@@ -60,9 +60,8 @@ class MicroPaymentControllerTest {
   @DisplayName("[결제/실패] 존재하지 않는 회선으로 결제 시도 시 404 반환")
   void payFailSubNotFound() throws Exception {
     MicroPaymentRequest request = new MicroPaymentRequest(999L, "Item", 1000);
-    doThrow(new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND))
-        .when(microPaymentService)
-        .pay(any(Long.class), any(String.class), any(Integer.class));
+    when(microPaymentService.pay(any(Long.class), any(String.class), any(Integer.class)))
+        .thenThrow(new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
 
     mockMvc
         .perform(
@@ -79,9 +78,8 @@ class MicroPaymentControllerTest {
   @DisplayName("[결제/실패] 해지된 회선으로 결제 시도 시 400 반환")
   void payFailSubTerminated() throws Exception {
     MicroPaymentRequest request = new MicroPaymentRequest(1L, "Item", 1000);
-    doThrow(new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED))
-        .when(microPaymentService)
-        .pay(any(Long.class), any(String.class), any(Integer.class));
+    when(microPaymentService.pay(any(Long.class), any(String.class), any(Integer.class)))
+        .thenThrow(new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED));
 
     mockMvc
         .perform(
@@ -96,12 +94,10 @@ class MicroPaymentControllerTest {
   }
 
   @Test
-  @DisplayName("[결제/실패] 유효하지 않은 금액으로 결제 시도 시 400 반환")
+  @DisplayName("[결제/실패] 유효하지 않은 금액으로 결제 시도 시 400 반환 (Validation Check)")
   void payFailInvalidAmount() throws Exception {
     MicroPaymentRequest request = new MicroPaymentRequest(1L, "Item", -100);
-    doThrow(new InvalidStateException(CoreErrorCode.INVALID_INPUT_VALUE))
-        .when(microPaymentService)
-        .pay(any(Long.class), any(String.class), any(Integer.class));
+    // Validation에서 걸러지므로 Service는 호출되지 않음
 
     mockMvc
         .perform(
@@ -110,8 +106,8 @@ class MicroPaymentControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andDo(print())
-        .andExpect(status().is(CoreErrorCode.INVALID_INPUT_VALUE.getHttpStatus().value()))
-        .andExpect(jsonPath("$.title").value(CoreErrorCode.INVALID_INPUT_VALUE.name()));
+        .andExpect(status().is(GlobalErrorCode.METHOD_ARGUMENT_NOT_VALID.getHttpStatus().value()))
+        .andExpect(jsonPath("$.title").value(GlobalErrorCode.METHOD_ARGUMENT_NOT_VALID.name()));
   }
 
   @Test
@@ -140,9 +136,8 @@ class MicroPaymentControllerTest {
   void cancelFailNotFound() throws Exception {
     Long microId = 999L;
     MicroPaymentCancelRequest request = new MicroPaymentCancelRequest(1L);
-    doThrow(new EntityNotFoundException(CoreErrorCode.MICRO_PAYMENT_NOT_FOUND))
-        .when(microPaymentService)
-        .cancel(eq(microId), any(Long.class));
+    when(microPaymentService.cancel(eq(microId), any(Long.class)))
+        .thenThrow(new EntityNotFoundException(CoreErrorCode.MICRO_PAYMENT_NOT_FOUND));
 
     mockMvc
         .perform(
@@ -160,9 +155,8 @@ class MicroPaymentControllerTest {
   void cancelFailForbidden() throws Exception {
     Long microId = 100L;
     MicroPaymentCancelRequest request = new MicroPaymentCancelRequest(2L); // 다른 subId
-    doThrow(new InvalidStateException(CoreErrorCode.MICRO_PAYMENT_BAD_REQUEST))
-        .when(microPaymentService)
-        .cancel(eq(microId), any(Long.class));
+    when(microPaymentService.cancel(eq(microId), any(Long.class)))
+        .thenThrow(new InvalidStateException(CoreErrorCode.MICRO_PAYMENT_BAD_REQUEST));
 
     mockMvc
         .perform(
@@ -180,9 +174,8 @@ class MicroPaymentControllerTest {
   void cancelFailAlreadyCanceled() throws Exception {
     Long microId = 100L;
     MicroPaymentCancelRequest request = new MicroPaymentCancelRequest(1L);
-    doThrow(new InvalidStateException(CoreErrorCode.MICRO_PAYMENT_ALREADY_CANCELED))
-        .when(microPaymentService)
-        .cancel(eq(microId), any(Long.class));
+    when(microPaymentService.cancel(eq(microId), any(Long.class)))
+        .thenThrow(new InvalidStateException(CoreErrorCode.MICRO_PAYMENT_ALREADY_CANCELED));
 
     mockMvc
         .perform(

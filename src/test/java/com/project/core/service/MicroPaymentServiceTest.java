@@ -182,7 +182,7 @@ class MicroPaymentServiceTest {
 
     MicroPayment microPayment =
         MicroPayment.builder().subscription(sub).name("Item").amount(1000).clock(clock).build();
-    microPayment.cancel(); // 이미 취소 상태로 변경
+    microPayment.cancel(subId); // 이미 취소 상태로 변경
 
     given(microPaymentRepository.findById(microId)).willReturn(Optional.of(microPayment));
 
