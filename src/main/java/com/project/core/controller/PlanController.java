@@ -37,7 +37,7 @@ public class PlanController {
 
   @PostMapping("/{subId}/terminate")
   public ResponseEntity<SubscriptionTerminateResponse> terminateSubscription(
-      @PathVariable Long subId) {
+  		@PathVariable(name="subId") Long subId) {
     SubscriptionTerminateResponse response = planService.terminateSubscription(subId);
     return ResponseEntity.ok(response);
   }

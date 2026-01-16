@@ -179,4 +179,128 @@ class CustomerControllerTest {
         .andDo(print())
         .andExpect(status().isNotFound());
   }
+  
+  // =========================
+  // [공통 실패] /customer/search
+  // =========================
+
+  @Test
+  @DisplayName("[조회/실패] 전화번호 기반 유저 조회 실패 - 잘못된 JSON(400)")
+  void loadByContactEncFail_invalidJson_badRequest() throws Exception {
+    mockMvc.perform(
+            post("/customer/search")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ invalid-json }"))
+        .andDo(print())
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("[조회/실패] 전화번호 기반 유저 조회 실패 - 서버 예외(500)")
+  void loadByContactEncFail_internalServerError() throws Exception {
+    // given
+    PhoneSearchRequest request = new PhoneSearchRequest("encrypted-phone");
+
+    when(customerService.loadByContactEnc(eq("encrypted-phone")))
+        .thenThrow(new RuntimeException("boom"));
+
+    // when & then
+    mockMvc.perform(
+            post("/customer/search")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andDo(print())
+        .andExpect(status().isInternalServerError())
+        // ExceptionAdvice를 @Import 했다면 아래도 안정적으로 검증 가능
+        .andExpect(jsonPath("$.title").value("INTERNAL_SERVER_ERROR"))
+        .andExpect(jsonPath("$.code").value("COMMON_004"));
+  }
+
+  // =========================
+  // [공통 실패] /customer/{customerId}/email
+  // =========================
+
+
+  @Test
+  @DisplayName("[변경/실패] 유저 이메일 변경 실패 - 잘못된 JSON(400)")
+  void changeEmailFail_invalidJson_badRequest() throws Exception {
+    // given
+    Long customerId = 1L;
+
+    // when & then
+    mockMvc.perform(
+            post("/customer/{customerId}/email", customerId)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ invalid-json }"))
+        .andDo(print())
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("[변경/실패] 유저 이메일 변경 실패 - 서버 예외(500)")
+  void changeEmailFail_internalServerError() throws Exception {
+    // given
+    Long customerId = 1L;
+    ChangeEmailRequest request = new ChangeEmailRequest("example@example.com");
+
+    when(customerService.changeEmailEnc(eq(customerId), any(ChangeEmailRequest.class)))
+        .thenThrow(new RuntimeException("boom"));
+
+    // when & then
+    mockMvc.perform(
+            post("/customer/{customerId}/email", customerId)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andDo(print())
+        .andExpect(status().isInternalServerError())
+        .andExpect(jsonPath("$.title").value("INTERNAL_SERVER_ERROR"))
+        .andExpect(jsonPath("$.code").value("COMMON_004"));
+  }
+
+  // =========================
+  // [공통 실패] /customer/{customerId}/grade
+  // =========================
+
+  @Test
+  @DisplayName("[변경/실패] 고객 등급 변경 실패 - 잘못된 JSON(400)")
+  void changeGradeFail_invalidJson_badRequest() throws Exception {
+    // given
+    Long customerId = 1L;
+
+    // when & then
+    mockMvc.perform(
+            post("/customer/{customerId}/grade", customerId)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ invalid-json }"))
+        .andDo(print())
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("[변경/실패] 고객 등급 변경 실패 - 서버 예외(500)")
+  void changeGradeFail_internalServerError() throws Exception {
+    // given
+    Long customerId = 1L;
+    ChangeGradeRequest request = new ChangeGradeRequest(Grade.GENERAL);
+
+    when(customerService.changeUserGrade(eq(customerId), any(ChangeGradeRequest.class)))
+        .thenThrow(new RuntimeException("boom"));
+
+    // when & then
+    mockMvc.perform(
+            post("/customer/{customerId}/grade", customerId)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+        .andDo(print())
+        .andExpect(status().isInternalServerError())
+        .andExpect(jsonPath("$.title").value("INTERNAL_SERVER_ERROR"))
+        .andExpect(jsonPath("$.code").value("COMMON_004"));
+  }
+
 }
