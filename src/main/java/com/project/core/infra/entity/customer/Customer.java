@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -51,6 +52,36 @@ public class Customer {
   @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
   private List<Subscription> subscriptionHistory = new ArrayList<>();
 
+  @Builder
+  private Customer(
+      String name,
+      String contactEnc,
+      String emailEnc,
+      Grade grade
+  ) {
+    if (name == null || name.isBlank()) {
+      throw new IllegalArgumentException("name은 필수입니다.");
+    }
+    if (contactEnc == null || contactEnc.isBlank()) {
+      throw new IllegalArgumentException("contactEnc는 필수입니다.");
+    }
+    if (emailEnc == null || emailEnc.isBlank()) {
+      throw new IllegalArgumentException("emailEnc는 필수입니다.");
+    }
+    if (grade == null) {
+      throw new IllegalArgumentException("grade는 필수입니다.");
+    }
+
+    this.name = name;
+    this.contactEnc = contactEnc;
+    this.emailEnc = emailEnc;
+    this.grade = grade;
+
+    this.createdAt = LocalDateTime.now();
+    this.isDeleted = false;
+    this.subscriptionHistory = new ArrayList<>();
+  }
+  
   public void changeEmailEnc(String emailEnc) {
     this.emailEnc = emailEnc;
   }

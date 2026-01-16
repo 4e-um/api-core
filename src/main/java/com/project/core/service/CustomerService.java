@@ -22,25 +22,27 @@ public class CustomerService {
   private final CustomerRepository customerRepository;
   private final AesUtil aesUtil;
 
-  @Transactional
-  public List<Customer> loadByContactEnc(String contactEnc) { // 유저 조회
-    List<Customer> customers = customerRepository.findByContactEnc(contactEnc);
-    if (customers.isEmpty()) {
-      throw new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND);
-    }
-    return customers;
+  @Transactional(readOnly = true)
+  public Customer loadByContactEnc(String contactEnc) {
+      return customerRepository.findByContactEnc(contactEnc)
+          .orElseThrow(() ->
+              new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND)
+          );
   }
 
+
   @Transactional
-  public ChangeEmailResponse changeEmailEnc(Long userId, ChangeEmailRequest request) { // 이메일 변경
+  public ChangeEmailResponse changeEmailEnc(Long customerId, ChangeEmailRequest request) { // 이메일 변경
     Customer customer =
         customerRepository
-            .findById(userId)
+            .findById(customerId)
             .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
 
     String emailEnc = aesUtil.encrypt(request.email());
     customer.changeEmailEnc(emailEnc);
-    return new ChangeEmailResponse(customer.getEmailEnc());
+    
+    String maskedEmail = maskEmail(request.email());
+    return new ChangeEmailResponse(maskedEmail);
   }
 
   @Transactional
@@ -52,5 +54,23 @@ public class CustomerService {
 
     customer.changeGrade(request.grade());
     return new ChangeGradeResponse(customer.getGrade());
+  }
+  
+  private String maskEmail(String email) {
+    if (email == null || !email.contains("@")) {
+      return null;
+    }
+    String[] parts = email.split("@", 2);
+    String local = parts[0];
+    String domain = parts[1];
+
+    if (local.isEmpty()) {
+      return "***@" + domain;
+    }
+    if (local.length() == 1) {
+      return local + "***@" + domain;
+    }
+    // 첫 글자만 남기고 나머지 마스킹
+    return local.charAt(0) + "***@" + domain;
   }
 }
