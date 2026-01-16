@@ -149,10 +149,6 @@ class DiscountControllerTest {
         .andExpect(jsonPath("$.newSdId").value(200));
   }
 
-  // =========================
-  // [추가/실패] POST /discounts/discount/add
-  // =========================
-
   @Test
   @DisplayName("[추가/실패] 할인 적용 생성 실패 - NOT_FOUND(404)")
   void addDiscount_notFound() throws Exception {
@@ -213,10 +209,6 @@ class DiscountControllerTest {
         .andExpect(jsonPath("$.title").value("INTERNAL_SERVER_ERROR"))
         .andExpect(jsonPath("$.code").value("COMMON_004"));
   }
-
-  // =========================
-  // [변경/실패] PATCH /discounts/discount/{sdId}
-  // =========================
 
   @Test
   @DisplayName("[변경/실패] 할인 변경 실패 - NOT_FOUND(404)")
