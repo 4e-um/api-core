@@ -1,7 +1,9 @@
 package com.project.core.util;
 
 import java.util.concurrent.ThreadLocalRandom;
+import lombok.experimental.UtilityClass;
 
+@UtilityClass
 public class PhoneUtil {
 
   // 010-XXXX-XXXX 형식의 랜덤 번호 생성

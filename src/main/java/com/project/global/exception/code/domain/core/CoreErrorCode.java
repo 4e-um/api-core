@@ -19,6 +19,12 @@ public enum CoreErrorCode implements BaseErrorCode {
 
   // 요금제
   PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "PLAN_001", "존재하지 않는 요금제입니다."),
+  PLAN_ALREADY_SUBSCRIBED(HttpStatus.BAD_REQUEST, "PLAN_002", "이미 가입된 요금제와 동일한 요금제로 변경할 수 없습니다."),
+
+  // 부가서비스
+  VAS_NOT_FOUND(HttpStatus.NOT_FOUND, "VAS_001", "존재하지 않는 부가서비스입니다."),
+  VAS_ALREADY_SUBSCRIBED(HttpStatus.BAD_REQUEST, "VAS_002", "이미 가입한 부가서비스입니다."),
+  VAS_ALREADY_TERMINATED(HttpStatus.BAD_REQUEST, "VAS_003", "이미 해지한 부가서비스입니다."),
 
   // 회선/가입
   SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "SUB_001", "존재하지 않는 회선입니다."),
