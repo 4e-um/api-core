@@ -1,5 +1,3 @@
 package com.project.core.controller.dto.request;
 
-public record PhoneSearchRequest(String contactEnc) {
-
-}
+public record PhoneSearchRequest(String contactEnc) {}

@@ -4,7 +4,6 @@ import com.project.core.infra.entity.discount.enums.Active;
 import com.project.core.infra.entity.discount.enums.Category;
 import com.project.core.infra.entity.discount.enums.DiscountType;
 import com.project.core.infra.entity.discount.enums.TargetScope;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -36,7 +35,6 @@ public class DiscountPolicy {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "discount_type", nullable = false, length = 10)
-
   private DiscountType discountType;
 
   @Column(name = "value", nullable = false)
@@ -55,6 +53,5 @@ public class DiscountPolicy {
   private Active active;
 
   @OneToMany(mappedBy = "discountPolicy")
-
   private List<SubscriptionDiscount> discountHistory = new ArrayList<>();
 }

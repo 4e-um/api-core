@@ -8,16 +8,13 @@ import com.project.core.controller.dto.response.ChangeGradeResponse;
 import com.project.core.controller.dto.response.CustomerResponse;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.service.CustomerService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 
 @RestController
 @RequestMapping("/customer")
@@ -30,16 +27,15 @@ public class CustomerController {
   @PostMapping("/search")
   public ResponseEntity<CustomerResponse> loadByContactEnc(
       @RequestBody PhoneSearchRequest request) {
-      Customer customer = customerService.loadByContactEnc(request.contactEnc());
+    Customer customer = customerService.loadByContactEnc(request.contactEnc());
 
-      return ResponseEntity.ok(CustomerResponse.from(customer));
+    return ResponseEntity.ok(CustomerResponse.from(customer));
   }
-
 
   /** 이메일 변경 */
   @PostMapping("/{customerId}/email")
   public ResponseEntity<ChangeEmailResponse> changeEmail(
-  		@PathVariable("customerId") Long customerId, @RequestBody ChangeEmailRequest request) {
+      @PathVariable("customerId") Long customerId, @RequestBody ChangeEmailRequest request) {
     ChangeEmailResponse response = customerService.changeEmailEnc(customerId, request);
     return ResponseEntity.ok(response);
   }
@@ -47,7 +43,7 @@ public class CustomerController {
   /** 고객 등급 변경 */
   @PostMapping("/{customerId}/grade")
   public ResponseEntity<ChangeGradeResponse> changeGrade(
-      @PathVariable(name="customerId") Long customerId, @RequestBody ChangeGradeRequest request) {
+      @PathVariable(name = "customerId") Long customerId, @RequestBody ChangeGradeRequest request) {
     ChangeGradeResponse response = customerService.changeUserGrade(customerId, request);
     return ResponseEntity.ok(response);
   }

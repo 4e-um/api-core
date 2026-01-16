@@ -34,8 +34,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.ReflectionUtils;
 
 @WebMvcTest(DiscountController.class)
 @Import(ExceptionAdvice.class)
@@ -150,6 +150,7 @@ class DiscountControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.newSdId").value(200));
   }
+
   // =========================
   // [추가/실패] POST /discounts/discount/add
   // =========================
@@ -166,7 +167,8 @@ class DiscountControllerTest {
         .thenThrow(new EntityNotFoundException(CoreErrorCode.DISCOUNT_NOT_FOUND));
 
     // when & then
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/discounts/discount/add")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -181,7 +183,8 @@ class DiscountControllerTest {
   @DisplayName("[추가/실패] 할인 적용 생성 실패 - 잘못된 JSON(400)")
   void addDiscount_badRequest_invalidJson() throws Exception {
     // when & then
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/discounts/discount/add")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -198,11 +201,11 @@ class DiscountControllerTest {
     request.setSubId(1L);
     request.setDiscountId(10L);
 
-    when(discountService.addDiscount(eq(1L), eq(10L)))
-        .thenThrow(new RuntimeException("boom"));
+    when(discountService.addDiscount(eq(1L), eq(10L))).thenThrow(new RuntimeException("boom"));
 
     // when & then
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/discounts/discount/add")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -230,7 +233,8 @@ class DiscountControllerTest {
         .thenThrow(new EntityNotFoundException(CoreErrorCode.DISCOUNT_NOT_FOUND));
 
     // when & then
-    mockMvc.perform(
+    mockMvc
+        .perform(
             patch("/discounts/discount/{sdId}", sdId)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -248,7 +252,8 @@ class DiscountControllerTest {
     Long sdId = 100L;
 
     // when & then
-    mockMvc.perform(
+    mockMvc
+        .perform(
             patch("/discounts/discount/{sdId}", sdId)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -266,11 +271,11 @@ class DiscountControllerTest {
     ChangeDiscountRequest request = new ChangeDiscountRequest();
     request.setDiscountId(20L);
 
-    when(discountService.changeDiscount(eq(20L), eq(sdId)))
-        .thenThrow(new RuntimeException("boom"));
+    when(discountService.changeDiscount(eq(20L), eq(sdId))).thenThrow(new RuntimeException("boom"));
 
     // when & then
-    mockMvc.perform(
+    mockMvc
+        .perform(
             patch("/discounts/discount/{sdId}", sdId)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)

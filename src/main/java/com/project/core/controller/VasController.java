@@ -24,21 +24,21 @@ public class VasController {
 
   @PostMapping("/{subId}/join")
   public ResponseEntity<VasJoinResponse> joinVas(
-      @PathVariable(name="subId") Long subId, @RequestBody VasJoinRequest request) {
+      @PathVariable(name = "subId") Long subId, @RequestBody VasJoinRequest request) {
     VasJoinResponse response = vasService.joinVas(subId, request.vasId());
     return ResponseEntity.ok(response);
   }
 
   @PostMapping("/{subId}/terminate")
   public ResponseEntity<VasTerminateResponse> terminateVas(
-  		@PathVariable(name="subId") Long subId, @RequestBody VasTerminateRequest request) {
+      @PathVariable(name = "subId") Long subId, @RequestBody VasTerminateRequest request) {
     VasTerminateResponse response = vasService.terminateVas(subId, request.vasId());
     return ResponseEntity.ok(response);
   }
 
   @PostMapping("/{subId}/bulk-terminate")
   public ResponseEntity<VasBulkTerminateResponse> terminateVasBulk(
-  		@PathVariable(name="subId") Long subId, @RequestBody VasBulkTerminateRequest request) {
+      @PathVariable(name = "subId") Long subId, @RequestBody VasBulkTerminateRequest request) {
     VasBulkTerminateResponse response = vasService.terminateVasBulk(subId, request.vasIds());
     return ResponseEntity.ok(response);
   }

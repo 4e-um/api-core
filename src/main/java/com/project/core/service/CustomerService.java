@@ -9,8 +9,6 @@ import com.project.core.infra.repository.customer.CustomerRepository;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
 import com.project.global.util.AesUtil;
-
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +22,10 @@ public class CustomerService {
 
   @Transactional(readOnly = true)
   public Customer loadByContactEnc(String contactEnc) {
-      return customerRepository.findByContactEnc(contactEnc)
-          .orElseThrow(() ->
-              new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND)
-          );
+    return customerRepository
+        .findByContactEnc(contactEnc)
+        .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
   }
-
 
   @Transactional
   public ChangeEmailResponse changeEmailEnc(Long customerId, ChangeEmailRequest request) { // 이메일 변경
@@ -40,7 +36,7 @@ public class CustomerService {
 
     String emailEnc = aesUtil.encrypt(request.email());
     customer.changeEmailEnc(emailEnc);
-    
+
     String maskedEmail = maskEmail(request.email());
     return new ChangeEmailResponse(maskedEmail);
   }
@@ -55,7 +51,7 @@ public class CustomerService {
     customer.changeGrade(request.grade());
     return new ChangeGradeResponse(customer.getGrade());
   }
-  
+
   private String maskEmail(String email) {
     if (email == null || !email.contains("@")) {
       return null;

@@ -53,12 +53,7 @@ public class Customer {
   private List<Subscription> subscriptionHistory = new ArrayList<>();
 
   @Builder
-  private Customer(
-      String name,
-      String contactEnc,
-      String emailEnc,
-      Grade grade
-  ) {
+  private Customer(String name, String contactEnc, String emailEnc, Grade grade) {
     if (name == null || name.isBlank()) {
       throw new IllegalArgumentException("name은 필수입니다.");
     }
@@ -81,7 +76,7 @@ public class Customer {
     this.isDeleted = false;
     this.subscriptionHistory = new ArrayList<>();
   }
-  
+
   public void changeEmailEnc(String emailEnc) {
     this.emailEnc = emailEnc;
   }

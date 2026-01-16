@@ -179,7 +179,7 @@ class CustomerControllerTest {
         .andDo(print())
         .andExpect(status().isNotFound());
   }
-  
+
   // =========================
   // [공통 실패] /customer/search
   // =========================
@@ -187,7 +187,8 @@ class CustomerControllerTest {
   @Test
   @DisplayName("[조회/실패] 전화번호 기반 유저 조회 실패 - 잘못된 JSON(400)")
   void loadByContactEncFail_invalidJson_badRequest() throws Exception {
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/customer/search")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -206,7 +207,8 @@ class CustomerControllerTest {
         .thenThrow(new RuntimeException("boom"));
 
     // when & then
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/customer/search")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -222,7 +224,6 @@ class CustomerControllerTest {
   // [공통 실패] /customer/{customerId}/email
   // =========================
 
-
   @Test
   @DisplayName("[변경/실패] 유저 이메일 변경 실패 - 잘못된 JSON(400)")
   void changeEmailFail_invalidJson_badRequest() throws Exception {
@@ -230,7 +231,8 @@ class CustomerControllerTest {
     Long customerId = 1L;
 
     // when & then
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/customer/{customerId}/email", customerId)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -250,7 +252,8 @@ class CustomerControllerTest {
         .thenThrow(new RuntimeException("boom"));
 
     // when & then
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/customer/{customerId}/email", customerId)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -272,7 +275,8 @@ class CustomerControllerTest {
     Long customerId = 1L;
 
     // when & then
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/customer/{customerId}/grade", customerId)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -292,7 +296,8 @@ class CustomerControllerTest {
         .thenThrow(new RuntimeException("boom"));
 
     // when & then
-    mockMvc.perform(
+    mockMvc
+        .perform(
             post("/customer/{customerId}/grade", customerId)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -302,5 +307,4 @@ class CustomerControllerTest {
         .andExpect(jsonPath("$.title").value("INTERNAL_SERVER_ERROR"))
         .andExpect(jsonPath("$.code").value("COMMON_004"));
   }
-
 }

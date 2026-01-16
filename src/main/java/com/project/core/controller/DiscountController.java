@@ -25,7 +25,7 @@ public class DiscountController {
   /** 회선(subId)에 적용된 할인 목록 조회 GET /discounts/subscriptions/{subId} */
   @GetMapping("/subscriptions/{subId}")
   public ResponseEntity<List<SubscriptionDiscountResponse>> getDiscountsBySubscription(
-      @PathVariable(name="subId") Long subId) {
+      @PathVariable(name = "subId") Long subId) {
     List<SubscriptionDiscount> discounts = discountService.loadRequiredBySubId(subId);
 
     List<SubscriptionDiscountResponse> response =
@@ -45,7 +45,7 @@ public class DiscountController {
   /** 기존 할인(sdId)을 종료하고, 새로운 할인 정책(discountId)로 변경 PATCH /discounts/{sdId} */
   @PatchMapping("/discount/{sdId}")
   public ResponseEntity<ChangeDiscountResponse> changeDiscount(
-      @PathVariable(name="sdId") Long sdId, @RequestBody ChangeDiscountRequest request) {
+      @PathVariable(name = "sdId") Long sdId, @RequestBody ChangeDiscountRequest request) {
     Long newSdId = discountService.changeDiscount(request.getDiscountId(), sdId);
     return ResponseEntity.ok(new ChangeDiscountResponse(newSdId));
   }
