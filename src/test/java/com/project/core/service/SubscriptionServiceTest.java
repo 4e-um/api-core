@@ -49,9 +49,7 @@ class SubscriptionServiceTest {
 
     // then
     assertThat(result).hasSize(2);
-    assertThat(result)
-        .extracting("subId")
-        .containsExactlyInAnyOrder(100L, 200L);
+    assertThat(result).extracting("subId").containsExactlyInAnyOrder(100L, 200L);
 
     verify(subscriptionRepository).findByCustomer_CustomerId(eq(customerId));
   }
@@ -62,8 +60,7 @@ class SubscriptionServiceTest {
     // given
     Long customerId = 999L;
 
-    given(subscriptionRepository.findByCustomer_CustomerId(eq(customerId)))
-        .willReturn(List.of());
+    given(subscriptionRepository.findByCustomer_CustomerId(eq(customerId))).willReturn(List.of());
 
     // when & then
     assertThatThrownBy(() -> subscriptionService.findSubscription(customerId))
@@ -80,8 +77,7 @@ class SubscriptionServiceTest {
 
   private static Subscription newInstanceSubscription(Long subId) {
     // Subscription @Builder(Customer customer, String phoneNumber, Clock clock) 시그니처 기준
-    Clock fixedClock =
-        Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneId.of("Asia/Seoul"));
+    Clock fixedClock = Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneId.of("Asia/Seoul"));
 
     Customer customer = org.mockito.Mockito.mock(Customer.class);
 

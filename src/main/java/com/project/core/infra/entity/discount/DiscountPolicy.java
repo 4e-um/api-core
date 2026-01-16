@@ -55,7 +55,7 @@ public class DiscountPolicy {
 
   @OneToMany(mappedBy = "discountPolicy")
   private List<SubscriptionDiscount> discountHistory = new ArrayList<>();
-  
+
   @Builder
   private DiscountPolicy(
       String name,

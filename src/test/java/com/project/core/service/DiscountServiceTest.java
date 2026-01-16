@@ -55,14 +55,15 @@ class DiscountServiceTest {
 
     DiscountPolicy policy = newInstanceDiscountPolicy(10L);
 
-    SubscriptionDiscount sd = SubscriptionDiscount.builder()
-        .subscription(subscription)
-        .discountPolicy(policy)
-        .discountType(policy.getDiscountType())
-        .value(policy.getValue())
-        .targetScope(policy.getTargetScope())
-        .startDate(java.time.LocalDateTime.of(2026, 1, 1, 0, 0))
-        .build();
+    SubscriptionDiscount sd =
+        SubscriptionDiscount.builder()
+            .subscription(subscription)
+            .discountPolicy(policy)
+            .discountType(policy.getDiscountType())
+            .value(policy.getValue())
+            .targetScope(policy.getTargetScope())
+            .startDate(java.time.LocalDateTime.of(2026, 1, 1, 0, 0))
+            .build();
     ReflectionTestUtils.setField(sd, "sdId", 100L);
 
     given(subscriptionDiscountRepository.findBySubscription_SubId(eq(subId)))
@@ -111,11 +112,12 @@ class DiscountServiceTest {
     given(discountPolicyRepository.findById(eq(discountId))).willReturn(Optional.of(policy));
 
     given(subscriptionDiscountRepository.save(any(SubscriptionDiscount.class)))
-        .willAnswer(invocation -> {
-          SubscriptionDiscount arg = invocation.getArgument(0);
-          ReflectionTestUtils.setField(arg, "sdId", 100L);
-          return arg;
-        });
+        .willAnswer(
+            invocation -> {
+              SubscriptionDiscount arg = invocation.getArgument(0);
+              ReflectionTestUtils.setField(arg, "sdId", 100L);
+              return arg;
+            });
 
     // when
     Long sdId = discountService.addDiscount(subId, discountId);
@@ -182,14 +184,15 @@ class DiscountServiceTest {
 
     // 기존 할인
     DiscountPolicy oldPolicy = newInstanceDiscountPolicy(10L);
-    SubscriptionDiscount existing = SubscriptionDiscount.builder()
-        .subscription(subscription)
-        .discountPolicy(oldPolicy)
-        .discountType(oldPolicy.getDiscountType())
-        .value(oldPolicy.getValue())
-        .targetScope(oldPolicy.getTargetScope())
-        .startDate(java.time.LocalDateTime.of(2026, 1, 1, 0, 0))
-        .build();
+    SubscriptionDiscount existing =
+        SubscriptionDiscount.builder()
+            .subscription(subscription)
+            .discountPolicy(oldPolicy)
+            .discountType(oldPolicy.getDiscountType())
+            .value(oldPolicy.getValue())
+            .targetScope(oldPolicy.getTargetScope())
+            .startDate(java.time.LocalDateTime.of(2026, 1, 1, 0, 0))
+            .build();
     ReflectionTestUtils.setField(existing, "sdId", sdId);
 
     given(subscriptionDiscountRepository.findBySdId(eq(sdId))).willReturn(Optional.of(existing));
@@ -201,11 +204,12 @@ class DiscountServiceTest {
 
     // 신규 저장되는 할인 sdId 세팅
     given(subscriptionDiscountRepository.save(any(SubscriptionDiscount.class)))
-        .willAnswer(invocation -> {
-          SubscriptionDiscount arg = invocation.getArgument(0);
-          ReflectionTestUtils.setField(arg, "sdId", 200L);
-          return arg;
-        });
+        .willAnswer(
+            invocation -> {
+              SubscriptionDiscount arg = invocation.getArgument(0);
+              ReflectionTestUtils.setField(arg, "sdId", 200L);
+              return arg;
+            });
 
     // when
     Long newSdId = discountService.changeDiscount(newDiscountId, sdId);
@@ -246,24 +250,25 @@ class DiscountServiceTest {
   void changeDiscountFailNewPolicyNotFound() {
     // given
     Long sdId = 100L;
-    Long newDiscountId = 999L;
     Long subId = 1L;
 
     Subscription subscription = newInstanceSubscription(subId);
 
     DiscountPolicy oldPolicy = newInstanceDiscountPolicy(10L);
-    SubscriptionDiscount existing = SubscriptionDiscount.builder()
-        .subscription(subscription)
-        .discountPolicy(oldPolicy)
-        .discountType(oldPolicy.getDiscountType())
-        .value(oldPolicy.getValue())
-        .targetScope(oldPolicy.getTargetScope())
-        .startDate(java.time.LocalDateTime.of(2026, 1, 1, 0, 0))
-        .build();
+    SubscriptionDiscount existing =
+        SubscriptionDiscount.builder()
+            .subscription(subscription)
+            .discountPolicy(oldPolicy)
+            .discountType(oldPolicy.getDiscountType())
+            .value(oldPolicy.getValue())
+            .targetScope(oldPolicy.getTargetScope())
+            .startDate(java.time.LocalDateTime.of(2026, 1, 1, 0, 0))
+            .build();
     ReflectionTestUtils.setField(existing, "sdId", sdId);
 
     given(subscriptionDiscountRepository.findBySdId(eq(sdId))).willReturn(Optional.of(existing));
 
+    Long newDiscountId = 999L;
     // addDiscount 내부 조회
     given(subscriptionRepository.findById(eq(subId))).willReturn(Optional.of(subscription));
     given(discountPolicyRepository.findById(eq(newDiscountId))).willReturn(Optional.empty());
@@ -284,20 +289,20 @@ class DiscountServiceTest {
   void changeDiscountFailSubscriptionNotFoundDuringAdd() {
     // given
     Long sdId = 100L;
-    Long newDiscountId = 20L;
     Long subId = 1L;
 
     Subscription subscription = newInstanceSubscription(subId);
 
     DiscountPolicy oldPolicy = newInstanceDiscountPolicy(10L);
-    SubscriptionDiscount existing = SubscriptionDiscount.builder()
-        .subscription(subscription)
-        .discountPolicy(oldPolicy)
-        .discountType(oldPolicy.getDiscountType())
-        .value(oldPolicy.getValue())
-        .targetScope(oldPolicy.getTargetScope())
-        .startDate(java.time.LocalDateTime.of(2026, 1, 1, 0, 0))
-        .build();
+    SubscriptionDiscount existing =
+        SubscriptionDiscount.builder()
+            .subscription(subscription)
+            .discountPolicy(oldPolicy)
+            .discountType(oldPolicy.getDiscountType())
+            .value(oldPolicy.getValue())
+            .targetScope(oldPolicy.getTargetScope())
+            .startDate(java.time.LocalDateTime.of(2026, 1, 1, 0, 0))
+            .build();
     ReflectionTestUtils.setField(existing, "sdId", sdId);
 
     given(subscriptionDiscountRepository.findBySdId(eq(sdId))).willReturn(Optional.of(existing));
@@ -305,6 +310,7 @@ class DiscountServiceTest {
     // addDiscount 내부에서 subscription 조회 실패
     given(subscriptionRepository.findById(eq(subId))).willReturn(Optional.empty());
 
+    Long newDiscountId = 20L;
     // when & then
     assertThatThrownBy(() -> discountService.changeDiscount(newDiscountId, sdId))
         .isInstanceOf(EntityNotFoundException.class)
@@ -320,10 +326,9 @@ class DiscountServiceTest {
   // =========================
 
   private static Subscription newInstanceSubscription(Long subId) {
-    Clock fixedClock = Clock.fixed(
-        java.time.Instant.parse("2026-01-01T00:00:00Z"),
-        java.time.ZoneId.of("Asia/Seoul")
-    );
+    Clock fixedClock =
+        Clock.fixed(
+            java.time.Instant.parse("2026-01-01T00:00:00Z"), java.time.ZoneId.of("Asia/Seoul"));
 
     Customer customer = org.mockito.Mockito.mock(Customer.class);
 
@@ -339,8 +344,6 @@ class DiscountServiceTest {
     return subscription;
   }
 
-
-
   private static DiscountPolicy newInstanceDiscountPolicy(Long discountId) {
     DiscountPolicy policy =
         DiscountPolicy.builder()
@@ -355,5 +358,4 @@ class DiscountServiceTest {
     ReflectionTestUtils.setField(policy, "discountId", discountId);
     return policy;
   }
-
 }

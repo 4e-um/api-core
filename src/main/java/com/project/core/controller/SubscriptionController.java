@@ -18,14 +18,12 @@ public class SubscriptionController {
   private final SubscriptionService subscriptionService;
 
   /**
-   * 유저(customerId)의 회선 목록 조회
-   * - 성공: 200 + List
-   * - 없음: EntityNotFoundException -> ExceptionAdvice에서 404 등으로 변환
+   * 유저(customerId)의 회선 목록 조회 - 성공: 200 + List - 없음: EntityNotFoundException -> ExceptionAdvice에서
+   * 404 등으로 변환
    */
   @GetMapping("/customers/{customerId}")
   public ResponseEntity<List<Subscription>> getSubscriptionsByCustomer(
-      @PathVariable(name = "customerId") Long customerId
-  ) {
+      @PathVariable(name = "customerId") Long customerId) {
     List<Subscription> subscriptions = subscriptionService.findSubscription(customerId);
     return ResponseEntity.ok(subscriptions);
   }

@@ -78,8 +78,7 @@ class SubscriptionControllerTest {
   // =========================
 
   private static Subscription newInstanceSubscription(Long subId) {
-    Clock fixedClock =
-        Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneId.of("Asia/Seoul"));
+    Clock fixedClock = Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneId.of("Asia/Seoul"));
 
     Customer customer = Mockito.mock(Customer.class);
 

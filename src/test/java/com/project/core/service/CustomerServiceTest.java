@@ -34,10 +34,6 @@ class CustomerServiceTest {
   @Mock private CustomerRepository customerRepository;
   @Mock private AesUtil aesUtil;
 
-  // =========================
-  // loadByContactEnc
-  // =========================
-
   @Test
   @DisplayName("[조회] 성공 - 전화번호 기반 유저 조회")
   void loadByContactEncSuccess() {
@@ -79,17 +75,12 @@ class CustomerServiceTest {
     verify(customerRepository).findByContactEnc(eq("encrypted-phone"));
   }
 
-  // =========================
-  // changeEmailEnc
-  // =========================
-
   @Test
   @DisplayName("[변경] 성공 - 이메일 변경(암호화 저장 + 마스킹 응답)")
   void changeEmailEncSuccess() {
     // given
     Long customerId = 1L;
     String plainEmail = "example@example.com";
-    ChangeEmailRequest request = new ChangeEmailRequest(plainEmail);
 
     Customer customer =
         Customer.builder()
@@ -103,6 +94,7 @@ class CustomerServiceTest {
     given(customerRepository.findById(eq(customerId))).willReturn(Optional.of(customer));
     given(aesUtil.encrypt(eq(plainEmail))).willReturn("new-email-enc");
 
+    ChangeEmailRequest request = new ChangeEmailRequest(plainEmail);
     // when
     ChangeEmailResponse response = customerService.changeEmailEnc(customerId, request);
 
@@ -141,7 +133,6 @@ class CustomerServiceTest {
     // given
     Long customerId = 1L;
     String email = "a@domain.com";
-    ChangeEmailRequest request = new ChangeEmailRequest(email);
 
     Customer customer =
         Customer.builder()
@@ -155,6 +146,7 @@ class CustomerServiceTest {
     given(customerRepository.findById(eq(customerId))).willReturn(Optional.of(customer));
     given(aesUtil.encrypt(eq(email))).willReturn("enc");
 
+    ChangeEmailRequest request = new ChangeEmailRequest(email);
     // when
     ChangeEmailResponse response = customerService.changeEmailEnc(customerId, request);
 
@@ -168,7 +160,6 @@ class CustomerServiceTest {
     // given
     Long customerId = 1L;
     String email = "@domain.com";
-    ChangeEmailRequest request = new ChangeEmailRequest(email);
 
     Customer customer =
         Customer.builder()
@@ -182,6 +173,7 @@ class CustomerServiceTest {
     given(customerRepository.findById(eq(customerId))).willReturn(Optional.of(customer));
     given(aesUtil.encrypt(eq(email))).willReturn("enc");
 
+    ChangeEmailRequest request = new ChangeEmailRequest(email);
     // when
     ChangeEmailResponse response = customerService.changeEmailEnc(customerId, request);
 
@@ -195,7 +187,6 @@ class CustomerServiceTest {
     // given
     Long customerId = 1L;
     String email = "not-an-email";
-    ChangeEmailRequest request = new ChangeEmailRequest(email);
 
     Customer customer =
         Customer.builder()
@@ -209,6 +200,7 @@ class CustomerServiceTest {
     given(customerRepository.findById(eq(customerId))).willReturn(Optional.of(customer));
     given(aesUtil.encrypt(eq(email))).willReturn("enc");
 
+    ChangeEmailRequest request = new ChangeEmailRequest(email);
     // when
     ChangeEmailResponse response = customerService.changeEmailEnc(customerId, request);
 
@@ -216,16 +208,11 @@ class CustomerServiceTest {
     assertThat(response.maskedEmail()).isNull();
   }
 
-  // =========================
-  // changeUserGrade
-  // =========================
-
   @Test
   @DisplayName("[변경] 성공 - 고객 등급 변경")
   void changeUserGradeSuccess() {
     // given
     Long customerId = 1L;
-    ChangeGradeRequest request = new ChangeGradeRequest(Grade.GENERAL);
 
     Customer customer =
         Customer.builder()
@@ -238,6 +225,7 @@ class CustomerServiceTest {
 
     given(customerRepository.findById(eq(customerId))).willReturn(Optional.of(customer));
 
+    ChangeGradeRequest request = new ChangeGradeRequest(Grade.GENERAL);
     // when
     ChangeGradeResponse response = customerService.changeUserGrade(customerId, request);
 
