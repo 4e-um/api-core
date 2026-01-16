@@ -22,22 +22,42 @@ public class DiscountService {
   private final SubscriptionRepository subscriptionRepository;
   private final DiscountPolicyRepository discountPolicyRepository;
 
-  @Transactional(readOnly = true) // 회선에 적용 된 할인 정책 확인
+  @Transactional(readOnly = true)
   public List<SubscriptionDiscount> loadRequiredBySubId(Long subId) {
-
     List<SubscriptionDiscount> discounts =
         subscriptionDiscountRepository.findBySubscription_SubId(subId);
 
     if (discounts.isEmpty()) {
       throw new EntityNotFoundException(CoreErrorCode.DISCOUNT_NOT_FOUND);
     }
-
     return discounts;
   }
 
-  @Transactional
+  // 트랜잭션 애노테이션 제거 (또는 유지해도 되지만, 내부호출 문제를 없애려면 경계 통일이 깔끔)
   public Long addDiscount(Long subId, Long discountId) {
+    SubscriptionDiscount discount = createSubscriptionDiscount(subId, discountId);
+    subscriptionDiscountRepository.save(discount);
+    return discount.getSdId();
+  }
 
+  @Transactional
+  public Long changeDiscount(Long discountId, Long sdId) {
+    SubscriptionDiscount old =
+        subscriptionDiscountRepository
+            .findBySdId(sdId)
+            .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.DISCOUNT_NOT_FOUND));
+
+    old.setEndDate(LocalDateTime.now());
+    old.setStatusTerminated();
+
+    SubscriptionDiscount created =
+        createSubscriptionDiscount(old.getSubscription().getSubId(), discountId);
+
+    subscriptionDiscountRepository.save(created);
+    return created.getSdId();
+  }
+
+  private SubscriptionDiscount createSubscriptionDiscount(Long subId, Long discountId) {
     Subscription subscription =
         subscriptionRepository
             .findById(subId)
@@ -49,38 +69,13 @@ public class DiscountService {
             .orElseThrow(
                 () -> new EntityNotFoundException(CoreErrorCode.DISCOUNT_POLICY_NOT_FOUND));
 
-    SubscriptionDiscount discount =
-        SubscriptionDiscount.builder()
-            .discountPolicy(policy)
-            .subscription(subscription)
-            .discountType(policy.getDiscountType())
-            .value(policy.getValue())
-            .targetScope(policy.getTargetScope())
-            .startDate(LocalDateTime.now())
-            .build();
-
-    subscriptionDiscountRepository.save(discount);
-
-    return discount.getSdId();
-  }
-
-  /**
-   * 기존 할인을 종료하고 새로운 할인으로 교체합니다.
-   *
-   * @param discountId 새로 적용할 할인 정책 ID
-   * @param sdId 종료할 기존 구독 할인 ID
-   * @return 새로 생성된 구독 할인 ID
-   */
-  @Transactional
-  public Long changeDiscount(Long discountId, Long sdId) {
-    SubscriptionDiscount discount =
-        subscriptionDiscountRepository
-            .findBySdId(sdId)
-            .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.DISCOUNT_NOT_FOUND));
-    // 내부 정보 수정 - 기존 할인 종료
-    discount.setEndDate(LocalDateTime.now());
-    discount.setStatusTerminated();
-    // 새로운 할인 적용
-    return addDiscount(discount.getSubscription().getSubId(), discountId); // 생성된 할인 테이블 아이디 반환
+    return SubscriptionDiscount.builder()
+        .discountPolicy(policy)
+        .subscription(subscription)
+        .discountType(policy.getDiscountType())
+        .value(policy.getValue())
+        .targetScope(policy.getTargetScope())
+        .startDate(LocalDateTime.now())
+        .build();
   }
 }

@@ -2,52 +2,49 @@ package com.project.core.controller;
 
 import com.project.core.controller.dto.request.ChangeEmailRequest;
 import com.project.core.controller.dto.request.ChangeGradeRequest;
+import com.project.core.controller.dto.request.PhoneSearchRequest;
 import com.project.core.controller.dto.response.ChangeEmailResponse;
 import com.project.core.controller.dto.response.ChangeGradeResponse;
 import com.project.core.controller.dto.response.CustomerResponse;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.service.CustomerService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/customer")
 @RequiredArgsConstructor
 public class CustomerController {
 
   private final CustomerService customerService;
 
   /** 고객 조회 (전화번호 기준) */
-  @GetMapping
-  public ResponseEntity<List<CustomerResponse>> loadByContactEnc(@RequestParam String contactEnc) {
-    List<Customer> customers = customerService.loadByContactEnc(contactEnc);
+  @PostMapping("/search")
+  public ResponseEntity<CustomerResponse> loadByContactEnc(
+      @RequestBody PhoneSearchRequest request) {
+    Customer customer = customerService.loadByContactEnc(request.contactEnc());
 
-    List<CustomerResponse> response = customers.stream().map(CustomerResponse::from).toList();
-
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(CustomerResponse.from(customer));
   }
 
   /** 이메일 변경 */
-  @PostMapping("/{userId}/email")
+  @PostMapping("/{customerId}/email")
   public ResponseEntity<ChangeEmailResponse> changeEmail(
-      @PathVariable Long userId, @RequestBody ChangeEmailRequest request) {
-    ChangeEmailResponse response = customerService.changeEmailEnc(userId, request);
+      @PathVariable("customerId") Long customerId, @RequestBody ChangeEmailRequest request) {
+    ChangeEmailResponse response = customerService.changeEmailEnc(customerId, request);
     return ResponseEntity.ok(response);
   }
 
   /** 고객 등급 변경 */
-  @PostMapping("/{userId}/grade")
+  @PostMapping("/{customerId}/grade")
   public ResponseEntity<ChangeGradeResponse> changeGrade(
-      @PathVariable Long userId, @RequestBody ChangeGradeRequest request) {
-    ChangeGradeResponse response = customerService.changeUserGrade(userId, request);
+      @PathVariable(name = "customerId") Long customerId, @RequestBody ChangeGradeRequest request) {
+    ChangeGradeResponse response = customerService.changeUserGrade(customerId, request);
     return ResponseEntity.ok(response);
   }
 }

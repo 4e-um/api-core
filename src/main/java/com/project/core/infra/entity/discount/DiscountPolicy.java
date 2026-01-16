@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -54,4 +55,39 @@ public class DiscountPolicy {
 
   @OneToMany(mappedBy = "discountPolicy")
   private List<SubscriptionDiscount> discountHistory = new ArrayList<>();
+
+  @Builder
+  private DiscountPolicy(
+      String name,
+      DiscountType discountType,
+      BigDecimal value,
+      Category category,
+      TargetScope targetScope,
+      Active active) {
+    if (name == null || name.isBlank()) {
+      throw new IllegalArgumentException("DiscountPolicy.name must not be null or blank");
+    }
+    if (discountType == null) {
+      throw new IllegalArgumentException("DiscountPolicy.discountType must not be null");
+    }
+    if (value == null) {
+      throw new IllegalArgumentException("DiscountPolicy.value must not be null");
+    }
+    if (category == null) {
+      throw new IllegalArgumentException("DiscountPolicy.category must not be null");
+    }
+    if (targetScope == null) {
+      throw new IllegalArgumentException("DiscountPolicy.targetScope must not be null");
+    }
+    if (active == null) {
+      throw new IllegalArgumentException("DiscountPolicy.active must not be null");
+    }
+
+    this.name = name;
+    this.discountType = discountType;
+    this.value = value;
+    this.category = category;
+    this.targetScope = targetScope;
+    this.active = active;
+  }
 }

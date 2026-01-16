@@ -29,7 +29,8 @@ public class MicroPaymentController {
 
   @PostMapping("/{microId}/cancel")
   public ResponseEntity<MicroPaymentResponse> cancel(
-      @PathVariable Long microId, @Valid @RequestBody MicroPaymentCancelRequest request) {
+      @PathVariable(name = "microId") Long microId,
+      @Valid @RequestBody MicroPaymentCancelRequest request) {
     MicroPaymentResponse response = microPaymentService.cancel(microId, request.subId());
     return ResponseEntity.ok(response);
   }

@@ -17,8 +17,9 @@ public class SubscriptionService {
   private final SubscriptionRepository subscriptionRepository;
   private final AesUtil aesUtil;
 
-  @Transactional
+  @Transactional(readOnly = true)
   public List<Subscription> findSubscription(Long customerId) {
+
     List<Subscription> subscriptions = subscriptionRepository.findByCustomer_CustomerId(customerId);
 
     if (subscriptions.isEmpty()) {
