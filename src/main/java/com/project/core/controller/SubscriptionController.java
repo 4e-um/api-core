@@ -1,5 +1,6 @@
 package com.project.core.controller;
 
+import com.project.core.controller.dto.response.SubscriptionResponse;
 import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.service.SubscriptionService;
 import java.util.List;
@@ -22,9 +23,15 @@ public class SubscriptionController {
    * 404 등으로 변환
    */
   @GetMapping("/customers/{customerId}")
-  public ResponseEntity<List<Subscription>> getSubscriptionsByCustomer(
-      @PathVariable(name = "customerId") Long customerId) {
-    List<Subscription> subscriptions = subscriptionService.findSubscription(customerId);
-    return ResponseEntity.ok(subscriptions);
+  public ResponseEntity<List<SubscriptionResponse>> getSubscriptionsByCustomer(
+      @PathVariable Long customerId
+  ) {
+    List<SubscriptionResponse> responses =
+        subscriptionService.findSubscription(customerId).stream()
+            .map(SubscriptionResponse::from)
+            .toList();
+
+    return ResponseEntity.ok(responses);
   }
+
 }
