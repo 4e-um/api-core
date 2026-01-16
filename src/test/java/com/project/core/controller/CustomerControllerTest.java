@@ -71,7 +71,7 @@ class CustomerControllerTest {
 
   @Test
   @DisplayName("[조회/실패] 전화번호 기반 유저 조회 실패 - 고객 없음")
-  void loadByContactEncFail_notFound() throws Exception {
+  void loadByContactEncFailNotFound() throws Exception {
     // given
     PhoneSearchRequest request = new PhoneSearchRequest("encrypted-phone");
 
@@ -116,7 +116,7 @@ class CustomerControllerTest {
 
   @Test
   @DisplayName("[변경/실패] 존재하지 않는 유저 이메일 변경 실패")
-  void changeEmailFail_notFound() throws Exception {
+  void changeEmailFailNotFound() throws Exception {
     // given
     Long customerId = 999L;
     ChangeEmailRequest request = new ChangeEmailRequest("example@example.com");
@@ -161,7 +161,7 @@ class CustomerControllerTest {
 
   @Test
   @DisplayName("[변경/실패] 존재하지 않는 고객 등급 변경 실패")
-  void changeGradeFail_notFound() throws Exception {
+  void changeGradeFailNotFound() throws Exception {
     // given
     Long customerId = 999L;
     ChangeGradeRequest request = new ChangeGradeRequest(Grade.GENERAL);
@@ -186,7 +186,7 @@ class CustomerControllerTest {
 
   @Test
   @DisplayName("[조회/실패] 전화번호 기반 유저 조회 실패 - 잘못된 JSON(400)")
-  void loadByContactEncFail_invalidJson_badRequest() throws Exception {
+  void loadByContactEncFailInvalidJsonBadRequest() throws Exception {
     mockMvc
         .perform(
             post("/customer/search")
@@ -199,7 +199,7 @@ class CustomerControllerTest {
 
   @Test
   @DisplayName("[조회/실패] 전화번호 기반 유저 조회 실패 - 서버 예외(500)")
-  void loadByContactEncFail_internalServerError() throws Exception {
+  void loadByContactEncFailInternalServerError() throws Exception {
     // given
     PhoneSearchRequest request = new PhoneSearchRequest("encrypted-phone");
 
