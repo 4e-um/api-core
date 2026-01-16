@@ -24,7 +24,7 @@ public class SubscriptionController {
    */
   @GetMapping("/customers/{customerId}")
   public ResponseEntity<List<SubscriptionResponse>> getSubscriptionsByCustomer(
-      @PathVariable Long customerId
+      @PathVariable(name="customerId") Long customerId
   ) {
     List<SubscriptionResponse> responses =
         subscriptionService.findSubscription(customerId).stream()

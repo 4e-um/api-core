@@ -3,20 +3,31 @@ package com.project.core.controller.dto.response;
 public final class MaskingUtil {
   private MaskingUtil() {}
 
-  // 예: 01012345678 -> 010****5678 (길이에 따라 유연하게)
+  // 마스킹 010-**12-**12의 형식
   public static String maskPhone(String phone) {
     if (phone == null || phone.isBlank()) return phone;
+
+    // 숫자만 추출
     String digits = phone.replaceAll("\\D", "");
-    if (digits.length() < 7) return "***"; // 너무 짧으면 안전하게
 
-    int prefix = Math.min(3, digits.length());
-    int suffix = 4;
-    if (digits.length() <= prefix + suffix) return "***";
+    // 휴대폰 번호 길이 최소 검증 (010XXXXXXXX 기준)
+    if (digits.length() != 11) {
+      return "***";
+    }
 
-    String start = digits.substring(0, prefix);
-    String end = digits.substring(digits.length() - suffix);
-    return start + "****" + end;
+    String first = digits.substring(0, 3);
+    String middle = digits.substring(3, 7);
+    String last = digits.substring(7, 11);
+
+    // 010-**34-**12
+    return String.format(
+        "%s-**%s-**%s",
+        first,
+        middle.substring(2),
+        last.substring(2)
+    );
   }
+
 
   // 이메일 마스킹도 필요하면 함께 (예: e***@example.com)
   public static String maskEmail(String email) {

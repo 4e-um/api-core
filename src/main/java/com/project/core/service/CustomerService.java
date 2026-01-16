@@ -4,6 +4,7 @@ import com.project.core.controller.dto.request.ChangeEmailRequest;
 import com.project.core.controller.dto.request.ChangeGradeRequest;
 import com.project.core.controller.dto.response.ChangeEmailResponse;
 import com.project.core.controller.dto.response.ChangeGradeResponse;
+import com.project.core.controller.dto.response.MaskingUtil;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.repository.customer.CustomerRepository;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
@@ -37,7 +38,7 @@ public class CustomerService {
     String emailEnc = aesUtil.encrypt(request.email());
     customer.changeEmailEnc(emailEnc);
 
-    String maskedEmail = maskEmail(request.email());
+    String maskedEmail = MaskingUtil.maskPhone(request.email());
     return new ChangeEmailResponse(maskedEmail);
   }
 
@@ -50,23 +51,5 @@ public class CustomerService {
 
     customer.changeGrade(request.grade());
     return new ChangeGradeResponse(customer.getGrade());
-  }
-
-  private String maskEmail(String email) {
-    if (email == null || !email.contains("@")) {
-      return null;
-    }
-    String[] parts = email.split("@", 2);
-    String local = parts[0];
-    String domain = parts[1];
-
-    if (local.isEmpty()) {
-      return "***@" + domain;
-    }
-    if (local.length() == 1) {
-      return local + "***@" + domain;
-    }
-    // 첫 글자만 남기고 나머지 마스킹
-    return local.charAt(0) + "***@" + domain;
   }
 }
