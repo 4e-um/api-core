@@ -38,7 +38,7 @@ public class CustomerService {
     String emailEnc = aesUtil.encrypt(request.email());
     customer.changeEmailEnc(emailEnc);
 
-    String maskedEmail = MaskingUtil.maskPhone(request.email());
+    String maskedEmail = MaskingUtil.maskEmail(request.email());
     return new ChangeEmailResponse(maskedEmail);
   }
 

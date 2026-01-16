@@ -1,7 +1,6 @@
 package com.project.core.controller;
 
 import com.project.core.controller.dto.response.SubscriptionResponse;
-import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.service.SubscriptionService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +23,7 @@ public class SubscriptionController {
    */
   @GetMapping("/customers/{customerId}")
   public ResponseEntity<List<SubscriptionResponse>> getSubscriptionsByCustomer(
-      @PathVariable(name="customerId") Long customerId
-  ) {
+      @PathVariable(name = "customerId") Long customerId) {
     List<SubscriptionResponse> responses =
         subscriptionService.findSubscription(customerId).stream()
             .map(SubscriptionResponse::from)
@@ -33,5 +31,4 @@ public class SubscriptionController {
 
     return ResponseEntity.ok(responses);
   }
-
 }

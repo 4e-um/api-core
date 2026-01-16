@@ -5,7 +5,9 @@ public final class MaskingUtil {
 
   // 마스킹 010-**12-**12의 형식
   public static String maskPhone(String phone) {
-    if (phone == null || phone.isBlank()) return phone;
+    if (phone == null || phone.isBlank()) {
+      return phone;
+    }
 
     // 숫자만 추출
     String digits = phone.replaceAll("\\D", "");
@@ -20,24 +22,28 @@ public final class MaskingUtil {
     String last = digits.substring(7, 11);
 
     // 010-**34-**12
-    return String.format(
-        "%s-**%s-**%s",
-        first,
-        middle.substring(2),
-        last.substring(2)
-    );
+    return String.format("%s-**%s-**%s", first, middle.substring(2), last.substring(2));
   }
 
-
-  // 이메일 마스킹도 필요하면 함께 (예: e***@example.com)
   public static String maskEmail(String email) {
-    if (email == null || email.isBlank()) return email;
+    if (email == null || email.isBlank()) {
+      return email;
+    }
+
     int at = email.indexOf('@');
-    if (at <= 0) return null; // 기존 테스트처럼 '@' 없으면 null 처리
+    if (at < 0) {
+      return null;
+    } // @ 없으면 null
 
     String local = email.substring(0, at);
-    String domain = email.substring(at);
-    if (local.length() == 1) return local + "***" + domain;
+    String domain = email.substring(at); // "@domain.com"
+
+    // local 비어있으면 "***@domain.com"
+    if (local.isEmpty()) {
+      return "***" + domain;
+    }
+
+    // local 1글자 이상이면 "첫 글자 + *** + @domain.com"
     return local.substring(0, 1) + "***" + domain;
   }
 }

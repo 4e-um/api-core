@@ -63,8 +63,7 @@ public class DiscountPolicy {
       BigDecimal value,
       Category category,
       TargetScope targetScope,
-      Active active
-  ) {
+      Active active) {
     if (name == null || name.isBlank()) {
       throw new IllegalArgumentException("DiscountPolicy.name must not be null or blank");
     }
@@ -91,5 +90,4 @@ public class DiscountPolicy {
     this.targetScope = targetScope;
     this.active = active;
   }
-
 }

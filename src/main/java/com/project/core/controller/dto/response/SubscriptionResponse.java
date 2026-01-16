@@ -10,8 +10,7 @@ public record SubscriptionResponse(
     LocalDateTime startDate,
     LocalDateTime endDate,
     SubscriptionStatus status,
-    Integer sendDay
-) {
+    Integer sendDay) {
   public static SubscriptionResponse from(Subscription s) {
     return new SubscriptionResponse(
         s.getSubId(),
@@ -19,7 +18,6 @@ public record SubscriptionResponse(
         s.getStartDate(),
         s.getEndDate(),
         s.getStatus(),
-        s.getSendDay()
-    );
+        s.getSendDay());
   }
 }
