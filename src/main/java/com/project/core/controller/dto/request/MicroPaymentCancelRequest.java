@@ -1,3 +1,5 @@
 package com.project.core.controller.dto.request;
 
-public record MicroPaymentCancelRequest(Long subId) {}
+import jakarta.validation.constraints.NotNull;
+
+public record MicroPaymentCancelRequest(@NotNull Long subId) {}

@@ -4,6 +4,7 @@ import com.project.core.controller.dto.request.MicroPaymentCancelRequest;
 import com.project.core.controller.dto.request.MicroPaymentRequest;
 import com.project.core.controller.dto.response.MicroPaymentResponse;
 import com.project.core.service.MicroPaymentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +21,7 @@ public class MicroPaymentController {
   private final MicroPaymentService microPaymentService;
 
   @PostMapping("/pay")
-  public ResponseEntity<MicroPaymentResponse> pay(@RequestBody MicroPaymentRequest request) {
+  public ResponseEntity<MicroPaymentResponse> pay(@Valid @RequestBody MicroPaymentRequest request) {
     MicroPaymentResponse response =
         microPaymentService.pay(request.subId(), request.name(), request.amount());
     return ResponseEntity.ok(response);
@@ -28,7 +29,7 @@ public class MicroPaymentController {
 
   @PostMapping("/{microId}/cancel")
   public ResponseEntity<MicroPaymentResponse> cancel(
-      @PathVariable Long microId, @RequestBody MicroPaymentCancelRequest request) {
+      @PathVariable Long microId, @Valid @RequestBody MicroPaymentCancelRequest request) {
     MicroPaymentResponse response = microPaymentService.cancel(microId, request.subId());
     return ResponseEntity.ok(response);
   }
