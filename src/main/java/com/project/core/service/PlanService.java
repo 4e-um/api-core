@@ -124,8 +124,21 @@ public class PlanService {
       throw new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
     }
 
+    // 변경하려는 요금제가 현재 요금제와 동일한지 확인
+    if (subscriptionPlanRepository
+        .findActivePlanBySubId(subId)
+        .map(sp -> sp.getPlan().getPlanId())
+        .filter(newPlanId::equals)
+        .isPresent()) {
+      throw new InvalidStateException(CoreErrorCode.PLAN_ALREADY_SUBSCRIBED);
+    }
+
     // 현재 사용 중인 요금제 찾아서 종료 처리
-    subscriptionPlanRepository.findActivePlanBySubId(subId).ifPresent(SubscriptionPlan::expire);
+    SubscriptionPlan currentPlan =
+        subscriptionPlanRepository
+            .findActivePlanBySubId(subId)
+            .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.PLAN_NOT_FOUND));
+    currentPlan.expire();
 
     // 변경할 새 요금제 정보 조회
     Plan newPlan =
@@ -141,6 +154,7 @@ public class PlanService {
 
     return PlanChangeResponse.builder()
         .subId(sub.getSubId())
+        .oldPlanId(currentPlan.getPlan().getPlanId())
         .newPlanId(newPlan.getPlanId())
         .changedAt(newHistory.getCreatedDate())
         .build();

@@ -1,7 +1,6 @@
 package com.project.core.controller;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -136,7 +135,7 @@ class PlanControllerTest {
             .terminatedAt(LocalDateTime.now())
             .build();
 
-    when(planService.terminateSubscription(eq(subId))).thenReturn(response);
+    when(planService.terminateSubscription(subId)).thenReturn(response);
 
     mockMvc
         .perform(post("/plan/{subId}/terminate", subId).with(csrf()))
