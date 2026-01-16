@@ -43,7 +43,8 @@ public class DiscountService {
   @Transactional
   public Long changeDiscount(Long discountId, Long sdId) {
     SubscriptionDiscount old =
-        subscriptionDiscountRepository.findBySdId(sdId)
+        subscriptionDiscountRepository
+            .findBySdId(sdId)
             .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.DISCOUNT_NOT_FOUND));
 
     old.setEndDate(LocalDateTime.now());
@@ -58,12 +59,15 @@ public class DiscountService {
 
   private SubscriptionDiscount createSubscriptionDiscount(Long subId, Long discountId) {
     Subscription subscription =
-        subscriptionRepository.findById(subId)
+        subscriptionRepository
+            .findById(subId)
             .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
 
     DiscountPolicy policy =
-        discountPolicyRepository.findById(discountId)
-            .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.DISCOUNT_POLICY_NOT_FOUND));
+        discountPolicyRepository
+            .findById(discountId)
+            .orElseThrow(
+                () -> new EntityNotFoundException(CoreErrorCode.DISCOUNT_POLICY_NOT_FOUND));
 
     return SubscriptionDiscount.builder()
         .discountPolicy(policy)
@@ -75,4 +79,3 @@ public class DiscountService {
         .build();
   }
 }
-
