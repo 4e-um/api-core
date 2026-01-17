@@ -91,8 +91,10 @@ public class MicroPaymentService {
                                 () ->
                                         new EntityNotFoundException(
                                                 CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
-        if (subscription.getStatus() != SubscriptionStatus.ACTIVE) {
+        if (subscription.getStatus() == SubscriptionStatus.TERMINATED) {
             throw new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
+        } else if (subscription.getStatus() == SubscriptionStatus.SUSPENDED) {
+            throw new InvalidStateException(CoreErrorCode.SUBSCRIPTION_SUSPENDED);
         }
         return subscription;
     }

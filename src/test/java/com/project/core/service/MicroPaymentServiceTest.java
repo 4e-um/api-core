@@ -141,6 +141,19 @@ class MicroPaymentServiceTest {
     }
 
     @Test
+    @DisplayName("[승인] 실패 - 정지된 회선")
+    void payFailSubSuspended() {
+        Subscription sub = mock(Subscription.class);
+        given(sub.getStatus()).willReturn(SubscriptionStatus.SUSPENDED);
+        given(subscriptionRepository.findById(any(Long.class))).willReturn(Optional.of(sub));
+
+        assertThatThrownBy(() -> microPaymentService.pay(1L, "Item", 1000))
+                .isInstanceOf(InvalidStateException.class)
+                .extracting("code")
+                .isEqualTo(CoreErrorCode.SUBSCRIPTION_SUSPENDED);
+    }
+
+    @Test
     @DisplayName("[승인] 실패 - 유효하지 않은 금액")
     void payFailInvalidAmount() {
         Subscription sub = mock(Subscription.class);

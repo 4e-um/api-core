@@ -142,7 +142,7 @@ public class PlanService {
         throw new OperationFailedException(CoreErrorCode.PHONE_NUMBER_GENERATION_FAILED);
     }
 
-    /** 요금제 변경 (기존 요금제 해지 -> 신규 요금제 가입 */
+    /** 요금제 변경 (기존 요금제 해지 -> 신규 요금제 가입) */
     public PlanChangeResponse changePlan(Long subId, Long newPlanId) {
 
         // 회선 존재 여부 확인
@@ -185,7 +185,7 @@ public class PlanService {
                 newHistory.getCreatedDate());
     }
 
-    /** 요금제 해지 (회선 정지) */
+    /** 요금제 해지 (회선 해지) */
     public SubscriptionTerminateResponse terminateSubscription(Long subId) {
         Subscription sub =
                 subscriptionRepository
@@ -213,8 +213,10 @@ public class PlanService {
                                 () ->
                                         new EntityNotFoundException(
                                                 CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
-        if (subscription.getStatus() != SubscriptionStatus.ACTIVE) {
+        if (subscription.getStatus() == SubscriptionStatus.TERMINATED) {
             throw new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
+        } else if (subscription.getStatus() == SubscriptionStatus.SUSPENDED) {
+            throw new InvalidStateException(CoreErrorCode.SUBSCRIPTION_SUSPENDED);
         }
         return subscription;
     }

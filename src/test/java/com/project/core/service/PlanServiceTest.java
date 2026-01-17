@@ -377,6 +377,20 @@ class PlanServiceTest {
     }
 
     @Test
+    @DisplayName("[변경] 실패 - 정지된 회선은 변경 불가")
+    void changePlanFailSubSuspended() {
+        Subscription sub = new Subscription(null, "phone", clock);
+        ReflectionTestUtils.setField(sub, "status", SubscriptionStatus.SUSPENDED);
+
+        given(subscriptionRepository.findById(1L)).willReturn(Optional.of(sub));
+
+        assertThatThrownBy(() -> planService.changePlan(1L, 2L))
+                .isInstanceOf(InvalidStateException.class)
+                .extracting("code")
+                .isEqualTo(CoreErrorCode.SUBSCRIPTION_SUSPENDED);
+    }
+
+    @Test
     @DisplayName("[해지] 성공 - 상태 변경 및 요금제 만료")
     void terminateSubscriptionSuccess() {
         // given

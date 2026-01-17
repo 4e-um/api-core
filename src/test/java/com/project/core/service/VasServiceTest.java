@@ -154,6 +154,19 @@ class VasServiceTest {
     }
 
     @Test
+    @DisplayName("[가입] 실패 - 정지된 회선")
+    void joinVasFailSubSuspended() {
+        Long subId = 1L;
+        Subscription subscription = mock(Subscription.class);
+        given(subscription.getStatus()).willReturn(SubscriptionStatus.SUSPENDED);
+        given(subscriptionRepository.findById(subId)).willReturn(Optional.of(subscription));
+
+        InvalidStateException ex =
+                assertThrows(InvalidStateException.class, () -> vasService.joinVas(subId, 1L));
+        assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_SUSPENDED);
+    }
+
+    @Test
     @DisplayName("[가입] 실패 - 부가서비스 정보 없음")
     void joinVasFailVasNotFound() {
         Long subId = 1L;
@@ -242,6 +255,19 @@ class VasServiceTest {
     }
 
     @Test
+    @DisplayName("[해지] 실패 - 정지된 회선")
+    void terminateVasFailSubSuspended() {
+        Long subId = 1L;
+        Subscription subscription = mock(Subscription.class);
+        given(subscription.getStatus()).willReturn(SubscriptionStatus.SUSPENDED);
+        given(subscriptionRepository.findById(subId)).willReturn(Optional.of(subscription));
+
+        InvalidStateException ex =
+                assertThrows(InvalidStateException.class, () -> vasService.terminateVas(subId, 1L));
+        assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_SUSPENDED);
+    }
+
+    @Test
     @DisplayName("[해지] 실패 - 가입되지 않았거나 이미 해지된 부가서비스")
     void terminateVasFailAlreadyTerminated() {
         Long subId = 1L;
@@ -310,6 +336,22 @@ class VasServiceTest {
                         InvalidStateException.class,
                         () -> vasService.terminateVasBulk(subId, vasIds));
         assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
+    }
+
+    @Test
+    @DisplayName("[일괄해지] 실패 - 정지된 회선")
+    void terminateVasBulkFailSubSuspended() {
+        Long subId = 1L;
+        Subscription subscription = mock(Subscription.class);
+        given(subscription.getStatus()).willReturn(SubscriptionStatus.SUSPENDED);
+        given(subscriptionRepository.findById(subId)).willReturn(Optional.of(subscription));
+
+        List<Long> vasIds = List.of(1L);
+        InvalidStateException ex =
+                assertThrows(
+                        InvalidStateException.class,
+                        () -> vasService.terminateVasBulk(subId, vasIds));
+        assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_SUSPENDED);
     }
 
     @Test
