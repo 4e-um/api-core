@@ -1,6 +1,5 @@
 package com.project.core.controller;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -76,7 +75,7 @@ class DiscountControllerTest {
 
         ReflectionTestUtils.setField(sd, "sdId", 100L);
 
-        when(discountService.loadRequiredBySubId(eq(subId))).thenReturn(List.of(sd));
+        when(discountService.loadRequiredBySubId(subId)).thenReturn(List.of(sd));
 
         // when & then
         mockMvc.perform(get("/discounts/subscriptions/{subId}", subId))
@@ -93,7 +92,7 @@ class DiscountControllerTest {
     void getDiscountsBySubscription_notFound() throws Exception {
         // given
         Long subId = 1L;
-        when(discountService.loadRequiredBySubId(eq(subId)))
+        when(discountService.loadRequiredBySubId(subId))
                 .thenThrow(new EntityNotFoundException(CoreErrorCode.DISCOUNT_NOT_FOUND));
 
         // when & then
@@ -112,7 +111,7 @@ class DiscountControllerTest {
         request.setSubId(1L);
         request.setDiscountId(10L);
 
-        when(discountService.addDiscount(eq(1L), eq(10L))).thenReturn(100L);
+        when(discountService.addDiscount(1L, 10L)).thenReturn(100L);
 
         // when & then
         mockMvc.perform(
@@ -134,7 +133,7 @@ class DiscountControllerTest {
         ChangeDiscountRequest request = new ChangeDiscountRequest();
         request.setDiscountId(20L);
 
-        when(discountService.changeDiscount(eq(20L), eq(sdId))).thenReturn(200L);
+        when(discountService.changeDiscount(20L, sdId)).thenReturn(200L);
 
         // when & then
         mockMvc.perform(
@@ -155,7 +154,7 @@ class DiscountControllerTest {
         request.setSubId(999L);
         request.setDiscountId(10L);
 
-        when(discountService.addDiscount(eq(999L), eq(10L)))
+        when(discountService.addDiscount(999L, 10L))
                 .thenThrow(new EntityNotFoundException(CoreErrorCode.DISCOUNT_NOT_FOUND));
 
         // when & then
@@ -191,7 +190,7 @@ class DiscountControllerTest {
         request.setSubId(1L);
         request.setDiscountId(10L);
 
-        when(discountService.addDiscount(eq(1L), eq(10L))).thenThrow(new RuntimeException("boom"));
+        when(discountService.addDiscount(1L, 10L)).thenThrow(new RuntimeException("boom"));
 
         // when & then
         mockMvc.perform(
@@ -214,7 +213,7 @@ class DiscountControllerTest {
         ChangeDiscountRequest request = new ChangeDiscountRequest();
         request.setDiscountId(20L);
 
-        when(discountService.changeDiscount(eq(20L), eq(sdId)))
+        when(discountService.changeDiscount(20L, sdId))
                 .thenThrow(new EntityNotFoundException(CoreErrorCode.DISCOUNT_NOT_FOUND));
 
         // when & then
@@ -254,8 +253,7 @@ class DiscountControllerTest {
         ChangeDiscountRequest request = new ChangeDiscountRequest();
         request.setDiscountId(20L);
 
-        when(discountService.changeDiscount(eq(20L), eq(sdId)))
-                .thenThrow(new RuntimeException("boom"));
+        when(discountService.changeDiscount(20L, sdId)).thenThrow(new RuntimeException("boom"));
 
         // when & then
         mockMvc.perform(

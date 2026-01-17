@@ -62,8 +62,7 @@ class SubscriptionServiceTest {
         // given
         Long customerId = 999L;
 
-        given(subscriptionRepository.findByCustomer_CustomerId(eq(customerId)))
-                .willReturn(List.of());
+        given(subscriptionRepository.findByCustomer_CustomerId(customerId)).willReturn(List.of());
 
         // when & then
         assertThatThrownBy(() -> subscriptionService.findSubscription(customerId))

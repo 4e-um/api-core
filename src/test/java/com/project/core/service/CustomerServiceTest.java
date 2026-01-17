@@ -50,8 +50,7 @@ class CustomerServiceTest {
                         .build();
         ReflectionTestUtils.setField(customer, "customerId", 1L);
 
-        given(customerRepository.findByContactEnc(eq(contactEnc)))
-                .willReturn(Optional.of(customer));
+        given(customerRepository.findByContactEnc(contactEnc)).willReturn(Optional.of(customer));
 
         // when
         Customer result = customerService.loadByContactEnc(contactEnc);
@@ -67,8 +66,7 @@ class CustomerServiceTest {
     @DisplayName("[조회] 실패 - 고객 없음")
     void loadByContactEncFailNotFound() {
         // given
-        given(customerRepository.findByContactEnc(eq("encrypted-phone")))
-                .willReturn(Optional.empty());
+        given(customerRepository.findByContactEnc("encrypted-phone")).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> customerService.loadByContactEnc("encrypted-phone"))
