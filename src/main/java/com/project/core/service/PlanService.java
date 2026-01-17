@@ -96,14 +96,13 @@ public class PlanService {
                 SubscriptionPlan.builder().subscription(newSub).plan(plan).build();
         subscriptionPlanRepository.save(initPlan);
 
-        return SubscriptionJoinResponse.builder()
-                .subId(newSub.getSubId())
-                .customerId(customer.getCustomerId())
-                .planId(plan.getPlanId())
-                .phoneNumber(aesUtil.decrypt(newSub.getPhoneNumber()))
-                .status(newSub.getStatus())
-                .startDate(newSub.getStartDate())
-                .build();
+        return new SubscriptionJoinResponse(
+                newSub.getSubId(),
+                customer.getCustomerId(),
+                plan.getPlanId(),
+                aesUtil.decrypt(newSub.getPhoneNumber()),
+                newSub.getStatus(),
+                newSub.getStartDate());
     }
 
     // 번호 결정 메소드
@@ -179,12 +178,11 @@ public class PlanService {
 
         subscriptionPlanRepository.save(newHistory);
 
-        return PlanChangeResponse.builder()
-                .subId(sub.getSubId())
-                .oldPlanId(currentPlan.getPlan().getPlanId())
-                .newPlanId(newPlan.getPlanId())
-                .changedAt(newHistory.getCreatedDate())
-                .build();
+        return new PlanChangeResponse(
+                sub.getSubId(),
+                currentPlan.getPlan().getPlanId(),
+                newPlan.getPlanId(),
+                newHistory.getCreatedDate());
     }
 
     /** 요금제 해지 (회선 정지) */
@@ -204,11 +202,7 @@ public class PlanService {
         sub.terminate(clock);
         subscriptionPlanRepository.findActivePlanBySubId(subId).ifPresent(SubscriptionPlan::expire);
 
-        return SubscriptionTerminateResponse.builder()
-                .subId(sub.getSubId())
-                .status(sub.getStatus())
-                .terminatedAt(sub.getEndDate())
-                .build();
+        return new SubscriptionTerminateResponse(sub.getSubId(), sub.getStatus(), sub.getEndDate());
     }
 
     private Subscription findActiveSubscription(Long subId) {

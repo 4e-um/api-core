@@ -129,7 +129,7 @@ class PlanServiceTest {
         SubscriptionJoinResponse response = planService.joinSubscription(customerId, 1L);
 
         // then
-        assertThat(response.getPhoneNumber()).isEqualTo("010-1234-5678");
+        assertThat(response.phoneNumber()).isEqualTo("010-1234-5678");
         verify(subscriptionRepository).save(any(Subscription.class));
         verify(subscriptionPlanRepository).save(any(SubscriptionPlan.class));
     }
@@ -164,7 +164,7 @@ class PlanServiceTest {
             SubscriptionJoinResponse response = planService.joinSubscription(1L, 1L);
 
             // then
-            assertThat(response.getPhoneNumber()).isEqualTo("010-1234-5678");
+            assertThat(response.phoneNumber()).isEqualTo("010-1234-5678");
             verify(subscriptionRepository).save(any(Subscription.class));
         }
     }
@@ -193,7 +193,7 @@ class PlanServiceTest {
             SubscriptionJoinResponse response = planService.joinSubscription(1L, 1L);
 
             // then
-            assertThat(response.getPhoneNumber()).isEqualTo("010-9999-8888");
+            assertThat(response.phoneNumber()).isEqualTo("010-9999-8888");
             verify(subscriptionRepository).save(any(Subscription.class));
         }
     }
@@ -279,8 +279,8 @@ class PlanServiceTest {
         PlanChangeResponse response = planService.changePlan(10L, 2L);
 
         // then
-        assertThat(response.getOldPlanId()).isEqualTo(1L);
-        assertThat(response.getNewPlanId()).isEqualTo(2L);
+        assertThat(response.oldPlanId()).isEqualTo(1L);
+        assertThat(response.newPlanId()).isEqualTo(2L);
         verify(oldHistory).expire();
         verify(subscriptionPlanRepository).save(any(SubscriptionPlan.class));
     }
@@ -394,7 +394,7 @@ class PlanServiceTest {
         SubscriptionTerminateResponse response = planService.terminateSubscription(1L);
 
         // then
-        assertThat(response.getStatus()).isEqualTo(SubscriptionStatus.TERMINATED);
+        assertThat(response.status()).isEqualTo(SubscriptionStatus.TERMINATED);
         assertThat(sub.getStatus()).isEqualTo(SubscriptionStatus.TERMINATED);
         verify(activePlan).expire();
     }
@@ -417,7 +417,7 @@ class PlanServiceTest {
         SubscriptionTerminateResponse response = planService.terminateSubscription(1L);
 
         // then
-        assertThat(response.getStatus()).isEqualTo(SubscriptionStatus.TERMINATED);
+        assertThat(response.status()).isEqualTo(SubscriptionStatus.TERMINATED);
         assertThat(sub.getStatus()).isEqualTo(SubscriptionStatus.TERMINATED);
         verify(activePlan).expire();
     }

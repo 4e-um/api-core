@@ -71,14 +71,13 @@ class PlanControllerTest {
     void joinSubscriptionSuccess() throws Exception {
         SubscriptionJoinRequest request = new SubscriptionJoinRequest(1L, 1L);
         SubscriptionJoinResponse response =
-                SubscriptionJoinResponse.builder()
-                        .subId(100L)
-                        .customerId(1L)
-                        .planId(1L)
-                        .phoneNumber("010-1234-5678")
-                        .status(SubscriptionStatus.ACTIVE)
-                        .startDate(LocalDateTime.now())
-                        .build();
+                new SubscriptionJoinResponse(
+                        100L,
+                        1L,
+                        1L,
+                        "010-1234-5678",
+                        SubscriptionStatus.ACTIVE,
+                        LocalDateTime.now());
 
         when(planService.joinSubscription(any(Long.class), any(Long.class))).thenReturn(response);
 
@@ -115,12 +114,7 @@ class PlanControllerTest {
     @DisplayName("[변경/성공] 요금제 변경 요청 성공")
     void changePlanSuccess() throws Exception {
         PlanChangeRequest request = new PlanChangeRequest(1L, 2L);
-        PlanChangeResponse response =
-                PlanChangeResponse.builder()
-                        .subId(1L)
-                        .newPlanId(2L)
-                        .changedAt(LocalDateTime.now())
-                        .build();
+        PlanChangeResponse response = new PlanChangeResponse(1L, 1L, 2L, LocalDateTime.now());
 
         when(planService.changePlan(any(Long.class), any(Long.class))).thenReturn(response);
 
@@ -164,11 +158,8 @@ class PlanControllerTest {
     void terminateSubscriptionSuccess() throws Exception {
         Long subId = 1L;
         SubscriptionTerminateResponse response =
-                SubscriptionTerminateResponse.builder()
-                        .subId(subId)
-                        .status(SubscriptionStatus.TERMINATED)
-                        .terminatedAt(LocalDateTime.now())
-                        .build();
+                new SubscriptionTerminateResponse(
+                        subId, SubscriptionStatus.TERMINATED, LocalDateTime.now());
 
         when(planService.terminateSubscription(subId)).thenReturn(response);
 
