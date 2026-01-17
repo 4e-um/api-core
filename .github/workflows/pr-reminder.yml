@@ -71,9 +71,7 @@ jobs:
           if [ -z "$PR_LIST_TRIMMED" ]; then
             echo "📭 리마인드 대상 PR이 없습니다. 슬랙 메시지를 보내지 않고 종료합니다."
             exit 0
-
-          현재 리마인드가 필요한 PR이 없습니다 🎉"
-          else
+          fi
             MESSAGE="*< 👀 PR Reminder >*
 
           최근 *업데이트가 없는 PR* 이 있어요 ⏳
