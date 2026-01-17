@@ -17,6 +17,8 @@ import jakarta.persistence.Table;
 
 import com.project.core.infra.entity.micro.enums.MicroPaymentStatus;
 import com.project.core.infra.entity.subscription.Subscription;
+import com.project.global.exception.code.domain.core.CoreErrorCode;
+import com.project.global.exception.core.InvalidStateException;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -63,16 +65,12 @@ public class MicroPayment {
     public void cancel(Long requesterSubId) {
         // 결제 내역의 주인과 요청자가 다르면 예외 발생
         if (!this.subscription.getSubId().equals(requesterSubId)) {
-            throw new com.project.global.exception.core.InvalidStateException(
-                    com.project.global.exception.code.domain.core.CoreErrorCode
-                            .MICRO_PAYMENT_BAD_REQUEST);
+            throw new InvalidStateException(CoreErrorCode.MICRO_PAYMENT_BAD_REQUEST);
         }
 
         // 이미 취소된 건인지 확인
         if (this.status == MicroPaymentStatus.CANCELED) {
-            throw new com.project.global.exception.core.InvalidStateException(
-                    com.project.global.exception.code.domain.core.CoreErrorCode
-                            .MICRO_PAYMENT_ALREADY_CANCELED);
+            throw new InvalidStateException(CoreErrorCode.MICRO_PAYMENT_ALREADY_CANCELED);
         }
         this.status = MicroPaymentStatus.CANCELED;
     }

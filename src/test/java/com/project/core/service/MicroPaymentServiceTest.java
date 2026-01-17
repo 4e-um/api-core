@@ -7,21 +7,12 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.project.core.controller.dto.response.MicroPaymentResponse;
-import com.project.core.infra.entity.micro.MicroPayment;
-import com.project.core.infra.entity.micro.enums.MicroPaymentStatus;
-import com.project.core.infra.entity.subscription.Subscription;
-import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
-import com.project.core.infra.repository.micro.MicroPaymentRepository;
-import com.project.core.infra.repository.subscription.SubscriptionRepository;
-import com.project.global.exception.code.domain.core.CoreErrorCode;
-import com.project.global.exception.core.EntityNotFoundException;
-import com.project.global.exception.core.InvalidStateException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,6 +23,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import com.project.core.controller.dto.response.MicroPaymentResponse;
+import com.project.core.infra.entity.micro.MicroPayment;
+import com.project.core.infra.entity.micro.enums.MicroPaymentStatus;
+import com.project.core.infra.entity.subscription.Subscription;
+import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
+import com.project.core.infra.repository.micro.MicroPaymentRepository;
+import com.project.core.infra.repository.subscription.SubscriptionRepository;
+import com.project.global.exception.code.domain.core.CoreErrorCode;
+import com.project.global.exception.core.EntityNotFoundException;
+import com.project.global.exception.core.InvalidStateException;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -49,49 +51,49 @@ class MicroPaymentServiceTest {
         given(clock.instant()).willReturn(Instant.parse("2026-01-01T00:00:00Z"));
     }
 
-  @Test
-  @DisplayName("[조회] 성공 - 소액결제 이력 조회")
-  void getMicroPaymentHistorySuccess() {
-    // given
-    Long subId = 1L;
-    MicroPayment mp1 = mock(MicroPayment.class);
-    given(mp1.getMicroId()).willReturn(10L);
-    given(mp1.getName()).willReturn("Item A");
-    given(mp1.getAmount()).willReturn(1000);
-    given(mp1.getPayDate()).willReturn(LocalDateTime.now().minusDays(1));
-    given(mp1.getStatus()).willReturn(MicroPaymentStatus.BILLED);
+    @Test
+    @DisplayName("[조회] 성공 - 소액결제 이력 조회")
+    void getMicroPaymentHistorySuccess() {
+        // given
+        Long subId = 1L;
+        MicroPayment mp1 = mock(MicroPayment.class);
+        given(mp1.getMicroId()).willReturn(10L);
+        given(mp1.getName()).willReturn("Item A");
+        given(mp1.getAmount()).willReturn(1000);
+        given(mp1.getPayDate()).willReturn(LocalDateTime.now().minusDays(1));
+        given(mp1.getStatus()).willReturn(MicroPaymentStatus.BILLED);
 
-    MicroPayment mp2 = mock(MicroPayment.class);
-    given(mp2.getMicroId()).willReturn(11L);
-    given(mp2.getName()).willReturn("Item B");
-    given(mp2.getAmount()).willReturn(2000);
-    given(mp2.getPayDate()).willReturn(LocalDateTime.now());
-    given(mp2.getStatus()).willReturn(MicroPaymentStatus.CANCELED);
+        MicroPayment mp2 = mock(MicroPayment.class);
+        given(mp2.getMicroId()).willReturn(11L);
+        given(mp2.getName()).willReturn("Item B");
+        given(mp2.getAmount()).willReturn(2000);
+        given(mp2.getPayDate()).willReturn(LocalDateTime.now());
+        given(mp2.getStatus()).willReturn(MicroPaymentStatus.CANCELED);
 
-    given(microPaymentRepository.findBySubscriptionSubIdOrderByPayDateDesc(subId))
-        .willReturn(java.util.List.of(mp2, mp1));
+        given(microPaymentRepository.findBySubscriptionSubIdOrderByPayDateDesc(subId))
+                .willReturn(java.util.List.of(mp2, mp1));
 
-    // when
-    java.util.List<com.project.core.controller.dto.response.MicroPaymentHistoryResponse> result =
-        microPaymentService.getMicroPaymentHistory(subId);
+        // when
+        java.util.List<com.project.core.controller.dto.response.MicroPaymentHistoryResponse>
+                result = microPaymentService.getMicroPaymentHistory(subId);
 
-    // then
-    assertThat(result).hasSize(2);
-    assertThat(result.get(0).name()).isEqualTo("Item B");
-    assertThat(result.get(0).status()).isEqualTo("CANCELED");
-    assertThat(result.get(1).name()).isEqualTo("Item A");
-    assertThat(result.get(1).status()).isEqualTo("BILLED");
-  }
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).name()).isEqualTo("Item B");
+        assertThat(result.get(0).status()).isEqualTo("CANCELED");
+        assertThat(result.get(1).name()).isEqualTo("Item A");
+        assertThat(result.get(1).status()).isEqualTo("BILLED");
+    }
 
-  @Test
-  @DisplayName("[승인] 성공 - 소액결제 승인")
-  void paySuccess() {
-    // given
-    Long subId = 1L;
-    Subscription sub = mock(Subscription.class);
-    given(sub.getStatus()).willReturn(SubscriptionStatus.ACTIVE);
-    given(sub.getSubId()).willReturn(subId);
-    given(subscriptionRepository.findById(subId)).willReturn(Optional.of(sub));
+    @Test
+    @DisplayName("[승인] 성공 - 소액결제 승인")
+    void paySuccess() {
+        // given
+        Long subId = 1L;
+        Subscription sub = mock(Subscription.class);
+        given(sub.getStatus()).willReturn(SubscriptionStatus.ACTIVE);
+        given(sub.getSubId()).willReturn(subId);
+        given(subscriptionRepository.findById(subId)).willReturn(Optional.of(sub));
 
         MicroPayment savedPayment =
                 MicroPayment.builder()

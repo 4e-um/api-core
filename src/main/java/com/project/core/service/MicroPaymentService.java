@@ -1,5 +1,11 @@
 package com.project.core.service;
 
+import java.time.Clock;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.project.core.controller.dto.response.MicroPaymentHistoryResponse;
 import com.project.core.controller.dto.response.MicroPaymentResponse;
 import com.project.core.infra.entity.micro.MicroPayment;
@@ -10,11 +16,8 @@ import com.project.core.infra.repository.subscription.SubscriptionRepository;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
 import com.project.global.exception.core.InvalidStateException;
-import java.time.Clock;
-import java.util.List;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,25 +28,25 @@ public class MicroPaymentService {
     private final SubscriptionRepository subscriptionRepository;
     private final Clock clock;
 
-  /** 소액결제 내역 조회 */
-  @Transactional(readOnly = true)
-  public List<MicroPaymentHistoryResponse> getMicroPaymentHistory(Long subId) {
+    /** 소액결제 내역 조회 */
+    @Transactional(readOnly = true)
+    public List<MicroPaymentHistoryResponse> getMicroPaymentHistory(Long subId) {
 
-    return microPaymentRepository.findBySubscriptionSubIdOrderByPayDateDesc(subId).stream()
-        .map(
-            mp ->
-                new MicroPaymentHistoryResponse(
-                    mp.getMicroId(),
-                    mp.getName(),
-                    mp.getAmount(),
-                    mp.getPayDate(),
-                    mp.getStatus().name()))
-        .toList();
-  }
+        return microPaymentRepository.findBySubscriptionSubIdOrderByPayDateDesc(subId).stream()
+                .map(
+                        mp ->
+                                new MicroPaymentHistoryResponse(
+                                        mp.getMicroId(),
+                                        mp.getName(),
+                                        mp.getAmount(),
+                                        mp.getPayDate(),
+                                        mp.getStatus().name()))
+                .toList();
+    }
 
-  // 소액결제 승인
-  public MicroPaymentResponse pay(Long subId, String name, Integer amount) {
-    Subscription subscription = findActiveSubscription(subId);
+    /** 소액결제 승인 */
+    public MicroPaymentResponse pay(Long subId, String name, Integer amount) {
+        Subscription subscription = findActiveSubscription(subId);
 
         // 금액 유효성 검사
         if (amount <= 0) {
@@ -63,7 +66,7 @@ public class MicroPaymentService {
         return toResponse(savedMicroPayment);
     }
 
-    // 소액결제 취소
+    /** 소액결제 취소 */
     public MicroPaymentResponse cancel(Long microId, Long subId) {
         // 결제 내역 조회
         MicroPayment microPayment =
