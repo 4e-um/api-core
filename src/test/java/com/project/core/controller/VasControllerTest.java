@@ -12,6 +12,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.core.controller.dto.request.VasBulkTerminateRequest;
 import com.project.core.controller.dto.request.VasJoinRequest;
@@ -25,15 +36,6 @@ import com.project.core.service.VasService;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
 import com.project.global.exception.core.InvalidStateException;
-import java.time.LocalDateTime;
-import java.util.List;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(VasController.class)
 class VasControllerTest {
@@ -42,41 +44,40 @@ class VasControllerTest {
     @Autowired private ObjectMapper objectMapper;
     @MockitoBean private VasService vasService;
 
-  @Test
-  @DisplayName("[조회/성공] 부가서비스 이력 조회 성공")
-  void getVasHistorySuccess() throws Exception {
-    Long subId = 1L;
-    SubscriptionVasResponse res1 =
-        new SubscriptionVasResponse(
-            1L,
-            "Vas A",
-            1000,
-            VasStatus.TERMINATED.name(),
-            LocalDateTime.now().minusDays(30),
-            LocalDateTime.now());
-    SubscriptionVasResponse res2 =
-        new SubscriptionVasResponse(
-            2L, "Vas B", 2000, VasStatus.ACTIVE.name(), LocalDateTime.now(), null);
+    @Test
+    @DisplayName("[조회/성공] 부가서비스 이력 조회 성공")
+    void getVasHistorySuccess() throws Exception {
+        Long subId = 1L;
+        SubscriptionVasResponse res1 =
+                new SubscriptionVasResponse(
+                        1L,
+                        "Vas A",
+                        1000,
+                        VasStatus.TERMINATED.name(),
+                        LocalDateTime.now().minusDays(30),
+                        LocalDateTime.now());
+        SubscriptionVasResponse res2 =
+                new SubscriptionVasResponse(
+                        2L, "Vas B", 2000, VasStatus.ACTIVE.name(), LocalDateTime.now(), null);
 
-    when(vasService.getVasHistory(subId)).thenReturn(List.of(res2, res1));
+        when(vasService.getVasHistory(subId)).thenReturn(List.of(res2, res1));
 
-    mockMvc
-        .perform(get("/vas/{subId}/history", subId).with(csrf()))
-        .andDo(print())
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$.length()").value(2))
-        .andExpect(jsonPath("$[0].vasName").value("Vas B"))
-        .andExpect(jsonPath("$[1].vasName").value("Vas A"));
-  }
+        mockMvc.perform(get("/vas/{subId}/history", subId).with(csrf()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].vasName").value("Vas B"))
+                .andExpect(jsonPath("$[1].vasName").value("Vas A"));
+    }
 
-  @Test
-  @DisplayName("[가입/성공] 부가서비스 가입 요청 성공")
-  void joinVasSuccess() throws Exception {
-    Long subId = 1L;
-    VasJoinRequest request = new VasJoinRequest(1L);
-    VasJoinResponse response =
-        new VasJoinResponse(10L, 1L, 1L, VasStatus.ACTIVE.name(), LocalDateTime.now());
+    @Test
+    @DisplayName("[가입/성공] 부가서비스 가입 요청 성공")
+    void joinVasSuccess() throws Exception {
+        Long subId = 1L;
+        VasJoinRequest request = new VasJoinRequest(1L);
+        VasJoinResponse response =
+                new VasJoinResponse(10L, 1L, 1L, VasStatus.ACTIVE.name(), LocalDateTime.now());
 
         when(vasService.joinVas(eq(subId), any(Long.class))).thenReturn(response);
 

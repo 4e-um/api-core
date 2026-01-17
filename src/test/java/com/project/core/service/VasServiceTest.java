@@ -9,6 +9,25 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import com.project.core.controller.dto.response.VasBulkTerminateResponse;
 import com.project.core.controller.dto.response.VasJoinResponse;
 import com.project.core.controller.dto.response.VasTerminateResponse;
@@ -23,23 +42,6 @@ import com.project.core.infra.repository.vas.VasRepository;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
 import com.project.global.exception.core.InvalidStateException;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -58,49 +60,49 @@ class VasServiceTest {
         given(clock.instant()).willReturn(Instant.parse("2026-01-01T00:00:00Z"));
     }
 
-  @Test
-  @DisplayName("[조회] 성공 - 부가서비스 이력 조회")
-  void getVasHistorySuccess() {
-    // given
-    Long subId = 1L;
-    Vas vas1 = mock(Vas.class);
-    given(vas1.getName()).willReturn("Vas A");
-    SubscriptionVas sv1 = mock(SubscriptionVas.class);
-    given(sv1.getSvId()).willReturn(10L);
-    given(sv1.getVas()).willReturn(vas1);
-    given(sv1.getMonthlyFee()).willReturn(1000);
-    given(sv1.getStatus()).willReturn(VasStatus.TERMINATED);
-    given(sv1.getStartDate()).willReturn(LocalDateTime.now().minusDays(30));
-    given(sv1.getEndDate()).willReturn(LocalDateTime.now());
+    @Test
+    @DisplayName("[조회] 성공 - 부가서비스 이력 조회")
+    void getVasHistorySuccess() {
+        // given
+        Long subId = 1L;
+        Vas vas1 = mock(Vas.class);
+        given(vas1.getName()).willReturn("Vas A");
+        SubscriptionVas sv1 = mock(SubscriptionVas.class);
+        given(sv1.getSvId()).willReturn(10L);
+        given(sv1.getVas()).willReturn(vas1);
+        given(sv1.getMonthlyFee()).willReturn(1000);
+        given(sv1.getStatus()).willReturn(VasStatus.TERMINATED);
+        given(sv1.getStartDate()).willReturn(LocalDateTime.now().minusDays(30));
+        given(sv1.getEndDate()).willReturn(LocalDateTime.now());
 
-    Vas vas2 = mock(Vas.class);
-    given(vas2.getName()).willReturn("Vas B");
-    SubscriptionVas sv2 = mock(SubscriptionVas.class);
-    given(sv2.getSvId()).willReturn(11L);
-    given(sv2.getVas()).willReturn(vas2);
-    given(sv2.getMonthlyFee()).willReturn(2000);
-    given(sv2.getStatus()).willReturn(VasStatus.ACTIVE);
-    given(sv2.getStartDate()).willReturn(LocalDateTime.now());
+        Vas vas2 = mock(Vas.class);
+        given(vas2.getName()).willReturn("Vas B");
+        SubscriptionVas sv2 = mock(SubscriptionVas.class);
+        given(sv2.getSvId()).willReturn(11L);
+        given(sv2.getVas()).willReturn(vas2);
+        given(sv2.getMonthlyFee()).willReturn(2000);
+        given(sv2.getStatus()).willReturn(VasStatus.ACTIVE);
+        given(sv2.getStartDate()).willReturn(LocalDateTime.now());
 
-    given(subscriptionVasRepository.findBySubscriptionSubIdOrderByStartDateDesc(subId))
-        .willReturn(java.util.List.of(sv2, sv1));
+        given(subscriptionVasRepository.findBySubscriptionSubIdOrderByStartDateDesc(subId))
+                .willReturn(java.util.List.of(sv2, sv1));
 
-    // when
-    java.util.List<com.project.core.controller.dto.response.SubscriptionVasResponse> result =
-        vasService.getVasHistory(subId);
+        // when
+        java.util.List<com.project.core.controller.dto.response.SubscriptionVasResponse> result =
+                vasService.getVasHistory(subId);
 
-    // then
-    assertThat(result).hasSize(2);
-    assertThat(result.get(0).vasName()).isEqualTo("Vas B");
-    assertThat(result.get(0).status()).isEqualTo("ACTIVE");
-    assertThat(result.get(1).vasName()).isEqualTo("Vas A");
-    assertThat(result.get(1).status()).isEqualTo("TERMINATED");
-  }
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).vasName()).isEqualTo("Vas B");
+        assertThat(result.get(0).status()).isEqualTo("ACTIVE");
+        assertThat(result.get(1).vasName()).isEqualTo("Vas A");
+        assertThat(result.get(1).status()).isEqualTo("TERMINATED");
+    }
 
-  @Test
-  @DisplayName("[가입] 성공 - 부가서비스 가입")
-  void joinVasSuccess() {
-    Long subId = 1L;
+    @Test
+    @DisplayName("[가입] 성공 - 부가서비스 가입")
+    void joinVasSuccess() {
+        Long subId = 1L;
 
         Subscription subscription = mock(Subscription.class);
         given(subscription.getStatus()).willReturn(SubscriptionStatus.ACTIVE);
