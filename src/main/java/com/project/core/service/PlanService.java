@@ -6,10 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.core.controller.dto.response.PlanChangeResponse;
-import com.project.core.controller.dto.response.SubscriptionJoinResponse;
-import com.project.core.controller.dto.response.SubscriptionPlanResponse;
-import com.project.core.controller.dto.response.SubscriptionTerminateResponse;
+import com.project.core.controller.dto.PlanDto;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.entity.plan.Plan;
 import com.project.core.infra.entity.plan.SubscriptionPlan;
@@ -44,14 +41,14 @@ public class PlanService {
 
     /** 요금제 변경 이력 조회 */
     @Transactional(readOnly = true)
-    public List<SubscriptionPlanResponse> getPlanHistory(Long subId) {
+    public List<PlanDto.HistoryResponse> getPlanHistory(Long subId) {
 
         return subscriptionPlanRepository
                 .findBySubscriptionSubIdOrderByCreatedDateDesc(subId)
                 .stream()
                 .map(
                         sp ->
-                                new SubscriptionPlanResponse(
+                                new PlanDto.HistoryResponse(
                                         sp.getSpId(),
                                         sp.getPlan().getPlanName(),
                                         sp.getCost(),
@@ -63,7 +60,7 @@ public class PlanService {
     /**
      * 요금제 가입 (신규 개통) 1. 활성 회선이 0개면 -> Customer의 연락처 사용 시도 2. 활성 회선이 있거나 위 번호가 이미 사용 중이면 -> 랜덤 번호 생성
      */
-    public SubscriptionJoinResponse joinSubscription(Long customerId, Long planId) {
+    public PlanDto.JoinResponse joinSubscription(Long customerId, Long planId) {
         // 고객, 요금제 조회
         Customer customer =
                 customerRepository
@@ -96,7 +93,7 @@ public class PlanService {
                 SubscriptionPlan.builder().subscription(newSub).plan(plan).build();
         subscriptionPlanRepository.save(initPlan);
 
-        return new SubscriptionJoinResponse(
+        return new PlanDto.JoinResponse(
                 newSub.getSubId(),
                 customer.getCustomerId(),
                 plan.getPlanId(),
@@ -143,7 +140,7 @@ public class PlanService {
     }
 
     /** 요금제 변경 (기존 요금제 해지 -> 신규 요금제 가입) */
-    public PlanChangeResponse changePlan(Long subId, Long newPlanId) {
+    public PlanDto.ChangeResponse changePlan(Long subId, Long newPlanId) {
 
         // 회선 존재 여부 확인
         Subscription sub = findActiveSubscription(subId);
@@ -178,7 +175,7 @@ public class PlanService {
 
         subscriptionPlanRepository.save(newHistory);
 
-        return new PlanChangeResponse(
+        return new PlanDto.ChangeResponse(
                 sub.getSubId(),
                 currentPlan.getPlan().getPlanId(),
                 newPlan.getPlanId(),
@@ -186,7 +183,7 @@ public class PlanService {
     }
 
     /** 요금제 해지 (회선 해지) */
-    public SubscriptionTerminateResponse terminateSubscription(Long subId) {
+    public PlanDto.TerminateResponse terminateSubscription(Long subId) {
         Subscription sub =
                 subscriptionRepository
                         .findById(subId)
@@ -202,7 +199,7 @@ public class PlanService {
         sub.terminate(clock);
         subscriptionPlanRepository.findActivePlanBySubId(subId).ifPresent(SubscriptionPlan::expire);
 
-        return new SubscriptionTerminateResponse(sub.getSubId(), sub.getStatus(), sub.getEndDate());
+        return new PlanDto.TerminateResponse(sub.getSubId(), sub.getStatus(), sub.getEndDate());
     }
 
     private Subscription findActiveSubscription(Long subId) {

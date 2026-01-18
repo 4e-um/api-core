@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import com.project.core.infra.entity.plan.enums.AllotmentPeriod;
 import com.project.core.infra.entity.subscription.Subscription;
 
 import lombok.AccessLevel;
@@ -41,6 +44,13 @@ public class SubscriptionPlan {
     @Column(name = "cost", nullable = false)
     private Integer cost;
 
+    @Column(name = "allotment_amount", nullable = false)
+    private Long allotmentAmount; // MB 단위, -1은 무제한
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "allotment_period", nullable = false, length = 10)
+    private AllotmentPeriod allotmentPeriod; // MONTH / DAY
+
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
 
@@ -52,6 +62,8 @@ public class SubscriptionPlan {
         this.subscription = subscription;
         this.plan = plan;
         this.cost = plan.getPlanBaseFee(); // 요금제 가격을 스냅샷으로 저장
+        this.allotmentAmount = plan.getAllotmentAmount();
+        this.allotmentPeriod = plan.getAllotmentPeriod();
         this.createdDate = LocalDateTime.now();
         this.leftDate = LocalDateTime.of(9999, 12, 31, 23, 59, 59);
     }

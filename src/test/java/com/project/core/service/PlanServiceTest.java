@@ -28,9 +28,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.project.core.controller.dto.response.PlanChangeResponse;
-import com.project.core.controller.dto.response.SubscriptionJoinResponse;
-import com.project.core.controller.dto.response.SubscriptionTerminateResponse;
+import com.project.core.controller.dto.PlanDto;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.entity.plan.Plan;
 import com.project.core.infra.entity.plan.SubscriptionPlan;
@@ -90,8 +88,7 @@ class PlanServiceTest {
                 .willReturn(java.util.List.of(sp2, sp1));
 
         // when
-        java.util.List<com.project.core.controller.dto.response.SubscriptionPlanResponse> result =
-                planService.getPlanHistory(subId);
+        java.util.List<PlanDto.HistoryResponse> result = planService.getPlanHistory(subId);
 
         // then
         assertThat(result).hasSize(2);
@@ -126,7 +123,7 @@ class PlanServiceTest {
         given(aesUtil.decrypt(anyString())).willReturn("010-1234-5678");
 
         // when
-        SubscriptionJoinResponse response = planService.joinSubscription(customerId, 1L);
+        PlanDto.JoinResponse response = planService.joinSubscription(customerId, 1L);
 
         // then
         assertThat(response.phoneNumber()).isEqualTo("010-1234-5678");
@@ -161,7 +158,7 @@ class PlanServiceTest {
             given(aesUtil.decrypt("newPhoneEnc")).willReturn("010-1234-5678");
 
             // when
-            SubscriptionJoinResponse response = planService.joinSubscription(1L, 1L);
+            PlanDto.JoinResponse response = planService.joinSubscription(1L, 1L);
 
             // then
             assertThat(response.phoneNumber()).isEqualTo("010-1234-5678");
@@ -190,7 +187,7 @@ class PlanServiceTest {
             given(aesUtil.decrypt("randomEnc")).willReturn("010-9999-8888");
 
             // when
-            SubscriptionJoinResponse response = planService.joinSubscription(1L, 1L);
+            PlanDto.JoinResponse response = planService.joinSubscription(1L, 1L);
 
             // then
             assertThat(response.phoneNumber()).isEqualTo("010-9999-8888");
@@ -276,7 +273,7 @@ class PlanServiceTest {
         given(planRepository.findById(2L)).willReturn(Optional.of(newPlan));
 
         // when
-        PlanChangeResponse response = planService.changePlan(10L, 2L);
+        PlanDto.ChangeResponse response = planService.changePlan(10L, 2L);
 
         // then
         assertThat(response.oldPlanId()).isEqualTo(1L);
@@ -405,7 +402,7 @@ class PlanServiceTest {
                 .willReturn(Optional.of(activePlan));
 
         // when
-        SubscriptionTerminateResponse response = planService.terminateSubscription(1L);
+        PlanDto.TerminateResponse response = planService.terminateSubscription(1L);
 
         // then
         assertThat(response.status()).isEqualTo(SubscriptionStatus.TERMINATED);
@@ -428,7 +425,7 @@ class PlanServiceTest {
                 .willReturn(Optional.of(activePlan));
 
         // when
-        SubscriptionTerminateResponse response = planService.terminateSubscription(1L);
+        PlanDto.TerminateResponse response = planService.terminateSubscription(1L);
 
         // then
         assertThat(response.status()).isEqualTo(SubscriptionStatus.TERMINATED);
