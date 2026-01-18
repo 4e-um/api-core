@@ -6,10 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.core.controller.dto.response.SubscriptionVasResponse;
-import com.project.core.controller.dto.response.VasBulkTerminateResponse;
-import com.project.core.controller.dto.response.VasJoinResponse;
-import com.project.core.controller.dto.response.VasTerminateResponse;
+import com.project.core.controller.dto.VasDto;
 import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 import com.project.core.infra.entity.vas.SubscriptionVas;
@@ -36,12 +33,12 @@ public class VasService {
 
     /** 부가서비스 가입 이력 조회 */
     @Transactional(readOnly = true)
-    public List<SubscriptionVasResponse> getVasHistory(Long subId) {
+    public List<VasDto.HistoryResponse> getVasHistory(Long subId) {
 
         return subscriptionVasRepository.findBySubscriptionSubIdOrderByStartDateDesc(subId).stream()
                 .map(
                         sv ->
-                                new SubscriptionVasResponse(
+                                new VasDto.HistoryResponse(
                                         sv.getSvId(),
                                         sv.getVas().getName(),
                                         sv.getMonthlyFee(), // 가입 당시 가격 or 현재 가격
@@ -52,7 +49,7 @@ public class VasService {
     }
 
     /** 부가서비스 가입 */
-    public VasJoinResponse joinVas(Long subId, Long vasId) {
+    public VasDto.JoinResponse joinVas(Long subId, Long vasId) {
         // 회선 조회 및 활성 상태 체크
         Subscription subscription = findActiveSubscription(subId);
 
@@ -77,7 +74,7 @@ public class VasService {
                 SubscriptionVas.builder().subscription(subscription).vas(vas).clock(clock).build();
         SubscriptionVas savedVas = subscriptionVasRepository.save(newSubscriptionVas);
 
-        return new VasJoinResponse(
+        return new VasDto.JoinResponse(
                 savedVas.getSvId(),
                 subId,
                 vasId,
@@ -86,7 +83,7 @@ public class VasService {
     }
 
     /** 부가서비스 해지 */
-    public VasTerminateResponse terminateVas(Long subId, Long vasId) {
+    public VasDto.TerminateResponse terminateVas(Long subId, Long vasId) {
         // 회선 조회 및 활성 상태 체크
         findActiveSubscription(subId);
 
@@ -102,7 +99,7 @@ public class VasService {
         // 해지 처리
         subscriptionVas.terminate(clock);
 
-        return new VasTerminateResponse(
+        return new VasDto.TerminateResponse(
                 subscriptionVas.getSvId(),
                 subId,
                 vasId,
@@ -111,7 +108,7 @@ public class VasService {
     }
 
     /** 부가서비스 일괄 해지 */
-    public VasBulkTerminateResponse terminateVasBulk(Long subId, List<Long> vasIds) {
+    public VasDto.BulkTerminateResponse terminateVasBulk(Long subId, List<Long> vasIds) {
         // 회선 조회 및 활성 상태 체크
         findActiveSubscription(subId);
 
@@ -125,14 +122,14 @@ public class VasService {
         }
 
         // 일괄 해지 처리 및 결과 변환
-        List<VasTerminateResponse> responses =
+        List<VasDto.TerminateResponse> responses =
                 targetList.stream()
                         .map(
                                 subVas -> {
                                     // 해지 처리 (시간 설정 및 상태 변경)
                                     subVas.terminate(clock);
 
-                                    return new VasTerminateResponse(
+                                    return new VasDto.TerminateResponse(
                                             subVas.getSvId(),
                                             subId,
                                             subVas.getVas().getVasId(),
@@ -141,7 +138,7 @@ public class VasService {
                                 })
                         .toList();
 
-        return new VasBulkTerminateResponse(subId, responses.size(), responses);
+        return new VasDto.BulkTerminateResponse(subId, responses.size(), responses);
     }
 
     private Subscription findActiveSubscription(Long subId) {

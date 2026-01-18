@@ -28,9 +28,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.project.core.controller.dto.response.VasBulkTerminateResponse;
-import com.project.core.controller.dto.response.VasJoinResponse;
-import com.project.core.controller.dto.response.VasTerminateResponse;
+import com.project.core.controller.dto.VasDto;
 import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 import com.project.core.infra.entity.vas.SubscriptionVas;
@@ -61,45 +59,6 @@ class VasServiceTest {
     }
 
     @Test
-    @DisplayName("[조회] 성공 - 부가서비스 이력 조회")
-    void getVasHistorySuccess() {
-        // given
-        Long subId = 1L;
-        Vas vas1 = mock(Vas.class);
-        given(vas1.getName()).willReturn("Vas A");
-        SubscriptionVas sv1 = mock(SubscriptionVas.class);
-        given(sv1.getSvId()).willReturn(10L);
-        given(sv1.getVas()).willReturn(vas1);
-        given(sv1.getMonthlyFee()).willReturn(1000);
-        given(sv1.getStatus()).willReturn(VasStatus.TERMINATED);
-        given(sv1.getStartDate()).willReturn(LocalDateTime.now().minusDays(30));
-        given(sv1.getEndDate()).willReturn(LocalDateTime.now());
-
-        Vas vas2 = mock(Vas.class);
-        given(vas2.getName()).willReturn("Vas B");
-        SubscriptionVas sv2 = mock(SubscriptionVas.class);
-        given(sv2.getSvId()).willReturn(11L);
-        given(sv2.getVas()).willReturn(vas2);
-        given(sv2.getMonthlyFee()).willReturn(2000);
-        given(sv2.getStatus()).willReturn(VasStatus.ACTIVE);
-        given(sv2.getStartDate()).willReturn(LocalDateTime.now());
-
-        given(subscriptionVasRepository.findBySubscriptionSubIdOrderByStartDateDesc(subId))
-                .willReturn(java.util.List.of(sv2, sv1));
-
-        // when
-        java.util.List<com.project.core.controller.dto.response.SubscriptionVasResponse> result =
-                vasService.getVasHistory(subId);
-
-        // then
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).vasName()).isEqualTo("Vas B");
-        assertThat(result.get(0).status()).isEqualTo("ACTIVE");
-        assertThat(result.get(1).vasName()).isEqualTo("Vas A");
-        assertThat(result.get(1).status()).isEqualTo("TERMINATED");
-    }
-
-    @Test
     @DisplayName("[가입] 성공 - 부가서비스 가입")
     void joinVasSuccess() {
         Long subId = 1L;
@@ -123,7 +82,7 @@ class VasServiceTest {
         ReflectionTestUtils.setField(savedVas, "svId", 100L);
         given(subscriptionVasRepository.save(any(SubscriptionVas.class))).willReturn(savedVas);
 
-        VasJoinResponse response = vasService.joinVas(subId, vasId);
+        VasDto.JoinResponse response = vasService.joinVas(subId, vasId);
 
         assertThat(response).isNotNull();
         assertThat(response.subVasId()).isEqualTo(100L);
@@ -225,7 +184,7 @@ class VasServiceTest {
                 .willReturn(Optional.of(subVas));
 
         Long vasId = 1L;
-        VasTerminateResponse response = vasService.terminateVas(subId, vasId);
+        VasDto.TerminateResponse response = vasService.terminateVas(subId, vasId);
 
         assertThat(response.status()).isEqualTo("TERMINATED");
         assertThat(subVas.getStatus()).isEqualTo(VasStatus.TERMINATED);
@@ -315,7 +274,7 @@ class VasServiceTest {
                 .willReturn(List.of(sv1, sv2));
 
         List<Long> vasIds = List.of(1L, 2L);
-        VasBulkTerminateResponse response = vasService.terminateVasBulk(subId, vasIds);
+        VasDto.BulkTerminateResponse response = vasService.terminateVasBulk(subId, vasIds);
 
         assertThat(response.count()).isEqualTo(2);
         assertThat(sv1.getStatus()).isEqualTo(VasStatus.TERMINATED);
@@ -386,5 +345,43 @@ class VasServiceTest {
                         EntityNotFoundException.class,
                         () -> vasService.terminateVasBulk(subId, vasIds));
         assertThat(ex.getCode()).isEqualTo(CoreErrorCode.VAS_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("[조회] 성공 - 부가서비스 이력 조회")
+    void getVasHistorySuccess() {
+        // given
+        Long subId = 1L;
+        Vas vas1 = mock(Vas.class);
+        given(vas1.getName()).willReturn("Vas A");
+        SubscriptionVas sv1 = mock(SubscriptionVas.class);
+        given(sv1.getSvId()).willReturn(10L);
+        given(sv1.getVas()).willReturn(vas1);
+        given(sv1.getMonthlyFee()).willReturn(1000);
+        given(sv1.getStatus()).willReturn(VasStatus.TERMINATED);
+        given(sv1.getStartDate()).willReturn(LocalDateTime.now().minusDays(30));
+        given(sv1.getEndDate()).willReturn(LocalDateTime.now());
+
+        Vas vas2 = mock(Vas.class);
+        given(vas2.getName()).willReturn("Vas B");
+        SubscriptionVas sv2 = mock(SubscriptionVas.class);
+        given(sv2.getSvId()).willReturn(11L);
+        given(sv2.getVas()).willReturn(vas2);
+        given(sv2.getMonthlyFee()).willReturn(2000);
+        given(sv2.getStatus()).willReturn(VasStatus.ACTIVE);
+        given(sv2.getStartDate()).willReturn(LocalDateTime.now());
+
+        given(subscriptionVasRepository.findBySubscriptionSubIdOrderByStartDateDesc(subId))
+                .willReturn(java.util.List.of(sv2, sv1));
+
+        // when
+        java.util.List<VasDto.HistoryResponse> result = vasService.getVasHistory(subId);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).vasName()).isEqualTo("Vas B");
+        assertThat(result.get(0).status()).isEqualTo("ACTIVE");
+        assertThat(result.get(1).vasName()).isEqualTo("Vas A");
+        assertThat(result.get(1).status()).isEqualTo("TERMINATED");
     }
 }
