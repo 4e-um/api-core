@@ -24,7 +24,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.project.core.controller.dto.response.MicroPaymentResponse;
+import com.project.core.controller.dto.MicroPaymentDto;
 import com.project.core.infra.entity.micro.MicroPayment;
 import com.project.core.infra.entity.micro.enums.MicroPaymentStatus;
 import com.project.core.infra.entity.subscription.Subscription;
@@ -74,8 +74,8 @@ class MicroPaymentServiceTest {
                 .willReturn(java.util.List.of(mp2, mp1));
 
         // when
-        java.util.List<com.project.core.controller.dto.response.MicroPaymentHistoryResponse>
-                result = microPaymentService.getMicroPaymentHistory(subId);
+        java.util.List<MicroPaymentDto.HistoryResponse> result =
+                microPaymentService.getMicroPaymentHistory(subId);
 
         // then
         assertThat(result).hasSize(2);
@@ -107,7 +107,7 @@ class MicroPaymentServiceTest {
         given(microPaymentRepository.save(any(MicroPayment.class))).willReturn(savedPayment);
 
         // when
-        MicroPaymentResponse response = microPaymentService.pay(subId, "Item", 1000);
+        MicroPaymentDto.Response response = microPaymentService.pay(subId, "Item", 1000);
 
         // then
         assertThat(response).isNotNull();
@@ -192,7 +192,7 @@ class MicroPaymentServiceTest {
         given(microPaymentRepository.findById(microId)).willReturn(Optional.of(microPayment));
 
         // when
-        MicroPaymentResponse response = microPaymentService.cancel(microId, subId);
+        MicroPaymentDto.Response response = microPaymentService.cancel(microId, subId);
 
         // then
         assertThat(response.status()).isEqualTo("CANCELED");
