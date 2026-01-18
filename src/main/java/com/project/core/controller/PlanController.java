@@ -1,6 +1,9 @@
 package com.project.core.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +14,7 @@ import com.project.core.controller.dto.request.PlanChangeRequest;
 import com.project.core.controller.dto.request.SubscriptionJoinRequest;
 import com.project.core.controller.dto.response.PlanChangeResponse;
 import com.project.core.controller.dto.response.SubscriptionJoinResponse;
+import com.project.core.controller.dto.response.SubscriptionPlanResponse;
 import com.project.core.controller.dto.response.SubscriptionTerminateResponse;
 import com.project.core.service.PlanService;
 
@@ -22,6 +26,14 @@ import lombok.RequiredArgsConstructor;
 public class PlanController {
 
     private final PlanService planService;
+
+    // 요금제 이력 조회
+    @GetMapping("/{subId}/history")
+    public ResponseEntity<List<SubscriptionPlanResponse>> getPlanHistory(
+            @PathVariable(name = "subId") Long subId) {
+        List<SubscriptionPlanResponse> history = planService.getPlanHistory(subId);
+        return ResponseEntity.ok(history);
+    }
 
     @PostMapping("/join")
     public ResponseEntity<SubscriptionJoinResponse> joinSubscription(

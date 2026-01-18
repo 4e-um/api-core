@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
 
@@ -48,6 +49,40 @@ class MicroPaymentServiceTest {
     void setup() {
         given(clock.getZone()).willReturn(ZoneId.of("Asia/Seoul"));
         given(clock.instant()).willReturn(Instant.parse("2026-01-01T00:00:00Z"));
+    }
+
+    @Test
+    @DisplayName("[조회] 성공 - 소액결제 이력 조회")
+    void getMicroPaymentHistorySuccess() {
+        // given
+        Long subId = 1L;
+        MicroPayment mp1 = mock(MicroPayment.class);
+        given(mp1.getMicroId()).willReturn(10L);
+        given(mp1.getName()).willReturn("Item A");
+        given(mp1.getAmount()).willReturn(1000);
+        given(mp1.getPayDate()).willReturn(LocalDateTime.now().minusDays(1));
+        given(mp1.getStatus()).willReturn(MicroPaymentStatus.BILLED);
+
+        MicroPayment mp2 = mock(MicroPayment.class);
+        given(mp2.getMicroId()).willReturn(11L);
+        given(mp2.getName()).willReturn("Item B");
+        given(mp2.getAmount()).willReturn(2000);
+        given(mp2.getPayDate()).willReturn(LocalDateTime.now());
+        given(mp2.getStatus()).willReturn(MicroPaymentStatus.CANCELED);
+
+        given(microPaymentRepository.findBySubscriptionSubIdOrderByPayDateDesc(subId))
+                .willReturn(java.util.List.of(mp2, mp1));
+
+        // when
+        java.util.List<com.project.core.controller.dto.response.MicroPaymentHistoryResponse>
+                result = microPaymentService.getMicroPaymentHistory(subId);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).name()).isEqualTo("Item B");
+        assertThat(result.get(0).status()).isEqualTo("CANCELED");
+        assertThat(result.get(1).name()).isEqualTo("Item A");
+        assertThat(result.get(1).status()).isEqualTo("BILLED");
     }
 
     @Test
@@ -103,6 +138,19 @@ class MicroPaymentServiceTest {
                 .isInstanceOf(InvalidStateException.class)
                 .extracting("code")
                 .isEqualTo(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
+    }
+
+    @Test
+    @DisplayName("[승인] 실패 - 정지된 회선")
+    void payFailSubSuspended() {
+        Subscription sub = mock(Subscription.class);
+        given(sub.getStatus()).willReturn(SubscriptionStatus.SUSPENDED);
+        given(subscriptionRepository.findById(any(Long.class))).willReturn(Optional.of(sub));
+
+        assertThatThrownBy(() -> microPaymentService.pay(1L, "Item", 1000))
+                .isInstanceOf(InvalidStateException.class)
+                .extracting("code")
+                .isEqualTo(CoreErrorCode.SUBSCRIPTION_SUSPENDED);
     }
 
     @Test

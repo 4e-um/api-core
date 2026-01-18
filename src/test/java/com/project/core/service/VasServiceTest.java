@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
@@ -57,6 +58,45 @@ class VasServiceTest {
     void setup() {
         given(clock.getZone()).willReturn(ZoneId.of("Asia/Seoul"));
         given(clock.instant()).willReturn(Instant.parse("2026-01-01T00:00:00Z"));
+    }
+
+    @Test
+    @DisplayName("[조회] 성공 - 부가서비스 이력 조회")
+    void getVasHistorySuccess() {
+        // given
+        Long subId = 1L;
+        Vas vas1 = mock(Vas.class);
+        given(vas1.getName()).willReturn("Vas A");
+        SubscriptionVas sv1 = mock(SubscriptionVas.class);
+        given(sv1.getSvId()).willReturn(10L);
+        given(sv1.getVas()).willReturn(vas1);
+        given(sv1.getMonthlyFee()).willReturn(1000);
+        given(sv1.getStatus()).willReturn(VasStatus.TERMINATED);
+        given(sv1.getStartDate()).willReturn(LocalDateTime.now().minusDays(30));
+        given(sv1.getEndDate()).willReturn(LocalDateTime.now());
+
+        Vas vas2 = mock(Vas.class);
+        given(vas2.getName()).willReturn("Vas B");
+        SubscriptionVas sv2 = mock(SubscriptionVas.class);
+        given(sv2.getSvId()).willReturn(11L);
+        given(sv2.getVas()).willReturn(vas2);
+        given(sv2.getMonthlyFee()).willReturn(2000);
+        given(sv2.getStatus()).willReturn(VasStatus.ACTIVE);
+        given(sv2.getStartDate()).willReturn(LocalDateTime.now());
+
+        given(subscriptionVasRepository.findBySubscriptionSubIdOrderByStartDateDesc(subId))
+                .willReturn(java.util.List.of(sv2, sv1));
+
+        // when
+        java.util.List<com.project.core.controller.dto.response.SubscriptionVasResponse> result =
+                vasService.getVasHistory(subId);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).vasName()).isEqualTo("Vas B");
+        assertThat(result.get(0).status()).isEqualTo("ACTIVE");
+        assertThat(result.get(1).vasName()).isEqualTo("Vas A");
+        assertThat(result.get(1).status()).isEqualTo("TERMINATED");
     }
 
     @Test
@@ -111,6 +151,19 @@ class VasServiceTest {
         InvalidStateException ex =
                 assertThrows(InvalidStateException.class, () -> vasService.joinVas(subId, 1L));
         assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
+    }
+
+    @Test
+    @DisplayName("[가입] 실패 - 정지된 회선")
+    void joinVasFailSubSuspended() {
+        Long subId = 1L;
+        Subscription subscription = mock(Subscription.class);
+        given(subscription.getStatus()).willReturn(SubscriptionStatus.SUSPENDED);
+        given(subscriptionRepository.findById(subId)).willReturn(Optional.of(subscription));
+
+        InvalidStateException ex =
+                assertThrows(InvalidStateException.class, () -> vasService.joinVas(subId, 1L));
+        assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_SUSPENDED);
     }
 
     @Test
@@ -202,6 +255,19 @@ class VasServiceTest {
     }
 
     @Test
+    @DisplayName("[해지] 실패 - 정지된 회선")
+    void terminateVasFailSubSuspended() {
+        Long subId = 1L;
+        Subscription subscription = mock(Subscription.class);
+        given(subscription.getStatus()).willReturn(SubscriptionStatus.SUSPENDED);
+        given(subscriptionRepository.findById(subId)).willReturn(Optional.of(subscription));
+
+        InvalidStateException ex =
+                assertThrows(InvalidStateException.class, () -> vasService.terminateVas(subId, 1L));
+        assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_SUSPENDED);
+    }
+
+    @Test
     @DisplayName("[해지] 실패 - 가입되지 않았거나 이미 해지된 부가서비스")
     void terminateVasFailAlreadyTerminated() {
         Long subId = 1L;
@@ -270,6 +336,22 @@ class VasServiceTest {
                         InvalidStateException.class,
                         () -> vasService.terminateVasBulk(subId, vasIds));
         assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
+    }
+
+    @Test
+    @DisplayName("[일괄해지] 실패 - 정지된 회선")
+    void terminateVasBulkFailSubSuspended() {
+        Long subId = 1L;
+        Subscription subscription = mock(Subscription.class);
+        given(subscription.getStatus()).willReturn(SubscriptionStatus.SUSPENDED);
+        given(subscriptionRepository.findById(subId)).willReturn(Optional.of(subscription));
+
+        List<Long> vasIds = List.of(1L);
+        InvalidStateException ex =
+                assertThrows(
+                        InvalidStateException.class,
+                        () -> vasService.terminateVasBulk(subId, vasIds));
+        assertThat(ex.getCode()).isEqualTo(CoreErrorCode.SUBSCRIPTION_SUSPENDED);
     }
 
     @Test

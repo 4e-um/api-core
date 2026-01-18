@@ -1,10 +1,12 @@
 package com.project.core.service;
 
 import java.time.Clock;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.project.core.controller.dto.response.MicroPaymentHistoryResponse;
 import com.project.core.controller.dto.response.MicroPaymentResponse;
 import com.project.core.infra.entity.micro.MicroPayment;
 import com.project.core.infra.entity.subscription.Subscription;
@@ -26,7 +28,23 @@ public class MicroPaymentService {
     private final SubscriptionRepository subscriptionRepository;
     private final Clock clock;
 
-    // 소액결제 승인
+    /** 소액결제 내역 조회 */
+    @Transactional(readOnly = true)
+    public List<MicroPaymentHistoryResponse> getMicroPaymentHistory(Long subId) {
+
+        return microPaymentRepository.findBySubscriptionSubIdOrderByPayDateDesc(subId).stream()
+                .map(
+                        mp ->
+                                new MicroPaymentHistoryResponse(
+                                        mp.getMicroId(),
+                                        mp.getName(),
+                                        mp.getAmount(),
+                                        mp.getPayDate(),
+                                        mp.getStatus().name()))
+                .toList();
+    }
+
+    /** 소액결제 승인 */
     public MicroPaymentResponse pay(Long subId, String name, Integer amount) {
         Subscription subscription = findActiveSubscription(subId);
 
@@ -48,7 +66,7 @@ public class MicroPaymentService {
         return toResponse(savedMicroPayment);
     }
 
-    // 소액결제 취소
+    /** 소액결제 취소 */
     public MicroPaymentResponse cancel(Long microId, Long subId) {
         // 결제 내역 조회
         MicroPayment microPayment =
@@ -73,8 +91,10 @@ public class MicroPaymentService {
                                 () ->
                                         new EntityNotFoundException(
                                                 CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
-        if (subscription.getStatus() != SubscriptionStatus.ACTIVE) {
+        if (subscription.getStatus() == SubscriptionStatus.TERMINATED) {
             throw new InvalidStateException(CoreErrorCode.SUBSCRIPTION_ALREADY_TERMINATED);
+        } else if (subscription.getStatus() == SubscriptionStatus.SUSPENDED) {
+            throw new InvalidStateException(CoreErrorCode.SUBSCRIPTION_SUSPENDED);
         }
         return subscription;
     }

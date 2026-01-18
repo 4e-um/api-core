@@ -1,5 +1,6 @@
 package com.project.core.infra.repository.plan;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,7 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
             "SELECT sp from SubscriptionPlan sp "
                     + "WHERE sp.subscription.subId = :subId AND sp.leftDate > CURRENT_TIMESTAMP")
     Optional<SubscriptionPlan> findActivePlanBySubId(@Param("subId") Long subId);
+
+    // 특정 회선의 요금제 변경 이력 전체 조회 (최신순)
+    List<SubscriptionPlan> findBySubscriptionSubIdOrderByCreatedDateDesc(Long subId);
 }

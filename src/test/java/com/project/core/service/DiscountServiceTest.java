@@ -85,8 +85,7 @@ class DiscountServiceTest {
     void loadRequiredBySubIdFailNotFound() {
         // given
         Long subId = 1L;
-        given(subscriptionDiscountRepository.findBySubscription_SubId(eq(subId)))
-                .willReturn(List.of());
+        given(subscriptionDiscountRepository.findBySubscription_SubId(subId)).willReturn(List.of());
 
         // when & then
         assertThatThrownBy(() -> discountService.loadRequiredBySubId(subId))
@@ -198,14 +197,12 @@ class DiscountServiceTest {
                         .build();
         ReflectionTestUtils.setField(existing, "sdId", sdId);
 
-        given(subscriptionDiscountRepository.findBySdId(eq(sdId)))
-                .willReturn(Optional.of(existing));
+        given(subscriptionDiscountRepository.findBySdId(sdId)).willReturn(Optional.of(existing));
 
         // 신규 할인 정책
         DiscountPolicy newPolicy = newInstanceDiscountPolicy(newDiscountId);
         given(subscriptionRepository.findById(eq(subId))).willReturn(Optional.of(subscription));
-        given(discountPolicyRepository.findById(eq(newDiscountId)))
-                .willReturn(Optional.of(newPolicy));
+        given(discountPolicyRepository.findById(newDiscountId)).willReturn(Optional.of(newPolicy));
 
         // 신규 저장되는 할인 sdId 세팅
         given(subscriptionDiscountRepository.save(any(SubscriptionDiscount.class)))
@@ -271,8 +268,7 @@ class DiscountServiceTest {
                         .build();
         ReflectionTestUtils.setField(existing, "sdId", sdId);
 
-        given(subscriptionDiscountRepository.findBySdId(eq(sdId)))
-                .willReturn(Optional.of(existing));
+        given(subscriptionDiscountRepository.findBySdId(sdId)).willReturn(Optional.of(existing));
 
         Long newDiscountId = 999L;
         // addDiscount 내부 조회
@@ -311,8 +307,7 @@ class DiscountServiceTest {
                         .build();
         ReflectionTestUtils.setField(existing, "sdId", sdId);
 
-        given(subscriptionDiscountRepository.findBySdId(eq(sdId)))
-                .willReturn(Optional.of(existing));
+        given(subscriptionDiscountRepository.findBySdId(sdId)).willReturn(Optional.of(existing));
 
         // addDiscount 내부에서 subscription 조회 실패
         given(subscriptionRepository.findById(eq(subId))).willReturn(Optional.empty());

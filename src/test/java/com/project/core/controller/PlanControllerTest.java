@@ -4,12 +4,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +26,7 @@ import com.project.core.controller.dto.request.PlanChangeRequest;
 import com.project.core.controller.dto.request.SubscriptionJoinRequest;
 import com.project.core.controller.dto.response.PlanChangeResponse;
 import com.project.core.controller.dto.response.SubscriptionJoinResponse;
+import com.project.core.controller.dto.response.SubscriptionPlanResponse;
 import com.project.core.controller.dto.response.SubscriptionTerminateResponse;
 import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 import com.project.core.service.PlanService;
@@ -39,18 +42,42 @@ class PlanControllerTest {
     @MockitoBean private PlanService planService;
 
     @Test
+    @DisplayName("[조회/성공] 요금제 이력 조회 성공")
+    void getPlanHistorySuccess() throws Exception {
+        Long subId = 1L;
+        SubscriptionPlanResponse res1 =
+                new SubscriptionPlanResponse(
+                        1L,
+                        "Plan A",
+                        10000,
+                        LocalDateTime.now().minusDays(30),
+                        LocalDateTime.now());
+        SubscriptionPlanResponse res2 =
+                new SubscriptionPlanResponse(2L, "Plan B", 20000, LocalDateTime.now(), null);
+
+        when(planService.getPlanHistory(subId)).thenReturn(List.of(res2, res1));
+
+        mockMvc.perform(get("/plan/{subId}/history", subId).with(csrf()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].planName").value("Plan B"))
+                .andExpect(jsonPath("$[1].planName").value("Plan A"));
+    }
+
+    @Test
     @DisplayName("[가입/성공] 요금제 가입 요청 성공")
     void joinSubscriptionSuccess() throws Exception {
         SubscriptionJoinRequest request = new SubscriptionJoinRequest(1L, 1L);
         SubscriptionJoinResponse response =
-                SubscriptionJoinResponse.builder()
-                        .subId(100L)
-                        .customerId(1L)
-                        .planId(1L)
-                        .phoneNumber("010-1234-5678")
-                        .status(SubscriptionStatus.ACTIVE)
-                        .startDate(LocalDateTime.now())
-                        .build();
+                new SubscriptionJoinResponse(
+                        100L,
+                        1L,
+                        1L,
+                        "010-1234-5678",
+                        SubscriptionStatus.ACTIVE,
+                        LocalDateTime.now());
 
         when(planService.joinSubscription(any(Long.class), any(Long.class))).thenReturn(response);
 
@@ -87,12 +114,7 @@ class PlanControllerTest {
     @DisplayName("[변경/성공] 요금제 변경 요청 성공")
     void changePlanSuccess() throws Exception {
         PlanChangeRequest request = new PlanChangeRequest(1L, 2L);
-        PlanChangeResponse response =
-                PlanChangeResponse.builder()
-                        .subId(1L)
-                        .newPlanId(2L)
-                        .changedAt(LocalDateTime.now())
-                        .build();
+        PlanChangeResponse response = new PlanChangeResponse(1L, 1L, 2L, LocalDateTime.now());
 
         when(planService.changePlan(any(Long.class), any(Long.class))).thenReturn(response);
 
@@ -136,11 +158,8 @@ class PlanControllerTest {
     void terminateSubscriptionSuccess() throws Exception {
         Long subId = 1L;
         SubscriptionTerminateResponse response =
-                SubscriptionTerminateResponse.builder()
-                        .subId(subId)
-                        .status(SubscriptionStatus.TERMINATED)
-                        .terminatedAt(LocalDateTime.now())
-                        .build();
+                new SubscriptionTerminateResponse(
+                        subId, SubscriptionStatus.TERMINATED, LocalDateTime.now());
 
         when(planService.terminateSubscription(subId)).thenReturn(response);
 

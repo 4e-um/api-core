@@ -39,6 +39,7 @@ public enum CoreErrorCode implements BaseErrorCode {
     SUBSCRIPTION_ALREADY_TERMINATED(HttpStatus.BAD_REQUEST, "SUB_002", "이미 해지된 회선입니다."),
     PHONE_NUMBER_GENERATION_FAILED(
             HttpStatus.INTERNAL_SERVER_ERROR, "SUB_003", "사용 가능한 전화번호 생성에 실패했습니다. (재시도 횟수 초과)"),
+    SUBSCRIPTION_SUSPENDED(HttpStatus.BAD_REQUEST, "SUB_004", "정지된 회선입니다."),
 
     // 보안
     ENCRYPTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SEC_001", "암호화/복호화 처리 중 오류가 발생했습니다."),

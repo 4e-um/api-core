@@ -66,6 +66,40 @@ class PlanServiceTest {
     }
 
     @Test
+    @DisplayName("[조회] 성공 - 요금제 이력 조회")
+    void getPlanHistorySuccess() {
+        // given
+        Long subId = 1L;
+        Plan plan1 = mock(Plan.class);
+        given(plan1.getPlanName()).willReturn("Plan A");
+        SubscriptionPlan sp1 = mock(SubscriptionPlan.class);
+        given(sp1.getSpId()).willReturn(10L);
+        given(sp1.getPlan()).willReturn(plan1);
+        given(sp1.getCost()).willReturn(10000);
+        given(sp1.getCreatedDate()).willReturn(LocalDateTime.now().minusDays(30));
+
+        Plan plan2 = mock(Plan.class);
+        given(plan2.getPlanName()).willReturn("Plan B");
+        SubscriptionPlan sp2 = mock(SubscriptionPlan.class);
+        given(sp2.getSpId()).willReturn(11L);
+        given(sp2.getPlan()).willReturn(plan2);
+        given(sp2.getCost()).willReturn(20000);
+        given(sp2.getCreatedDate()).willReturn(LocalDateTime.now());
+
+        given(subscriptionPlanRepository.findBySubscriptionSubIdOrderByCreatedDateDesc(subId))
+                .willReturn(java.util.List.of(sp2, sp1));
+
+        // when
+        java.util.List<com.project.core.controller.dto.response.SubscriptionPlanResponse> result =
+                planService.getPlanHistory(subId);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).planName()).isEqualTo("Plan B");
+        assertThat(result.get(1).planName()).isEqualTo("Plan A");
+    }
+
+    @Test
     @DisplayName("[가입] 활성회선 0개이고 기존 번호 미사용 중이면 기존 번호 복구")
     void joinSubscriptionReuseNumber() {
         // given
@@ -95,7 +129,7 @@ class PlanServiceTest {
         SubscriptionJoinResponse response = planService.joinSubscription(customerId, 1L);
 
         // then
-        assertThat(response.getPhoneNumber()).isEqualTo("010-1234-5678");
+        assertThat(response.phoneNumber()).isEqualTo("010-1234-5678");
         verify(subscriptionRepository).save(any(Subscription.class));
         verify(subscriptionPlanRepository).save(any(SubscriptionPlan.class));
     }
@@ -130,7 +164,7 @@ class PlanServiceTest {
             SubscriptionJoinResponse response = planService.joinSubscription(1L, 1L);
 
             // then
-            assertThat(response.getPhoneNumber()).isEqualTo("010-1234-5678");
+            assertThat(response.phoneNumber()).isEqualTo("010-1234-5678");
             verify(subscriptionRepository).save(any(Subscription.class));
         }
     }
@@ -159,7 +193,7 @@ class PlanServiceTest {
             SubscriptionJoinResponse response = planService.joinSubscription(1L, 1L);
 
             // then
-            assertThat(response.getPhoneNumber()).isEqualTo("010-9999-8888");
+            assertThat(response.phoneNumber()).isEqualTo("010-9999-8888");
             verify(subscriptionRepository).save(any(Subscription.class));
         }
     }
@@ -245,8 +279,8 @@ class PlanServiceTest {
         PlanChangeResponse response = planService.changePlan(10L, 2L);
 
         // then
-        assertThat(response.getOldPlanId()).isEqualTo(1L);
-        assertThat(response.getNewPlanId()).isEqualTo(2L);
+        assertThat(response.oldPlanId()).isEqualTo(1L);
+        assertThat(response.newPlanId()).isEqualTo(2L);
         verify(oldHistory).expire();
         verify(subscriptionPlanRepository).save(any(SubscriptionPlan.class));
     }
@@ -343,6 +377,20 @@ class PlanServiceTest {
     }
 
     @Test
+    @DisplayName("[변경] 실패 - 정지된 회선은 변경 불가")
+    void changePlanFailSubSuspended() {
+        Subscription sub = new Subscription(null, "phone", clock);
+        ReflectionTestUtils.setField(sub, "status", SubscriptionStatus.SUSPENDED);
+
+        given(subscriptionRepository.findById(1L)).willReturn(Optional.of(sub));
+
+        assertThatThrownBy(() -> planService.changePlan(1L, 2L))
+                .isInstanceOf(InvalidStateException.class)
+                .extracting("code")
+                .isEqualTo(CoreErrorCode.SUBSCRIPTION_SUSPENDED);
+    }
+
+    @Test
     @DisplayName("[해지] 성공 - 상태 변경 및 요금제 만료")
     void terminateSubscriptionSuccess() {
         // given
@@ -360,7 +408,30 @@ class PlanServiceTest {
         SubscriptionTerminateResponse response = planService.terminateSubscription(1L);
 
         // then
-        assertThat(response.getStatus()).isEqualTo(SubscriptionStatus.TERMINATED);
+        assertThat(response.status()).isEqualTo(SubscriptionStatus.TERMINATED);
+        assertThat(sub.getStatus()).isEqualTo(SubscriptionStatus.TERMINATED);
+        verify(activePlan).expire();
+    }
+
+    @Test
+    @DisplayName("[해지] 성공 - SUSPENDED 상태의 회선 해지")
+    void terminateSubscriptionSuccessWhenSuspended() {
+        // given
+        Subscription sub = new Subscription(null, "phone", clock);
+        ReflectionTestUtils.setField(sub, "status", SubscriptionStatus.SUSPENDED);
+        ReflectionTestUtils.setField(sub, "endDate", LocalDateTime.now());
+
+        SubscriptionPlan activePlan = mock(SubscriptionPlan.class);
+
+        given(subscriptionRepository.findById(1L)).willReturn(Optional.of(sub));
+        given(subscriptionPlanRepository.findActivePlanBySubId(1L))
+                .willReturn(Optional.of(activePlan));
+
+        // when
+        SubscriptionTerminateResponse response = planService.terminateSubscription(1L);
+
+        // then
+        assertThat(response.status()).isEqualTo(SubscriptionStatus.TERMINATED);
         assertThat(sub.getStatus()).isEqualTo(SubscriptionStatus.TERMINATED);
         verify(activePlan).expire();
     }
