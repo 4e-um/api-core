@@ -27,6 +27,7 @@ public class ContactHashUtil {
             // ✅ Python: base64.b64decode(HASH_KEY) 와 동일
             byte[] keyBytes = Base64.getDecoder().decode(hashKey);
             this.keySpec = new SecretKeySpec(keyBytes, "HmacSHA256");
+            this.hashKey = null; // 초기화 후 메모리에서 평문 키를 제거하여 보안을 강화합니다.
         } catch (IllegalArgumentException e) {
             // hashKey가 base64가 아니면 여기로 옴
             throw new InvalidStateException(CoreErrorCode.ENCRYPTION_MUST_BE_BASE64);
