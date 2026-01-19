@@ -56,7 +56,9 @@ class SubscriptionServiceTest {
         // then
         assertThat(result).hasSize(2);
 
-        assertThat(result).extracting(SubscriptionResponse::subId).containsExactlyInAnyOrder(100L, 200L);
+        assertThat(result)
+                .extracting(SubscriptionResponse::subId)
+                .containsExactlyInAnyOrder(100L, 200L);
 
         verify(subscriptionRepository).findByCustomer_CustomerId(customerId);
     }

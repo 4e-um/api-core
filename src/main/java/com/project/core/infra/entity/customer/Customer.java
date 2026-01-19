@@ -74,8 +74,8 @@ public class Customer {
             throw new IllegalArgumentException("grade는 필수입니다.");
         }
         if (contactHash == null || contactHash.isBlank()) {
-          throw new IllegalArgumentException("contactHash는 필수입니다.");
-      }
+            throw new IllegalArgumentException("contactHash는 필수입니다.");
+        }
 
         this.name = name;
         this.contactEnc = contactEnc;

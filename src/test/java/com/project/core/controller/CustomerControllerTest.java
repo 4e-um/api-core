@@ -72,7 +72,7 @@ class CustomerControllerTest {
                                 fixedTime.plusDays(30),
                                 SubscriptionStatus.ACTIVE,
                                 15));
-        
+
         when(customerService.loadByPhone(eq("01012345678"))).thenReturn(customer);
         when(subscriptionService.findSubscriptionResponses(eq(1L))).thenReturn(subs); // ✅ 추가
 
