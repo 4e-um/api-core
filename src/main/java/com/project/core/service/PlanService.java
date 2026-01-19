@@ -52,6 +52,8 @@ public class PlanService {
                                         sp.getSpId(),
                                         sp.getPlan().getPlanName(),
                                         sp.getCost(),
+                                        sp.getAllotmentAmount(),
+                                        sp.getAllotmentPeriod(),
                                         sp.getCreatedDate(),
                                         sp.getLeftDate()))
                 .toList();

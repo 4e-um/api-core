@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.NotNull;
 
+import com.project.core.infra.entity.plan.enums.AllotmentPeriod;
 import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 
 public class PlanDto {
@@ -30,6 +31,8 @@ public class PlanDto {
             Long spId,
             String planName,
             Integer cost,
+            Long allotmentAmount,
+            AllotmentPeriod allotmentPeriod,
             LocalDateTime joinDate,
             LocalDateTime leftDate) {}
 }

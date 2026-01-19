@@ -32,6 +32,7 @@ import com.project.core.controller.dto.PlanDto;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.entity.plan.Plan;
 import com.project.core.infra.entity.plan.SubscriptionPlan;
+import com.project.core.infra.entity.plan.enums.AllotmentPeriod;
 import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 import com.project.core.infra.repository.customer.CustomerRepository;
@@ -74,6 +75,8 @@ class PlanServiceTest {
         given(sp1.getSpId()).willReturn(10L);
         given(sp1.getPlan()).willReturn(plan1);
         given(sp1.getCost()).willReturn(10000);
+        given(sp1.getAllotmentAmount()).willReturn(5120L);
+        given(sp1.getAllotmentPeriod()).willReturn(AllotmentPeriod.MONTH);
         given(sp1.getCreatedDate()).willReturn(LocalDateTime.now().minusDays(30));
 
         Plan plan2 = mock(Plan.class);
@@ -82,6 +85,8 @@ class PlanServiceTest {
         given(sp2.getSpId()).willReturn(11L);
         given(sp2.getPlan()).willReturn(plan2);
         given(sp2.getCost()).willReturn(20000);
+        given(sp1.getAllotmentAmount()).willReturn(153600L);
+        given(sp1.getAllotmentPeriod()).willReturn(AllotmentPeriod.MONTH);
         given(sp2.getCreatedDate()).willReturn(LocalDateTime.now());
 
         given(subscriptionPlanRepository.findBySubscriptionSubIdOrderByCreatedDateDesc(subId))

@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.core.controller.dto.PlanDto;
+import com.project.core.infra.entity.plan.enums.AllotmentPeriod;
 import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 import com.project.core.service.PlanService;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
@@ -48,10 +49,19 @@ class PlanControllerTest {
                         1L,
                         "Plan A",
                         10000,
+                        5120L,
+                        AllotmentPeriod.MONTH,
                         LocalDateTime.now().minusDays(30),
                         LocalDateTime.now());
         PlanDto.HistoryResponse res2 =
-                new PlanDto.HistoryResponse(2L, "Plan B", 20000, LocalDateTime.now(), null);
+                new PlanDto.HistoryResponse(
+                        2L,
+                        "Plan B",
+                        20000,
+                        153600L,
+                        AllotmentPeriod.MONTH,
+                        LocalDateTime.now(),
+                        null);
 
         when(planService.getPlanHistory(subId)).thenReturn(List.of(res2, res1));
 
