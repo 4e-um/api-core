@@ -25,28 +25,28 @@ public class VasController {
 
     // 부가서비스 이력 조회
     @GetMapping
-    public ResponseEntity<List<VasDto.HistoryResponse>> getVasHistory(@PathVariable Long subId) {
+    public ResponseEntity<List<VasDto.HistoryResponse>> getVasHistory(@PathVariable(name="subId") Long subId) {
         List<VasDto.HistoryResponse> history = vasService.getVasHistory(subId);
         return ResponseEntity.ok(history);
     }
 
     @PostMapping
     public ResponseEntity<VasDto.JoinResponse> joinVas(
-            @PathVariable Long subId, @RequestBody VasDto.Request request) {
+            @PathVariable(name="subId") Long subId, @RequestBody VasDto.Request request) {
         VasDto.JoinResponse response = vasService.joinVas(subId, request.vasId());
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{vasId}")
     public ResponseEntity<VasDto.TerminateResponse> terminateVas(
-            @PathVariable Long subId, @PathVariable Long vasId) {
+            @PathVariable(name="subId") Long subId, @PathVariable(name="vasId") Long vasId) {
         VasDto.TerminateResponse response = vasService.terminateVas(subId, vasId);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/bulk-terminate")
     public ResponseEntity<VasDto.BulkTerminateResponse> terminateVasBulk(
-            @PathVariable Long subId, @RequestBody VasDto.BulkRequest request) {
+            @PathVariable(name="subId") Long subId, @RequestBody VasDto.BulkRequest request) {
         VasDto.BulkTerminateResponse response =
                 vasService.terminateVasBulk(subId, request.vasIds());
         return ResponseEntity.ok(response);

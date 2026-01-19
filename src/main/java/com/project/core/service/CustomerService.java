@@ -27,8 +27,7 @@ public class CustomerService {
 
     @Transactional
     public Customer loadByPhone(String phoneRaw) {
-      String normalized = phoneRaw.replaceAll("[^0-9]", "");
-      String hash = contactHashUtil.hmacSha256Hex(normalized);
+      String hash = contactHashUtil.hmacSha256Base64(phoneRaw);
 
       return customerRepository.findByContactHash(hash)
           .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
