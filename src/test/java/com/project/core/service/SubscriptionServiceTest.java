@@ -56,10 +56,7 @@ class SubscriptionServiceTest {
         // then
         assertThat(result).hasSize(2);
 
-        // DTO 내용은 프로젝트 구현에 따라 필드명이 다를 수 있어서,
-        // 우선 "null 아닌지" + "호출흐름" 커버에 집중
-        assertThat(result.get(0)).isNotNull();
-        assertThat(result.get(1)).isNotNull();
+        assertThat(result).extracting(SubscriptionResponse::subId).containsExactlyInAnyOrder(100L, 200L);
 
         verify(subscriptionRepository).findByCustomer_CustomerId(customerId);
     }
