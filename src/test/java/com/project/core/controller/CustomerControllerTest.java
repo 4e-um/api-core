@@ -73,8 +73,8 @@ class CustomerControllerTest {
                                 SubscriptionStatus.ACTIVE,
                                 15));
 
-        when(customerService.loadByPhone(eq("01012345678"))).thenReturn(customer);
-        when(subscriptionService.findSubscriptionResponses(eq(1L))).thenReturn(subs); // ✅ 추가
+        when(customerService.loadByPhone("01012345678")).thenReturn(customer);
+        when(subscriptionService.findSubscriptionResponses(1L)).thenReturn(subs); // ✅ 추가
 
         // when & then
         mockMvc.perform(
@@ -99,7 +99,7 @@ class CustomerControllerTest {
         // given
         PhoneSearchRequest request = new PhoneSearchRequest("01012345678");
 
-        when(customerService.loadByPhone(eq("01012345678")))
+        when(customerService.loadByPhone("01012345678"))
                 .thenThrow(new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
 
         // when & then
@@ -220,8 +220,7 @@ class CustomerControllerTest {
         // given
         PhoneSearchRequest request = new PhoneSearchRequest("01012345678");
 
-        when(customerService.loadByPhone(eq("01012345678")))
-                .thenThrow(new RuntimeException("boom"));
+        when(customerService.loadByPhone("01012345678")).thenThrow(new RuntimeException("boom"));
 
         // when & then
         mockMvc.perform(
