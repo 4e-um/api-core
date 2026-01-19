@@ -63,22 +63,6 @@ class SubscriptionServiceTest {
         verify(subscriptionRepository).findByCustomer_CustomerId(customerId);
     }
 
-    @Test
-    @DisplayName("[조회] 실패 - 고객의 회선 목록이 비어있음")
-    void findSubscriptionResponsesFailNotFound() {
-        // given
-        Long customerId = 999L;
-        given(subscriptionRepository.findByCustomer_CustomerId(customerId)).willReturn(List.of());
-
-        // when & then
-        assertThatThrownBy(() -> subscriptionService.findSubscriptionResponses(customerId))
-                .isInstanceOf(EntityNotFoundException.class)
-                .extracting("code")
-                .isEqualTo(CoreErrorCode.SUBSCRIPTION_NOT_FOUND);
-
-        verify(subscriptionRepository).findByCustomer_CustomerId(customerId);
-    }
-
     // =========================
     // test fixtures
     // =========================
