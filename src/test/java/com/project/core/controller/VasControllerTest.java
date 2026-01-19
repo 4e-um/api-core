@@ -180,7 +180,7 @@ class VasControllerTest {
                 new VasDto.TerminateResponse(
                         10L, subId, 1L, VasStatus.TERMINATED.name(), LocalDateTime.now());
 
-        when(vasService.terminateVas(eq(subId), eq(vasId))).thenReturn(response);
+        when(vasService.terminateVas(subId, vasId)).thenReturn(response);
 
         mockMvc.perform(delete("/subscriptions/{subId}/vas/{vasId}", subId, vasId).with(csrf()))
                 .andDo(print())
@@ -195,7 +195,7 @@ class VasControllerTest {
         Long vasId = 1L;
         doThrow(new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND))
                 .when(vasService)
-                .terminateVas(eq(subId), eq(vasId));
+                .terminateVas(subId, vasId);
 
         mockMvc.perform(delete("/subscriptions/{subId}/vas/{vasId}", subId, vasId).with(csrf()))
                 .andDo(print())
@@ -212,7 +212,7 @@ class VasControllerTest {
         // EntityNotFoundException이지만 코드는 VAS_ALREADY_TERMINATED (400)
         doThrow(new EntityNotFoundException(CoreErrorCode.VAS_ALREADY_TERMINATED))
                 .when(vasService)
-                .terminateVas(eq(subId), eq(vasId));
+                .terminateVas(subId, vasId);
 
         mockMvc.perform(delete("/subscriptions/{subId}/vas/{vasId}", subId, vasId).with(csrf()))
                 .andDo(print())

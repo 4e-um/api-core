@@ -157,7 +157,7 @@ class MicroPaymentControllerTest {
                 new MicroPaymentDto.Response(
                         microId, 1L, "Item", 5000, LocalDateTime.now(), "CANCELED");
 
-        when(microPaymentService.cancel(eq(microId), eq(subId))).thenReturn(response);
+        when(microPaymentService.cancel(microId, subId)).thenReturn(response);
 
         mockMvc.perform(
                         post(
@@ -175,7 +175,7 @@ class MicroPaymentControllerTest {
     void cancelFailNotFound() throws Exception {
         Long subId = 1L;
         Long microId = 999L;
-        when(microPaymentService.cancel(eq(microId), eq(subId)))
+        when(microPaymentService.cancel(microId, subId))
                 .thenThrow(new EntityNotFoundException(CoreErrorCode.MICRO_PAYMENT_NOT_FOUND));
 
         mockMvc.perform(
@@ -195,7 +195,7 @@ class MicroPaymentControllerTest {
     void cancelFailForbidden() throws Exception {
         Long subId = 2L; // 다른 subId
         Long microId = 100L;
-        when(microPaymentService.cancel(eq(microId), eq(subId)))
+        when(microPaymentService.cancel(microId, subId))
                 .thenThrow(new InvalidStateException(CoreErrorCode.MICRO_PAYMENT_BAD_REQUEST));
 
         mockMvc.perform(
@@ -219,7 +219,7 @@ class MicroPaymentControllerTest {
     void cancelFailAlreadyCanceled() throws Exception {
         Long subId = 1L;
         Long microId = 100L;
-        when(microPaymentService.cancel(eq(microId), eq(subId)))
+        when(microPaymentService.cancel(microId, subId))
                 .thenThrow(new InvalidStateException(CoreErrorCode.MICRO_PAYMENT_ALREADY_CANCELED));
 
         mockMvc.perform(
