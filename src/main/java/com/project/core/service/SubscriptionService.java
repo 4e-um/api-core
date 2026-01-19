@@ -24,7 +24,7 @@ public class SubscriptionService {
     public List<Subscription> findSubscription(Long customerId) {
 
         List<Subscription> subscriptions =
-                subscriptionRepository.findByCustomer_CustomerId(customerId);
+                subscriptionRepository.findAllByCustomer_CustomerIdWithPlan(customerId);
 
         if (subscriptions.isEmpty()) {
             throw new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND);

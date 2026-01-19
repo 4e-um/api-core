@@ -1,10 +1,16 @@
 package com.project.core.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.core.controller.dto.request.ChangeEmailRequest;
@@ -12,6 +18,7 @@ import com.project.core.controller.dto.request.ChangeGradeRequest;
 import com.project.core.controller.dto.request.PhoneSearchRequest;
 import com.project.core.controller.dto.response.ChangeEmailResponse;
 import com.project.core.controller.dto.response.ChangeGradeResponse;
+import com.project.core.controller.dto.response.CustomerListResponse;
 import com.project.core.controller.dto.response.CustomerResponse;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.service.CustomerService;
@@ -24,6 +31,15 @@ import lombok.RequiredArgsConstructor;
 public class CustomerController {
 
     private final CustomerService customerService;
+
+    /** 고객 전체 목록 조회 (페이징) */
+    @GetMapping
+    public ResponseEntity<Page<CustomerListResponse>> getAllCustomers(
+            @RequestParam(name = "search", required = false) String search,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<CustomerListResponse> response = customerService.getAllCustomers(search, pageable);
+        return ResponseEntity.ok(response);
+    }
 
     /** 고객 조회 (전화번호 기준) */
     @PostMapping("/search")
