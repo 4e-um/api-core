@@ -234,6 +234,39 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.code").value("COMMON_004"));
     }
 
+    @Test
+    @DisplayName("[조회/성공] 고객은 존재하지만 구독이 없으면 subscriptions는 빈 배열")
+    void searchByPhoneSuccess_emptySubscriptions() throws Exception {
+        // given
+        PhoneSearchRequest request = new PhoneSearchRequest("01012345678");
+
+        Customer customer =
+                Customer.builder()
+                        .name("홍길동")
+                        .grade(Grade.GENERAL)
+                        .contactEnc("encrypted-phone")
+                        .contactHash("hash")
+                        .emailEnc("encrypted-email")
+                        .build();
+        ReflectionTestUtils.setField(customer, "customerId", 1L);
+
+        when(customerService.loadByPhone("01012345678")).thenReturn(customer);
+        when(subscriptionService.findSubscriptionResponses(1L)).thenReturn(List.of()); // ✅ 핵심
+
+        // when & then
+        mockMvc.perform(
+                        post("/customer/search")
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.customerId").value(1L))
+                .andExpect(jsonPath("$.name").value("홍길동"))
+                .andExpect(jsonPath("$.subscriptions").isArray())
+                .andExpect(jsonPath("$.subscriptions.length()").value(0));
+    }
+
     // =========================
     // [공통 실패] /customer/{customerId}/email
     // =========================

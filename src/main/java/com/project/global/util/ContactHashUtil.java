@@ -10,6 +10,9 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.project.global.exception.code.domain.core.CoreErrorCode;
+import com.project.global.exception.core.InvalidStateException;
+
 @Component
 public class ContactHashUtil {
 
@@ -26,7 +29,7 @@ public class ContactHashUtil {
             this.keySpec = new SecretKeySpec(keyBytes, "HmacSHA256");
         } catch (IllegalArgumentException e) {
             // hashKey가 base64가 아니면 여기로 옴
-            throw new IllegalStateException("ureca.hash-key must be Base64 encoded", e);
+            throw new InvalidStateException(CoreErrorCode.ENCRYPTION_MUST_BE_BASE64);
         }
     }
 
@@ -44,7 +47,7 @@ public class ContactHashUtil {
             // ✅ Python: base64.b64encode(signature).decode('utf-8') 와 동일
             return Base64.getEncoder().encodeToString(raw);
         } catch (GeneralSecurityException e) {
-            throw new IllegalStateException(e);
+            throw new InvalidStateException(CoreErrorCode.ENCRYPTION_FAILED);
         }
     }
 }

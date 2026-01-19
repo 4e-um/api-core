@@ -1,7 +1,6 @@
 package com.project.core.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -22,8 +21,6 @@ import com.project.core.controller.dto.response.SubscriptionResponse;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.repository.subscription.SubscriptionRepository;
-import com.project.global.exception.code.domain.core.CoreErrorCode;
-import com.project.global.exception.core.EntityNotFoundException;
 import com.project.global.util.AesUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -82,5 +79,21 @@ class SubscriptionServiceTest {
 
         ReflectionTestUtils.setField(subscription, "subId", subId);
         return subscription;
+    }
+
+    @Test
+    @DisplayName("[조회] 성공 - 구독이 없으면 빈 리스트 반환")
+    void findSubscription_empty_returnsEmptyList() {
+        // given
+        Long customerId = 1L;
+        given(subscriptionRepository.findByCustomer_CustomerId(customerId)).willReturn(List.of());
+
+        // when
+        List<SubscriptionResponse> result =
+                subscriptionService.findSubscriptionResponses(customerId);
+
+        // then
+        assertThat(result).isEmpty();
+        verify(subscriptionRepository).findByCustomer_CustomerId(customerId);
     }
 }

@@ -24,9 +24,7 @@ public class SubscriptionService {
         List<Subscription> subscriptions =
                 subscriptionRepository.findByCustomer_CustomerId(customerId);
 
-        return subscriptions.stream()
-                .map(sub -> SubscriptionResponse.from(sub, aesUtil))
-                .toList();
+        // ✅ 구독이 없으면 빈 리스트 반환 (예외 없음)
+        return subscriptions.stream().map(sub -> SubscriptionResponse.from(sub, aesUtil)).toList();
     }
 }
-
