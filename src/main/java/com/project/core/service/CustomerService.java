@@ -25,7 +25,7 @@ public class CustomerService {
     private final AesUtil aesUtil;
     private final ContactHashUtil contactHashUtil;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Customer loadByPhone(String phoneRaw) {
         String hash = contactHashUtil.hmacSha256Base64(phoneRaw);
 

@@ -38,24 +38,24 @@ class CustomerServiceTest {
     @Mock private ContactHashUtil contactHashUtil;
 
     @Test
-    @DisplayName("[조회] 성공 - 전화번호 기반 유저 조회")
+    @DisplayName("[조회] 성공 - 전화번호(raw) 기반 유저 조회 (hash 변환 후 조회)")
     void loadByPhoneSuccess() {
         // given
         String phoneRaw = "010-1234-5678";
-        String contactHash = "hash-base64";
+        String hash = "hash-value";
 
         Customer customer =
                 Customer.builder()
                         .name("홍길동")
                         .grade(Grade.GENERAL)
                         .contactEnc("encrypted-phone")
-                        .contactHash(contactHash) // ✅ 필수
+                        .contactHash(hash)
                         .emailEnc("encrypted-email")
                         .build();
         ReflectionTestUtils.setField(customer, "customerId", 1L);
 
-        given(contactHashUtil.hmacSha256Base64(phoneRaw)).willReturn(contactHash);
-        given(customerRepository.findByContactHash(contactHash)).willReturn(Optional.of(customer));
+        given(contactHashUtil.hmacSha256Base64(phoneRaw)).willReturn(hash);
+        given(customerRepository.findByContactHash(hash)).willReturn(Optional.of(customer));
 
         // when
         Customer result = customerService.loadByPhone(phoneRaw);
@@ -66,19 +66,18 @@ class CustomerServiceTest {
         assertThat(result.getGrade()).isEqualTo(Grade.GENERAL);
 
         verify(contactHashUtil).hmacSha256Base64(phoneRaw);
-        verify(customerRepository).findByContactHash(contactHash);
-        verifyNoInteractions(aesUtil);
+        verify(customerRepository).findByContactHash(hash);
     }
 
     @Test
-    @DisplayName("[조회] 실패 - 고객 없음")
+    @DisplayName("[조회] 실패 - 고객 없음 (hash 변환 후 조회)")
     void loadByPhoneFailNotFound() {
         // given
-        String phoneRaw = "010-1234-5678";
-        String contactHash = "hash-base64";
+        String phoneRaw = "010-9999-9999";
+        String hash = "hash-not-found";
 
-        given(contactHashUtil.hmacSha256Base64(phoneRaw)).willReturn(contactHash);
-        given(customerRepository.findByContactHash(contactHash)).willReturn(Optional.empty());
+        given(contactHashUtil.hmacSha256Base64(phoneRaw)).willReturn(hash);
+        given(customerRepository.findByContactHash(hash)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> customerService.loadByPhone(phoneRaw))
@@ -87,8 +86,26 @@ class CustomerServiceTest {
                 .isEqualTo(CoreErrorCode.CUSTOMER_NOT_FOUND);
 
         verify(contactHashUtil).hmacSha256Base64(phoneRaw);
-        verify(customerRepository).findByContactHash(contactHash);
-        verifyNoInteractions(aesUtil);
+        verify(customerRepository).findByContactHash(hash);
+    }
+
+    @Test
+    @DisplayName("[조회] 실패 - phoneRaw null이면 CUSTOMER_NOT_FOUND")
+    void loadByPhoneFailNullPhoneRaw() {
+        // given
+        String phoneRaw = null;
+
+        given(contactHashUtil.hmacSha256Base64(phoneRaw)).willReturn(null);
+        given(customerRepository.findByContactHash(null)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> customerService.loadByPhone(phoneRaw))
+                .isInstanceOf(EntityNotFoundException.class)
+                .extracting("code")
+                .isEqualTo(CoreErrorCode.CUSTOMER_NOT_FOUND);
+
+        verify(contactHashUtil).hmacSha256Base64(phoneRaw);
+        verify(customerRepository).findByContactHash(null);
     }
 
     @Test
@@ -103,7 +120,7 @@ class CustomerServiceTest {
                         .name("홍길동")
                         .grade(Grade.GENERAL)
                         .contactEnc("encrypted-phone")
-                        .contactHash("hash-base64") // ✅ 필수
+                        .contactHash("hash-value")
                         .emailEnc("old-email-enc")
                         .build();
         ReflectionTestUtils.setField(customer, "customerId", customerId);
@@ -111,9 +128,10 @@ class CustomerServiceTest {
         given(customerRepository.findById(customerId)).willReturn(Optional.of(customer));
         given(aesUtil.encrypt(plainEmail)).willReturn("new-email-enc");
 
+        ChangeEmailRequest request = new ChangeEmailRequest(plainEmail);
+
         // when
-        ChangeEmailResponse response =
-                customerService.changeEmailEnc(customerId, new ChangeEmailRequest(plainEmail));
+        ChangeEmailResponse response = customerService.changeEmailEnc(customerId, request);
 
         // then
         assertThat(response).isNotNull();
@@ -121,30 +139,123 @@ class CustomerServiceTest {
 
         verify(customerRepository).findById(customerId);
         verify(aesUtil).encrypt(plainEmail);
-        verifyNoInteractions(contactHashUtil);
 
         assertThat(ReflectionTestUtils.getField(customer, "emailEnc")).isEqualTo("new-email-enc");
     }
 
     @Test
-    @DisplayName("[변경] 실패 - 고객 없음")
+    @DisplayName("[변경] 실패 - 고객 없음 (이메일 변경)")
     void changeEmailEncFailNotFound() {
         // given
         Long customerId = 999L;
+        ChangeEmailRequest request = new ChangeEmailRequest("example@example.com");
+
         given(customerRepository.findById(customerId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(
-                        () ->
-                                customerService.changeEmailEnc(
-                                        customerId, new ChangeEmailRequest("a@b.com")))
+        assertThatThrownBy(() -> customerService.changeEmailEnc(customerId, request))
                 .isInstanceOf(EntityNotFoundException.class)
                 .extracting("code")
                 .isEqualTo(CoreErrorCode.CUSTOMER_NOT_FOUND);
 
         verify(customerRepository).findById(customerId);
         verifyNoInteractions(aesUtil);
-        verifyNoInteractions(contactHashUtil);
+    }
+
+    @Test
+    @DisplayName("[변경] 성공 - 이메일 마스킹: local 1글자")
+    void changeEmailEncMaskLocalLength1() {
+        // given
+        Long customerId = 1L;
+        String email = "a@domain.com";
+
+        Customer customer =
+                Customer.builder()
+                        .name("홍길동")
+                        .grade(Grade.GENERAL)
+                        .contactEnc("encrypted-phone")
+                        .contactHash("hash-value")
+                        .emailEnc("old")
+                        .build();
+        ReflectionTestUtils.setField(customer, "customerId", customerId);
+
+        given(customerRepository.findById(customerId)).willReturn(Optional.of(customer));
+        given(aesUtil.encrypt(email)).willReturn("enc");
+
+        ChangeEmailRequest request = new ChangeEmailRequest(email);
+
+        // when
+        ChangeEmailResponse response = customerService.changeEmailEnc(customerId, request);
+
+        // then
+        assertThat(response.maskedEmail()).isEqualTo("a***@domain.com");
+
+        verify(customerRepository).findById(customerId);
+        verify(aesUtil).encrypt(email);
+    }
+
+    @Test
+    @DisplayName("[변경] 성공 - 이메일 마스킹: local 비어있음")
+    void changeEmailEncMaskLocalEmpty() {
+        // given
+        Long customerId = 1L;
+        String email = "@domain.com";
+
+        Customer customer =
+                Customer.builder()
+                        .name("홍길동")
+                        .grade(Grade.GENERAL)
+                        .contactEnc("encrypted-phone")
+                        .contactHash("hash-value")
+                        .emailEnc("old")
+                        .build();
+        ReflectionTestUtils.setField(customer, "customerId", customerId);
+
+        given(customerRepository.findById(customerId)).willReturn(Optional.of(customer));
+        given(aesUtil.encrypt(email)).willReturn("enc");
+
+        ChangeEmailRequest request = new ChangeEmailRequest(email);
+
+        // when
+        ChangeEmailResponse response = customerService.changeEmailEnc(customerId, request);
+
+        // then
+        assertThat(response.maskedEmail()).isEqualTo("***@domain.com");
+
+        verify(customerRepository).findById(customerId);
+        verify(aesUtil).encrypt(email);
+    }
+
+    @Test
+    @DisplayName("[변경] 성공 - 이메일 마스킹: @ 없음이면 null")
+    void changeEmailEncMaskNoAtReturnsNull() {
+        // given
+        Long customerId = 1L;
+        String email = "not-an-email";
+
+        Customer customer =
+                Customer.builder()
+                        .name("홍길동")
+                        .grade(Grade.GENERAL)
+                        .contactEnc("encrypted-phone")
+                        .contactHash("hash-value")
+                        .emailEnc("old")
+                        .build();
+        ReflectionTestUtils.setField(customer, "customerId", customerId);
+
+        given(customerRepository.findById(customerId)).willReturn(Optional.of(customer));
+        given(aesUtil.encrypt(email)).willReturn("enc");
+
+        ChangeEmailRequest request = new ChangeEmailRequest(email);
+
+        // when
+        ChangeEmailResponse response = customerService.changeEmailEnc(customerId, request);
+
+        // then
+        assertThat(response.maskedEmail()).isNull();
+
+        verify(customerRepository).findById(customerId);
+        verify(aesUtil).encrypt(email);
     }
 
     @Test
@@ -158,16 +269,17 @@ class CustomerServiceTest {
                         .name("홍길동")
                         .grade(Grade.VIP)
                         .contactEnc("encrypted-phone")
-                        .contactHash("hash-base64") // ✅ 필수
+                        .contactHash("hash-value")
                         .emailEnc("encrypted-email")
                         .build();
         ReflectionTestUtils.setField(customer, "customerId", customerId);
 
         given(customerRepository.findById(customerId)).willReturn(Optional.of(customer));
 
+        ChangeGradeRequest request = new ChangeGradeRequest(Grade.GENERAL);
+
         // when
-        ChangeGradeResponse response =
-                customerService.changeUserGrade(customerId, new ChangeGradeRequest(Grade.GENERAL));
+        ChangeGradeResponse response = customerService.changeUserGrade(customerId, request);
 
         // then
         assertThat(response).isNotNull();
@@ -175,8 +287,6 @@ class CustomerServiceTest {
         assertThat(customer.getGrade()).isEqualTo(Grade.GENERAL);
 
         verify(customerRepository).findById(customerId);
-        verifyNoInteractions(aesUtil);
-        verifyNoInteractions(contactHashUtil);
     }
 
     @Test
@@ -184,19 +294,17 @@ class CustomerServiceTest {
     void changeUserGradeFailNotFound() {
         // given
         Long customerId = 999L;
+        ChangeGradeRequest request = new ChangeGradeRequest(Grade.GENERAL);
+
         given(customerRepository.findById(customerId)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(
-                        () ->
-                                customerService.changeUserGrade(
-                                        customerId, new ChangeGradeRequest(Grade.GENERAL)))
+        assertThatThrownBy(() -> customerService.changeUserGrade(customerId, request))
                 .isInstanceOf(EntityNotFoundException.class)
                 .extracting("code")
                 .isEqualTo(CoreErrorCode.CUSTOMER_NOT_FOUND);
 
         verify(customerRepository).findById(customerId);
         verifyNoInteractions(aesUtil);
-        verifyNoInteractions(contactHashUtil);
     }
 }

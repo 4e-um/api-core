@@ -23,14 +23,6 @@ public class SubscriptionService {
 
     @Transactional(readOnly = true)
     public List<SubscriptionResponse> findSubscriptionResponses(Long customerId) {
-        return findSubscription(customerId).stream()
-                .map(sub -> SubscriptionResponse.from(sub, aesUtil))
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Subscription> findSubscription(Long customerId) {
-
         List<Subscription> subscriptions =
                 subscriptionRepository.findByCustomer_CustomerId(customerId);
 
@@ -38,6 +30,6 @@ public class SubscriptionService {
             throw new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND);
         }
 
-        return subscriptions;
+        return subscriptions.stream().map(sub -> SubscriptionResponse.from(sub, aesUtil)).toList();
     }
 }
