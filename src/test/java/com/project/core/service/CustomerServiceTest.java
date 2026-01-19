@@ -50,31 +50,31 @@ class CustomerServiceTest {
                         .build();
         ReflectionTestUtils.setField(customer, "customerId", 1L);
 
-        given(customerRepository.findByContactEnc(contactEnc)).willReturn(Optional.of(customer));
+        given(customerRepository.findByContactHash(contactEnc)).willReturn(Optional.of(customer));
 
         // when
-        Customer result = customerService.loadByContactEnc(contactEnc);
+        Customer result = customerService.loadByPhone(contactEnc);
 
         // then
         assertThat(result).isNotNull();
         assertThat(result.getName()).isEqualTo("홍길동");
         assertThat(result.getGrade()).isEqualTo(Grade.GENERAL);
-        verify(customerRepository).findByContactEnc(eq(contactEnc));
+        verify(customerRepository).findByContactHash(eq(contactEnc));
     }
 
     @Test
     @DisplayName("[조회] 실패 - 고객 없음")
     void loadByContactEncFailNotFound() {
         // given
-        given(customerRepository.findByContactEnc("encrypted-phone")).willReturn(Optional.empty());
+        given(customerRepository.findByContactHash("encrypted-phone")).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> customerService.loadByContactEnc("encrypted-phone"))
+        assertThatThrownBy(() -> customerService.loadByPhone("encrypted-phone"))
                 .isInstanceOf(EntityNotFoundException.class)
                 .extracting("code")
                 .isEqualTo(CoreErrorCode.CUSTOMER_NOT_FOUND);
 
-        verify(customerRepository).findByContactEnc(eq("encrypted-phone"));
+        verify(customerRepository).findByContactHash(eq("encrypted-phone"));
     }
 
     @Test

@@ -13,6 +13,7 @@ import com.project.core.infra.repository.customer.CustomerRepository;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
 import com.project.global.util.AesUtil;
+import com.project.global.util.ContactHashUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,13 +23,17 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final AesUtil aesUtil;
+    private final ContactHashUtil contactHashUtil;
 
-    @Transactional(readOnly = true)
-    public Customer loadByContactEnc(String contactEnc) {
-        return customerRepository
-                .findByContactEnc(contactEnc)
-                .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
+    @Transactional
+    public Customer loadByPhone(String phoneRaw) {
+      String normalized = phoneRaw.replaceAll("[^0-9]", "");
+      String hash = contactHashUtil.hmacSha256Hex(normalized);
+
+      return customerRepository.findByContactHash(hash)
+          .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
     }
+
 
     @Transactional
     public ChangeEmailResponse changeEmailEnc(

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.project.core.controller.dto.response.SubscriptionResponse;
 import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.repository.subscription.SubscriptionRepository;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
@@ -19,6 +20,13 @@ public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final AesUtil aesUtil;
+
+    @Transactional(readOnly = true)
+    public List<SubscriptionResponse> findSubscriptionResponses(Long customerId) {
+      return findSubscription(customerId).stream()
+          .map(sub -> SubscriptionResponse.from(sub, aesUtil))
+          .toList();
+    }
 
     @Transactional(readOnly = true)
     public List<Subscription> findSubscription(Long customerId) {
