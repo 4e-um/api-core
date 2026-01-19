@@ -36,11 +36,11 @@ public class Customer {
     @Column(name = "name", nullable = false)
     private String name;
 
-	  @Column(name = "contact_enc", nullable = false) // 암호화된 전화번호
-	  private String contactEnc;
-	  
-	  @Column(name = "contact_hash", nullable = false) // 조회용 암호
-	  private String contactHash;
+    @Column(name = "contact_enc", nullable = false) // 암호화된 전화번호
+    private String contactEnc;
+
+    @Column(name = "contact_hash", nullable = false) // 조회용 암호
+    private String contactHash;
 
     @Column(name = "email_enc", nullable = false) // 암호화된 이메일
     private String emailEnc;
@@ -59,7 +59,8 @@ public class Customer {
     private List<Subscription> subscriptionHistory = new ArrayList<>();
 
     @Builder
-    private Customer(String name, String contactEnc, String emailEnc, Grade grade, String contactHash) {
+    private Customer(
+            String name, String contactEnc, String emailEnc, Grade grade, String contactHash) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("name은 필수입니다.");
         }
@@ -73,7 +74,7 @@ public class Customer {
             throw new IllegalArgumentException("grade는 필수입니다.");
         }
         if (contactHash == null) {
-          throw new IllegalArgumentException("contactHash는 필수입니다.");
+            throw new IllegalArgumentException("contactHash는 필수입니다.");
         }
 
         this.name = name;

@@ -30,23 +30,19 @@ public class CustomerController {
     private final CustomerService customerService;
     private final SubscriptionService subscriptionService;
 
-
     /** 고객 조회 (전화번호 기준) */
     @PostMapping("/search")
     public ResponseEntity<CustomerSearchResponse> searchByPhone(
-        @RequestBody PhoneSearchRequest request
-    ) {
+            @RequestBody PhoneSearchRequest request) {
         Customer customer = customerService.loadByPhone(request.phoneRaw());
         Long customerId = customer.getCustomerId();
 
         List<SubscriptionResponse> subscriptions =
-            subscriptionService.findSubscriptionResponses(customerId);
+                subscriptionService.findSubscriptionResponses(customerId);
 
         return ResponseEntity.ok(
-            new CustomerSearchResponse(customerId, customer.getName(), subscriptions)
-        );
+                new CustomerSearchResponse(customerId, customer.getName(), subscriptions));
     }
-
 
     /** 이메일 변경 */
     @PostMapping("/{customerId}/email")

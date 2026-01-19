@@ -63,14 +63,14 @@ class CustomerControllerTest {
         ReflectionTestUtils.setField(customer, "customerId", 1L);
 
         List<SubscriptionResponse> subs =
-                List.of(new SubscriptionResponse(
-                        10L,
-                        "010-****-5678",
-                        LocalDateTime.now().minusDays(1),
-                        LocalDateTime.now().plusDays(30),
-                        SubscriptionStatus.ACTIVE,
-                        15
-                ));
+                List.of(
+                        new SubscriptionResponse(
+                                10L,
+                                "010-****-5678",
+                                LocalDateTime.now().minusDays(1),
+                                LocalDateTime.now().plusDays(30),
+                                SubscriptionStatus.ACTIVE,
+                                15));
 
         when(customerService.loadByPhone(eq("01012345678"))).thenReturn(customer);
         when(subscriptionService.findSubscriptionResponses(eq(1L))).thenReturn(subs); // ✅ 추가

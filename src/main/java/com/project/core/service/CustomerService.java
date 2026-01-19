@@ -27,12 +27,12 @@ public class CustomerService {
 
     @Transactional
     public Customer loadByPhone(String phoneRaw) {
-      String hash = contactHashUtil.hmacSha256Base64(phoneRaw);
+        String hash = contactHashUtil.hmacSha256Base64(phoneRaw);
 
-      return customerRepository.findByContactHash(hash)
-          .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
+        return customerRepository
+                .findByContactHash(hash)
+                .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
     }
-
 
     @Transactional
     public ChangeEmailResponse changeEmailEnc(

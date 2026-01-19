@@ -27,7 +27,7 @@ public class MicroPaymentController {
     // 소액결제 내역 조회
     @GetMapping
     public ResponseEntity<List<MicroPaymentDto.HistoryResponse>> getMicroPaymentHistory(
-            @PathVariable(name="subId") Long subId) {
+            @PathVariable(name = "subId") Long subId) {
         List<MicroPaymentDto.HistoryResponse> history =
                 microPaymentService.getMicroPaymentHistory(subId);
         return ResponseEntity.ok(history);
@@ -35,7 +35,8 @@ public class MicroPaymentController {
 
     @PostMapping
     public ResponseEntity<MicroPaymentDto.Response> pay(
-            @PathVariable(name = "subId") Long subId, @Valid @RequestBody MicroPaymentDto.Request request) {
+            @PathVariable(name = "subId") Long subId,
+            @Valid @RequestBody MicroPaymentDto.Request request) {
         MicroPaymentDto.Response response =
                 microPaymentService.pay(subId, request.name(), request.amount());
         return ResponseEntity.ok(response);
@@ -43,7 +44,8 @@ public class MicroPaymentController {
 
     @PostMapping("/{microId}/cancel")
     public ResponseEntity<MicroPaymentDto.Response> cancel(
-            @PathVariable(name="subId") Long subId, @PathVariable(name="microId") Long microId) {
+            @PathVariable(name = "subId") Long subId,
+            @PathVariable(name = "microId") Long microId) {
         MicroPaymentDto.Response response = microPaymentService.cancel(microId, subId);
         return ResponseEntity.ok(response);
     }

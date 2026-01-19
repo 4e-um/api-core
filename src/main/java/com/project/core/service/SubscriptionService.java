@@ -23,9 +23,9 @@ public class SubscriptionService {
 
     @Transactional(readOnly = true)
     public List<SubscriptionResponse> findSubscriptionResponses(Long customerId) {
-      return findSubscription(customerId).stream()
-          .map(sub -> SubscriptionResponse.from(sub, aesUtil))
-          .toList();
+        return findSubscription(customerId).stream()
+                .map(sub -> SubscriptionResponse.from(sub, aesUtil))
+                .toList();
     }
 
     @Transactional(readOnly = true)
