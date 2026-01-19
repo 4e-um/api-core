@@ -6,8 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.core.controller.dto.response.MicroPaymentHistoryResponse;
-import com.project.core.controller.dto.response.MicroPaymentResponse;
+import com.project.core.controller.dto.MicroPaymentDto;
 import com.project.core.infra.entity.micro.MicroPayment;
 import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
@@ -30,12 +29,12 @@ public class MicroPaymentService {
 
     /** 소액결제 내역 조회 */
     @Transactional(readOnly = true)
-    public List<MicroPaymentHistoryResponse> getMicroPaymentHistory(Long subId) {
+    public List<MicroPaymentDto.HistoryResponse> getMicroPaymentHistory(Long subId) {
 
         return microPaymentRepository.findBySubscriptionSubIdOrderByPayDateDesc(subId).stream()
                 .map(
                         mp ->
-                                new MicroPaymentHistoryResponse(
+                                new MicroPaymentDto.HistoryResponse(
                                         mp.getMicroId(),
                                         mp.getName(),
                                         mp.getAmount(),
@@ -45,7 +44,7 @@ public class MicroPaymentService {
     }
 
     /** 소액결제 승인 */
-    public MicroPaymentResponse pay(Long subId, String name, Integer amount) {
+    public MicroPaymentDto.Response pay(Long subId, String name, Integer amount) {
         Subscription subscription = findActiveSubscription(subId);
 
         // 금액 유효성 검사
@@ -67,7 +66,7 @@ public class MicroPaymentService {
     }
 
     /** 소액결제 취소 */
-    public MicroPaymentResponse cancel(Long microId, Long subId) {
+    public MicroPaymentDto.Response cancel(Long microId, Long subId) {
         // 결제 내역 조회
         MicroPayment microPayment =
                 microPaymentRepository
@@ -99,8 +98,8 @@ public class MicroPaymentService {
         return subscription;
     }
 
-    private MicroPaymentResponse toResponse(MicroPayment entity) {
-        return new MicroPaymentResponse(
+    private MicroPaymentDto.Response toResponse(MicroPayment entity) {
+        return new MicroPaymentDto.Response(
                 entity.getMicroId(),
                 entity.getSubscription().getSubId(),
                 entity.getName(),

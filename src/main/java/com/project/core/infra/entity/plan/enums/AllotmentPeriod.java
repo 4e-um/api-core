@@ -1,6 +1,6 @@
 package com.project.core.infra.entity.plan.enums;
 
-public enum AllowancePeriod {
+public enum AllotmentPeriod {
     MONTH,
     DAY
 }

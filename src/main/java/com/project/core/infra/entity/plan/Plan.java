@@ -9,7 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-import com.project.core.infra.entity.plan.enums.AllowancePeriod;
+import com.project.core.infra.entity.plan.enums.AllotmentPeriod;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -32,10 +32,10 @@ public class Plan {
     @Column(name = "plan_base_fee", nullable = false)
     private Integer planBaseFee;
 
-    @Column(name = "allowance_amount", nullable = false)
-    private Long allowanceAmount; // MB 단위, -1은 무제한
+    @Column(name = "allotment_amount", nullable = false)
+    private Long allotmentAmount; // MB 단위, -1은 무제한
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "allowance_period", nullable = false, length = 10)
-    private AllowancePeriod allowancePeriod; // MONTH / DAY
+    @Column(name = "allotment_period", nullable = false, length = 10)
+    private AllotmentPeriod allotmentPeriod; // MONTH / DAY
 }

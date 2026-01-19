@@ -12,43 +12,39 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.core.controller.dto.request.MicroPaymentCancelRequest;
-import com.project.core.controller.dto.request.MicroPaymentRequest;
-import com.project.core.controller.dto.response.MicroPaymentHistoryResponse;
-import com.project.core.controller.dto.response.MicroPaymentResponse;
+import com.project.core.controller.dto.MicroPaymentDto;
 import com.project.core.service.MicroPaymentService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/micro-payment")
+@RequestMapping("/subscriptions/{subId}/micropayments")
 public class MicroPaymentController {
 
     private final MicroPaymentService microPaymentService;
 
     // 소액결제 내역 조회
-    @GetMapping("/{subId}/history")
-    public ResponseEntity<List<MicroPaymentHistoryResponse>> getMicroPaymentHistory(
-            @PathVariable(name = "subId") Long subId) {
-        List<MicroPaymentHistoryResponse> history =
+    @GetMapping
+    public ResponseEntity<List<MicroPaymentDto.HistoryResponse>> getMicroPaymentHistory(
+            @PathVariable Long subId) {
+        List<MicroPaymentDto.HistoryResponse> history =
                 microPaymentService.getMicroPaymentHistory(subId);
         return ResponseEntity.ok(history);
     }
 
-    @PostMapping("/pay")
-    public ResponseEntity<MicroPaymentResponse> pay(
-            @Valid @RequestBody MicroPaymentRequest request) {
-        MicroPaymentResponse response =
-                microPaymentService.pay(request.subId(), request.name(), request.amount());
+    @PostMapping
+    public ResponseEntity<MicroPaymentDto.Response> pay(
+            @PathVariable Long subId, @Valid @RequestBody MicroPaymentDto.Request request) {
+        MicroPaymentDto.Response response =
+                microPaymentService.pay(subId, request.name(), request.amount());
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{microId}/cancel")
-    public ResponseEntity<MicroPaymentResponse> cancel(
-            @PathVariable(name = "microId") Long microId,
-            @Valid @RequestBody MicroPaymentCancelRequest request) {
-        MicroPaymentResponse response = microPaymentService.cancel(microId, request.subId());
+    public ResponseEntity<MicroPaymentDto.Response> cancel(
+            @PathVariable Long subId, @PathVariable Long microId) {
+        MicroPaymentDto.Response response = microPaymentService.cancel(microId, subId);
         return ResponseEntity.ok(response);
     }
 }
