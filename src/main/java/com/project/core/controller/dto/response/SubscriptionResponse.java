@@ -17,8 +17,10 @@ public record SubscriptionResponse(
         Integer sendDay,
         String planName,
         long dataUsed, // Byte
-        long dataLimit // Byte
-) {
+        long dataLimit) { // Byte (-1 if unlimited)
+
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
     public static SubscriptionResponse from(Subscription subscription, AesUtil aesUtil) {
         String decryptedPhone = aesUtil.decrypt(subscription.getPhoneNumber());
         String currentPlan = "N/A";
@@ -46,7 +48,7 @@ public record SubscriptionResponse(
             }
         }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter formatter = FORMATTER;
         String formattedStart = subscription.getStartDate().format(formatter);
         String formattedEnd =
                 subscription.getEndDate() != null

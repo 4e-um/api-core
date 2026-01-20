@@ -1,5 +1,6 @@
 package com.project.core.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +21,8 @@ import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.repository.customer.CustomerRepository;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
+import com.project.global.exception.core.InvalidStateException;
+import com.project.global.exception.core.OperationFailedException;
 import com.project.global.util.AesUtil;
 import com.project.global.util.ContactHashUtil;
 
@@ -52,8 +55,12 @@ public class CustomerService {
                 } else {
                     return Page.empty(pageable);
                 }
-            } catch (Exception e) {
+            } catch (InvalidStateException e) {
                 // 해싱 실패 시 빈 결과
+                log.warn(
+                        "Failed to hash search term, returning empty page. Search term: {}",
+                        search,
+                        e);
                 return Page.empty(pageable);
             }
         }
@@ -71,12 +78,11 @@ public class CustomerService {
         Subscription sub =
                 customer.getSubscriptionHistory().stream()
                         .filter(s -> "ACTIVE".equals(s.getStatus().name()))
-                        .reduce((first, second) -> second)
+                        .max(Comparator.comparing(Subscription::getStartDate))
                         .orElse(
-                                customer.getSubscriptionHistory().isEmpty()
-                                        ? null
-                                        : customer.getSubscriptionHistory()
-                                                .get(customer.getSubscriptionHistory().size() - 1));
+                                customer.getSubscriptionHistory().stream()
+                                        .max(Comparator.comparing(Subscription::getStartDate))
+                                        .orElse(null));
 
         // 3. 회선 전화번호 복호화
         String decryptedSubPhone = null;
@@ -95,9 +101,9 @@ public class CustomerService {
         }
         try {
             return aesUtil.decrypt(encrypted);
-        } catch (Exception e) {
+        } catch (OperationFailedException e) {
             // 복호화 실패 시 (평문이거나 형식이 안 맞음) 원본 반환 혹은 로깅
-            // log.warn("Decryption failed for value: {}", encrypted, e);
+            log.warn("Decryption failed for value: {}", encrypted, e);
             return encrypted;
         }
     }

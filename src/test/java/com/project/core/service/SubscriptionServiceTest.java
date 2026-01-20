@@ -40,7 +40,7 @@ class SubscriptionServiceTest {
         Subscription s1 = newInstanceSubscription(100L);
         Subscription s2 = newInstanceSubscription(200L);
 
-        given(subscriptionRepository.findByCustomer_CustomerId(customerId))
+        given(subscriptionRepository.findAllByCustomer_CustomerIdWithPlan(customerId))
                 .willReturn(List.of(s1, s2));
 
         // aesUtil이 SubscriptionResponse.from(...) 내부에서 decrypt를 호출할 가능성이 높아서 스텁
@@ -57,7 +57,7 @@ class SubscriptionServiceTest {
                 .extracting(SubscriptionResponse::subId)
                 .containsExactlyInAnyOrder(100L, 200L);
 
-        verify(subscriptionRepository).findByCustomer_CustomerId(customerId);
+        verify(subscriptionRepository).findAllByCustomer_CustomerIdWithPlan(customerId);
     }
 
     // =========================
@@ -86,7 +86,8 @@ class SubscriptionServiceTest {
     void findSubscription_empty_returnsEmptyList() {
         // given
         Long customerId = 1L;
-        given(subscriptionRepository.findByCustomer_CustomerId(customerId)).willReturn(List.of());
+        given(subscriptionRepository.findAllByCustomer_CustomerIdWithPlan(customerId))
+                .willReturn(List.of());
 
         // when
         List<SubscriptionResponse> result =
@@ -94,6 +95,6 @@ class SubscriptionServiceTest {
 
         // then
         assertThat(result).isEmpty();
-        verify(subscriptionRepository).findByCustomer_CustomerId(customerId);
+        verify(subscriptionRepository).findAllByCustomer_CustomerIdWithPlan(customerId);
     }
 }

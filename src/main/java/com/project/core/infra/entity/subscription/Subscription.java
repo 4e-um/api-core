@@ -19,6 +19,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.BatchSize;
+
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.entity.discount.SubscriptionDiscount;
 import com.project.core.infra.entity.plan.SubscriptionPlan;
@@ -66,14 +68,17 @@ public class Subscription {
     // ---------------------------------------------------------------------
 
     // 요금제 이력 (1:N)
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
     private List<SubscriptionPlan> planHistory = new ArrayList<>();
 
     // 부가서비스 이력 (1:N)
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
     private List<SubscriptionVas> vasHistory = new ArrayList<>();
 
     // 할인 이력 (1:N)
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
     private List<SubscriptionDiscount> subHistory = new ArrayList<>();
 

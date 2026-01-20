@@ -26,6 +26,11 @@ public record CustomerListResponse(
         String createdAt, // yyyy-MM-dd
         String lastActivity) { // yyyy-MM-dd HH:mm
 
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
     public static CustomerListResponse of(
             Customer customer,
             Subscription sub,
@@ -62,10 +67,7 @@ public record CustomerListResponse(
         }
 
         // 날짜 포맷팅
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
-        String formattedCreatedAt = customer.getCreatedAt().format(dateFormatter);
+        String formattedCreatedAt = customer.getCreatedAt().format(DATE_FORMATTER);
 
         // 2. 최근 활동 계산 (고객 ID 기준 시드) - 목록/상세 어디서든 고객 기준이면 동일하게 나오도록
         Random customerRandom = new Random(customer.getCustomerId());
@@ -78,13 +80,13 @@ public record CustomerListResponse(
                         .minusDays(randomDays)
                         .minusHours(randomHours)
                         .minusMinutes(randomMinutes);
-        String formattedLastActivity = randomActivity.format(dateTimeFormatter);
+        String formattedLastActivity = randomActivity.format(DATE_TIME_FORMATTER);
 
         return CustomerListResponse.builder()
                 .customerId(customer.getCustomerId())
                 .name(customer.getName())
                 .contact(MaskingUtil.maskPhone(decryptedContact))
-                .email(maskEmail(decryptedEmail)) // 커스텀 마스킹 사용
+                .email(MaskingUtil.maskEmail(decryptedEmail)) // 커스텀 마스킹 사용
                 .grade(customer.getGrade().name())
                 .representativeSubId(formattedSubId)
                 .representativePhone(sub != null ? MaskingUtil.maskPhone(decryptedSubPhone) : "N/A")
@@ -95,17 +97,5 @@ public record CustomerListResponse(
                 .createdAt(formattedCreatedAt)
                 .lastActivity(formattedLastActivity)
                 .build();
-    }
-
-    private static String maskEmail(String email) {
-        if (email == null || email.isBlank()) {
-            return "N/A";
-        }
-        int atIndex = email.indexOf('@');
-        if (atIndex <= 2) {
-            return email;
-        }
-        // te***@domain.com (앞 2글자 노출)
-        return email.substring(0, 2) + "***" + email.substring(atIndex);
     }
 }
