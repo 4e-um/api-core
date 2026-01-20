@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -124,7 +123,6 @@ class CustomerControllerTest {
 
         ReflectionTestUtils.setField(customer, "customerId", 1L);
 
-        LocalDateTime fixedTime = LocalDateTime.of(2024, 1, 1, 0, 0);
         List<SubscriptionResponse> subs =
                 List.of(
                         new SubscriptionResponse(

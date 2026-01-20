@@ -18,6 +18,7 @@ import com.project.core.controller.dto.response.CustomerListResponse;
 import com.project.core.controller.dto.response.MaskingUtil;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.entity.subscription.Subscription;
+import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 import com.project.core.infra.repository.customer.CustomerRepository;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
@@ -51,7 +52,7 @@ public class CustomerService {
                 if (customerOpt.isPresent()) {
                     Customer customer = customerOpt.get();
                     // 단건 결과를 Page로 변환 (DTO 변환 로직 재사용 필요하므로 아래 로직 태움)
-                    return new PageImpl<>(List.of(customer), pageable, 1).map(c -> convertToDto(c));
+                    return new PageImpl<>(List.of(customer), pageable, 1).map(this::convertToDto);
                 } else {
                     return Page.empty(pageable);
                 }
@@ -78,11 +79,12 @@ public class CustomerService {
         Subscription sub =
                 customer.getSubscriptionHistory().stream()
                         .filter(s -> "ACTIVE".equals(s.getStatus().name()))
-                        .max(Comparator.comparing(Subscription::getStartDate))
-                        .orElse(
-                                customer.getSubscriptionHistory().stream()
-                                        .max(Comparator.comparing(Subscription::getStartDate))
-                                        .orElse(null));
+                        .max(
+                                Comparator.comparing(
+                                                (Subscription s) ->
+                                                        s.getStatus() == SubscriptionStatus.ACTIVE)
+                                        .thenComparing(Subscription::getStartDate))
+                        .orElse(null);
 
         // 3. 회선 전화번호 복호화
         String decryptedSubPhone = null;
