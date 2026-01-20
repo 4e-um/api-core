@@ -21,7 +21,6 @@ import com.project.core.controller.dto.request.PhoneSearchRequest;
 import com.project.core.controller.dto.response.ChangeEmailResponse;
 import com.project.core.controller.dto.response.ChangeGradeResponse;
 import com.project.core.controller.dto.response.CustomerListResponse;
-import com.project.core.controller.dto.response.CustomerResponse;
 import com.project.core.controller.dto.response.CustomerSearchResponse;
 import com.project.core.controller.dto.response.SubscriptionResponse;
 import com.project.core.infra.entity.customer.Customer;

@@ -20,7 +20,8 @@ public record SubscriptionResponse(
         long dataUsed, // Byte
         long dataLimit // Byte
         ) {
-    public static SubscriptionResponse from(Subscription subscription) {
+    public static SubscriptionResponse from(Subscription subscription, AesUtil aesUtil) {
+        String decryptedPhone = aesUtil.decrypt(subscription.getPhoneNumber());
         String currentPlan = "N/A";
         long dataLimit = 0;
         long dataUsed = 0;
@@ -50,7 +51,7 @@ public record SubscriptionResponse(
 
         return new SubscriptionResponse(
                 subscription.getSubId(),
-                MaskingUtil.maskPhone(subscription.getPhoneNumber()),
+                MaskingUtil.maskPhone(decryptedPhone),
                 formattedStart,
                 formattedEnd,
                 subscription.getStatus(),

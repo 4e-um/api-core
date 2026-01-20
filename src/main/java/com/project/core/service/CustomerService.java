@@ -40,11 +40,11 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public Page<CustomerListResponse> getAllCustomers(String search, Pageable pageable) {
         if (search != null && !search.isBlank()) {
-            // 검색어가 있을 경우: 전화번호 암호화 후 검색
+            // 검색어가 있을 경우: 전화번호 해싱 후 검색
             try {
-                String encryptedSearch = aesUtil.encrypt(search);
-                Optional<Customer> customerOpt = customerRepository.findByContactEnc(encryptedSearch);
-
+                String searchHash = contactHashUtil.hmacSha256Base64(search);
+                Optional<Customer> customerOpt = customerRepository.findByContactHash(searchHash);
+                
                 if (customerOpt.isPresent()) {
                     Customer customer = customerOpt.get();
                     // 단건 결과를 Page로 변환 (DTO 변환 로직 재사용 필요하므로 아래 로직 태움)
@@ -54,7 +54,7 @@ public class CustomerService {
                     return Page.empty(pageable);
                 }
             } catch (Exception e) {
-                // 암호화 실패 시 빈 결과
+                // 해싱 실패 시 빈 결과
                 return Page.empty(pageable);
             }
         }
