@@ -27,6 +27,11 @@
 
 name: Deploy Backend to GKE
 
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
 on:
   workflow_run:
     workflows: ["Integrate Backend"]

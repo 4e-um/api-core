@@ -281,8 +281,8 @@ jobs:
     needs: [analyze]
 
     permissions:
-      contents: read
       actions: write
+      contents: write
 
     steps:
       - name: Checkout source
