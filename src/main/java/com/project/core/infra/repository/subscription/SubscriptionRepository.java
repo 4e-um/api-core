@@ -3,6 +3,8 @@ package com.project.core.infra.repository.subscription;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,6 +22,12 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
             "SELECT s FROM Subscription s LEFT JOIN FETCH s.planHistory ph LEFT JOIN FETCH ph.plan"
                     + " WHERE s.customer.customerId = :customerId")
     List<Subscription> findAllByCustomer_CustomerIdWithPlan(@Param("customerId") Long customerId);
+
+    @Override
+    @Query(
+            value = "SELECT s FROM Subscription s JOIN FETCH s.customer",
+            countQuery = "SELECT count(s.subId) FROM Subscription s")
+    Page<Subscription> findAll(Pageable pageable);
 
     long countByCustomerAndStatus(Customer customer, SubscriptionStatus status);
 
