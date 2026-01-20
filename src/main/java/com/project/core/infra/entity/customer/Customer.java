@@ -15,6 +15,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.BatchSize;
+
 import com.project.core.infra.entity.customer.enums.Grade;
 import com.project.core.infra.entity.subscription.Subscription;
 
@@ -55,6 +57,7 @@ public class Customer {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
 
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Subscription> subscriptionHistory = new ArrayList<>();
 
