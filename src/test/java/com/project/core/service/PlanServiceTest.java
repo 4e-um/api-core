@@ -367,7 +367,13 @@ class PlanServiceTest {
     @Test
     @DisplayName("[변경] 실패 - 이미 해지된 회선은 변경 불가")
     void changePlanFailAlreadyTerminated() {
-        Subscription sub = new Subscription(null, "phone", clock);
+        Subscription sub =
+                Subscription.builder()
+                        .customer(null)
+                        .phoneNumber("phone")
+                        .phoneHash("hash")
+                        .clock(clock)
+                        .build();
         ReflectionTestUtils.setField(sub, "status", SubscriptionStatus.TERMINATED); // 해지 상태
 
         given(subscriptionRepository.findById(1L)).willReturn(Optional.of(sub));
@@ -381,7 +387,13 @@ class PlanServiceTest {
     @Test
     @DisplayName("[변경] 실패 - 정지된 회선은 변경 불가")
     void changePlanFailSubSuspended() {
-        Subscription sub = new Subscription(null, "phone", clock);
+        Subscription sub =
+                Subscription.builder()
+                        .customer(null)
+                        .phoneNumber("phone")
+                        .phoneHash("hash")
+                        .clock(clock)
+                        .build();
         ReflectionTestUtils.setField(sub, "status", SubscriptionStatus.SUSPENDED);
 
         given(subscriptionRepository.findById(1L)).willReturn(Optional.of(sub));
@@ -396,7 +408,13 @@ class PlanServiceTest {
     @DisplayName("[해지] 성공 - 상태 변경 및 요금제 만료")
     void terminateSubscriptionSuccess() {
         // given
-        Subscription sub = new Subscription(null, "phone", clock);
+        Subscription sub =
+                Subscription.builder()
+                        .customer(null)
+                        .phoneNumber("phone")
+                        .phoneHash("hash")
+                        .clock(clock)
+                        .build();
         ReflectionTestUtils.setField(sub, "status", SubscriptionStatus.ACTIVE);
         ReflectionTestUtils.setField(sub, "endDate", LocalDateTime.now());
 
@@ -419,7 +437,13 @@ class PlanServiceTest {
     @DisplayName("[해지] 성공 - SUSPENDED 상태의 회선 해지")
     void terminateSubscriptionSuccessWhenSuspended() {
         // given
-        Subscription sub = new Subscription(null, "phone", clock);
+        Subscription sub =
+                Subscription.builder()
+                        .customer(null)
+                        .phoneNumber("phone")
+                        .phoneHash("hash")
+                        .clock(clock)
+                        .build();
         ReflectionTestUtils.setField(sub, "status", SubscriptionStatus.SUSPENDED);
         ReflectionTestUtils.setField(sub, "endDate", LocalDateTime.now());
 
@@ -452,7 +476,13 @@ class PlanServiceTest {
     @Test
     @DisplayName("[해지] 실패 - 이미 해지된 회선")
     void terminateSubscriptionFailAlreadyTerminated() {
-        Subscription sub = new Subscription(null, "phone", clock);
+        Subscription sub =
+                Subscription.builder()
+                        .customer(null)
+                        .phoneNumber("phone")
+                        .phoneHash("hash")
+                        .clock(clock)
+                        .build();
         ReflectionTestUtils.setField(sub, "status", SubscriptionStatus.TERMINATED);
 
         given(subscriptionRepository.findById(1L)).willReturn(Optional.of(sub));

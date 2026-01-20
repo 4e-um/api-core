@@ -7,6 +7,8 @@ import java.util.Base64;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import jakarta.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +23,7 @@ public class ContactHashUtil {
 
     private SecretKeySpec keySpec;
 
-    @jakarta.annotation.PostConstruct
+    @PostConstruct
     public void init() {
         try {
             // ✅ Python: base64.b64decode(HASH_KEY) 와 동일
