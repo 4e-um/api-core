@@ -20,6 +20,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import com.project.core.infra.entity.customer.Customer;
+import com.project.core.infra.entity.discount.SubscriptionDiscount;
 import com.project.core.infra.entity.plan.SubscriptionPlan;
 import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 import com.project.core.infra.entity.vas.SubscriptionVas;
@@ -73,6 +74,8 @@ public class Subscription {
     private List<SubscriptionVas> vasHistory = new ArrayList<>();
 
     // 할인 이력 (1:N)
+    @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
+    private List<SubscriptionDiscount> subHistory = new ArrayList<>();
 
     @Builder
     public Subscription(Customer customer, String phoneNumber, Clock clock) {

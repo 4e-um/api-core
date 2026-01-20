@@ -1,5 +1,7 @@
 package com.project.core.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,9 +14,11 @@ import com.project.core.controller.dto.request.ChangeGradeRequest;
 import com.project.core.controller.dto.request.PhoneSearchRequest;
 import com.project.core.controller.dto.response.ChangeEmailResponse;
 import com.project.core.controller.dto.response.ChangeGradeResponse;
-import com.project.core.controller.dto.response.CustomerResponse;
+import com.project.core.controller.dto.response.CustomerSearchResponse;
+import com.project.core.controller.dto.response.SubscriptionResponse;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.service.CustomerService;
+import com.project.core.service.SubscriptionService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,14 +28,20 @@ import lombok.RequiredArgsConstructor;
 public class CustomerController {
 
     private final CustomerService customerService;
+    private final SubscriptionService subscriptionService;
 
     /** 고객 조회 (전화번호 기준) */
     @PostMapping("/search")
-    public ResponseEntity<CustomerResponse> loadByContactEnc(
+    public ResponseEntity<CustomerSearchResponse> searchByPhone(
             @RequestBody PhoneSearchRequest request) {
-        Customer customer = customerService.loadByContactEnc(request.contactEnc());
+        Customer customer = customerService.loadByPhone(request.phoneRaw());
+        Long customerId = customer.getCustomerId();
 
-        return ResponseEntity.ok(CustomerResponse.from(customer));
+        List<SubscriptionResponse> subscriptions =
+                subscriptionService.findSubscriptionResponses(customerId);
+
+        return ResponseEntity.ok(
+                new CustomerSearchResponse(customerId, customer.getName(), subscriptions));
     }
 
     /** 이메일 변경 */

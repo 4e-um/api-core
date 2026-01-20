@@ -44,7 +44,9 @@ public enum CoreErrorCode implements BaseErrorCode {
     // 보안
     ENCRYPTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SEC_001", "암호화/복호화 처리 중 오류가 발생했습니다."),
     AES_KEY_LENGTH_INCORRECT(
-            HttpStatus.INTERNAL_SERVER_ERROR, "SEC_002", "AES Secret Key는 32바이트여야 합니다.");
+            HttpStatus.INTERNAL_SERVER_ERROR, "SEC_002", "AES Secret Key는 32바이트여야 합니다."),
+    ENCRYPTION_MUST_BE_BASE64(
+            HttpStatus.INTERNAL_SERVER_ERROR, "SEC_003", "암호화는 base64로 이루어져야 합니다.");
 
     private final HttpStatus httpStatus;
     private final String customCode;

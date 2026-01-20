@@ -26,7 +26,8 @@ public class PlanController {
 
     // 요금제 이력 조회
     @GetMapping("/{subId}/plans")
-    public ResponseEntity<List<PlanDto.HistoryResponse>> getPlanHistory(@PathVariable Long subId) {
+    public ResponseEntity<List<PlanDto.HistoryResponse>> getPlanHistory(
+            @PathVariable(name = "subId") Long subId) {
         List<PlanDto.HistoryResponse> history = planService.getPlanHistory(subId);
         return ResponseEntity.ok(history);
     }
@@ -41,14 +42,14 @@ public class PlanController {
 
     @PutMapping("/{subId}/plan")
     public ResponseEntity<PlanDto.ChangeResponse> changePlan(
-            @PathVariable Long subId, @RequestBody PlanDto.ChangeRequest request) {
+            @PathVariable(name = "subId") Long subId, @RequestBody PlanDto.ChangeRequest request) {
         PlanDto.ChangeResponse response = planService.changePlan(subId, request.planId());
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{subId}")
     public ResponseEntity<PlanDto.TerminateResponse> terminateSubscription(
-            @PathVariable Long subId) {
+            @PathVariable(name = "subId") Long subId) {
         PlanDto.TerminateResponse response = planService.terminateSubscription(subId);
         return ResponseEntity.ok(response);
     }

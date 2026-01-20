@@ -5,10 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.project.core.controller.dto.response.SubscriptionResponse;
 import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.repository.subscription.SubscriptionRepository;
-import com.project.global.exception.code.domain.core.CoreErrorCode;
-import com.project.global.exception.core.EntityNotFoundException;
 import com.project.global.util.AesUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -21,15 +20,11 @@ public class SubscriptionService {
     private final AesUtil aesUtil;
 
     @Transactional(readOnly = true)
-    public List<Subscription> findSubscription(Long customerId) {
-
+    public List<SubscriptionResponse> findSubscriptionResponses(Long customerId) {
         List<Subscription> subscriptions =
                 subscriptionRepository.findByCustomer_CustomerId(customerId);
 
-        if (subscriptions.isEmpty()) {
-            throw new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND);
-        }
-
-        return subscriptions;
+        // ✅ 구독이 없으면 빈 리스트 반환 (예외 없음)
+        return subscriptions.stream().map(sub -> SubscriptionResponse.from(sub, aesUtil)).toList();
     }
 }
