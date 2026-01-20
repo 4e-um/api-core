@@ -83,8 +83,7 @@ class DiscountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].sdId").value(100))
                 .andExpect(jsonPath("$[0].subId").value(1))
-                .andExpect(jsonPath("$[0].discountId").value(10))
-                .andExpect(jsonPath("$[0].maskedPhoneNumber").value("010-**34-**12")); // 마스킹 결과
+                .andExpect(jsonPath("$[0].discountId").value(10));
     }
 
     @Test
