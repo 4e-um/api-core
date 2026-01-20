@@ -17,6 +17,7 @@ import com.project.core.infra.repository.customer.CustomerRepository;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
 import com.project.global.util.AesUtil;
+import com.project.global.util.ContactHashUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final AesUtil aesUtil;
+    private final ContactHashUtil contactHashUtil;
 
     @Transactional(readOnly = true)
     public Page<CustomerListResponse> getAllCustomers(String search, Pageable pageable) {
@@ -42,7 +44,7 @@ public class CustomerService {
             try {
                 String encryptedSearch = aesUtil.encrypt(search);
                 Optional<Customer> customerOpt = customerRepository.findByContactEnc(encryptedSearch);
-                
+
                 if (customerOpt.isPresent()) {
                     Customer customer = customerOpt.get();
                     // 단건 결과를 Page로 변환 (DTO 변환 로직 재사용 필요하므로 아래 로직 태움)
@@ -71,7 +73,7 @@ public class CustomerService {
         Subscription sub = customer.getSubscriptionHistory().stream()
                 .filter(s -> "ACTIVE".equals(s.getStatus().name()))
                 .reduce((first, second) -> second)
-                .orElse(customer.getSubscriptionHistory().isEmpty() ? null : 
+                .orElse(customer.getSubscriptionHistory().isEmpty() ? null :
                         customer.getSubscriptionHistory().get(customer.getSubscriptionHistory().size() - 1));
 
         // 3. 회선 전화번호 복호화
@@ -96,9 +98,11 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    public Customer loadByContactEnc(String contactEnc) {
+    public Customer loadByPhone(String phoneRaw) {
+        String hash = contactHashUtil.hmacSha256Base64(phoneRaw);
+
         return customerRepository
-                .findByContactEnc(contactEnc)
+                .findByContactHash(hash)
                 .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
     }
 

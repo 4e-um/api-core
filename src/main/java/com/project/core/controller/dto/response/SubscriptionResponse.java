@@ -7,6 +7,7 @@ import java.util.Random;
 import com.project.core.infra.entity.plan.Plan;
 import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
+import com.project.global.util.AesUtil;
 
 public record SubscriptionResponse(
         Long subId,
@@ -23,7 +24,7 @@ public record SubscriptionResponse(
         String currentPlan = "N/A";
         long dataLimit = 0;
         long dataUsed = 0;
-        
+
         // 시드 기반 랜덤 (회선 ID)
         Random random = new Random(subscription.getSubId());
 
@@ -32,7 +33,7 @@ public record SubscriptionResponse(
                     .get(subscription.getPlanHistory().size() - 1)
                     .getPlan();
             currentPlan = plan.getPlanName();
-            
+
             long allotmentMB = plan.getAllotmentAmount();
             if (allotmentMB == -1) {
                 dataLimit = -1;

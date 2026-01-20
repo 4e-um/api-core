@@ -4,6 +4,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,8 +22,11 @@ import com.project.core.controller.dto.response.ChangeEmailResponse;
 import com.project.core.controller.dto.response.ChangeGradeResponse;
 import com.project.core.controller.dto.response.CustomerListResponse;
 import com.project.core.controller.dto.response.CustomerResponse;
+import com.project.core.controller.dto.response.CustomerSearchResponse;
+import com.project.core.controller.dto.response.SubscriptionResponse;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.service.CustomerService;
+import com.project.core.service.SubscriptionService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 public class CustomerController {
 
     private final CustomerService customerService;
+    private final SubscriptionService subscriptionService;
 
     /** 고객 전체 목록 조회 (페이징) */
     @GetMapping
@@ -43,11 +49,16 @@ public class CustomerController {
 
     /** 고객 조회 (전화번호 기준) */
     @PostMapping("/search")
-    public ResponseEntity<CustomerResponse> loadByContactEnc(
+    public ResponseEntity<CustomerSearchResponse> searchByPhone(
             @RequestBody PhoneSearchRequest request) {
-        Customer customer = customerService.loadByContactEnc(request.contactEnc());
+        Customer customer = customerService.loadByPhone(request.phoneRaw());
+        Long customerId = customer.getCustomerId();
 
-        return ResponseEntity.ok(CustomerResponse.from(customer));
+        List<SubscriptionResponse> subscriptions =
+                subscriptionService.findSubscriptionResponses(customerId);
+
+        return ResponseEntity.ok(
+                new CustomerSearchResponse(customerId, customer.getName(), subscriptions));
     }
 
     /** 고객 상세 조회 (ID 기준) */
