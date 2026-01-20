@@ -62,18 +62,7 @@ public class SubscriptionService {
         SubscriptionListResponse baseInfo =
                 SubscriptionListResponse.of(sub, decryptedEmail, decryptedPhone);
 
-        return SubscriptionDetailResponse.builder()
-                .subId(baseInfo.subId())
-                .customerName(baseInfo.customerName())
-                .email(baseInfo.email())
-                .phoneNumber(baseInfo.phoneNumber())
-                .planName(baseInfo.planName())
-                .dataUsed(baseInfo.dataUsed())
-                .dataLimit(baseInfo.dataLimit())
-                .status(baseInfo.status())
-                .startDate(baseInfo.startDate())
-                .lastActivity(baseInfo.lastActivity())
-                .build();
+        return SubscriptionDetailResponse.from(baseInfo);
     }
 
     @Transactional(readOnly = true)
