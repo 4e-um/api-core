@@ -102,6 +102,13 @@ public class CustomerService {
                 .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
+    public CustomerListResponse getCustomerDetail(Long customerId) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
+        return convertToDto(customer);
+    }
+
     @Transactional
     public ChangeEmailResponse changeEmailEnc(
             Long customerId, ChangeEmailRequest request) { // 이메일 변경

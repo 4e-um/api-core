@@ -50,6 +50,13 @@ public class CustomerController {
         return ResponseEntity.ok(CustomerResponse.from(customer));
     }
 
+    /** 고객 상세 조회 (ID 기준) */
+    @GetMapping("/{customerId}")
+    public ResponseEntity<CustomerListResponse> getCustomerDetail(@PathVariable("customerId") Long customerId) {
+        CustomerListResponse response = customerService.getCustomerDetail(customerId);
+        return ResponseEntity.ok(response);
+    }
+
     /** 이메일 변경 */
     @PostMapping("/{customerId}/email")
     public ResponseEntity<ChangeEmailResponse> changeEmail(
