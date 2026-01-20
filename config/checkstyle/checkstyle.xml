@@ -41,11 +41,14 @@
        - 변경: ${config_loc}/checkstyle-suppressions.xml
        - 이유: Gradle configDirectory 설정 방식 사용 (Gradle 8.x+ 권장)
 
-    7. [braces-knr-style] RightCurly에서 CTOR_DEF 제거
-       - 원본: CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, STATIC_INIT, INSTANCE_INIT
-       - 변경: CLASS_DEF, METHOD_DEF, LITERAL_FOR, LITERAL_WHILE, STATIC_INIT, INSTANCE_INIT
-       - 이유: Spotless(Google Format AOSP)는 빈 생성자를 `private Foo() {}`로 포맷함
-               WhitespaceAround의 allowEmptyConstructors=true와 일관성 유지
+    7. [braces-knr-style] RightCurly option을 alone_or_singleline으로 변경
+       - 원본: option=alone
+       - 변경: option=alone_or_singleline
+       - 이유: Spotless(Google Java Format)가 빈 클래스/메서드/생성자를 한 줄로 포맷함
+               예: public class Empty {}
+               예: void empty() {}
+               예: private MyClass() {}
+               alone_or_singleline은 한 줄 형태와 별도 줄 형태 모두 허용
     ========================================================================
 -->
 
@@ -240,15 +243,18 @@ The following rules in the Naver coding convention cannot be checked by this con
                      value="[braces-knr-style] ''{0}'' at column {1} should be on the previous line."/>
         </module>
         <!--
-            [MODIFIED] CTOR_DEF 제거
-            원본: CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, STATIC_INIT, INSTANCE_INIT
-            변경: CLASS_DEF, METHOD_DEF, LITERAL_FOR, LITERAL_WHILE, STATIC_INIT, INSTANCE_INIT
-            이유: Spotless(Google Format AOSP)는 빈 생성자를 `private Foo() {}`로 포맷함.
-                  allowEmptyConstructors=true (WhitespaceAround)와 일관성 유지
+            [MODIFIED] [braces-knr-style] RightCurly option을 alone_or_singleline으로 변경
+            원본: option=alone
+            변경: option=alone_or_singleline
+            이유: Spotless(Google Java Format)가 빈 클래스/메서드/생성자를 한 줄로 포맷함
+                  예: public class Empty {}
+                  예: void empty() {}
+                  예: private MyClass() {}
+                  alone_or_singleline은 한 줄 형태도 허용
         -->
         <module name="RightCurly">
-            <property name="option" value="alone"/>
-            <property name="tokens" value="CLASS_DEF, METHOD_DEF, LITERAL_FOR, LITERAL_WHILE, STATIC_INIT, INSTANCE_INIT"/>
+            <property name="option" value="alone_or_singleline"/>
+            <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, STATIC_INIT, INSTANCE_INIT"/>
             <message key="line.alone"
                      value="[braces-knr-style] ''{0}'' at column {1} should be alone on a line."/>
             <message key="line.break.before"
@@ -469,7 +475,12 @@ The following rules in the Naver coding convention cannot be checked by this con
         </module>
     </module>
 
-    <!-- Suppression -->
+    <!--
+        [MODIFIED] SuppressionFilter 변수명 변경
+        원본: ${suppressionFile}
+        변경: ${config_loc}/checkstyle-suppressions.xml
+        이유: Gradle configDirectory 설정 방식 사용 (Gradle 8.x+ 권장)
+    -->
     <module name="SuppressionFilter">
         <property name="file" value="${config_loc}/checkstyle-suppressions.xml"/>
         <property name="optional" value="true"/>

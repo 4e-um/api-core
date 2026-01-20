@@ -1,0 +1,136 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-core
+  namespace: app
+  labels:
+    app: api-core
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-core
+  template:
+    metadata:
+      labels:
+        app: api-core
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      serviceAccountName: api-core
+      containers:
+        - name: api-core
+          image: asia-northeast3-docker.pkg.dev/PROJECT_ID/telecom-app-repo/api-core:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            # CloudSQL Proxy 사용 시
+            - name: POSTGRES_HOST
+              value: "127.0.0.1"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: "app_db"
+            # OpenTelemetry
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://alloy.monitoring:4318/v1/traces"
+            - name: OTEL_SAMPLING_PROBABILITY
+              value: "0.1"
+            # Secret paths (read from mounted Secret Manager files)
+            - name: SECRETS_PATH
+              value: "/secrets"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              export POSTGRES_USER=$(cat /secrets/db-username)
+              export POSTGRES_PASSWORD=$(cat /secrets/db-password)
+              exec java -jar /app.jar
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: secrets
+              mountPath: /secrets
+              readOnly: true
+
+        # Cloud SQL Auth Proxy sidecar
+        - name: cloud-sql-proxy
+          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0
+          args:
+            - "--structured-logs"
+            - "--auto-iam-authn"
+            - "$(cat /secrets/db-connection-name)"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              CONNECTION_NAME=$(cat /secrets/db-connection-name)
+              exec /cloud-sql-proxy --structured-logs --auto-iam-authn "$CONNECTION_NAME"
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: secrets
+              mountPath: /secrets
+              readOnly: true
+
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: api-core-secrets
+
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: api-core
