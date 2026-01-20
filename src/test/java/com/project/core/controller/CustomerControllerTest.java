@@ -68,10 +68,13 @@ class CustomerControllerTest {
                         new SubscriptionResponse(
                                 10L,
                                 "010-****-5678",
-                                fixedTime.minusDays(1),
-                                fixedTime.plusDays(30),
+                                "2024-01-01",
+                                "2024-12-31",
                                 SubscriptionStatus.ACTIVE,
-                                15));
+                                15,
+                                "프리미엄 플랜",
+                                5000,
+                                10000));
 
         when(customerService.loadByPhone("01012345678")).thenReturn(customer);
         when(subscriptionService.findSubscriptionResponses(1L)).thenReturn(subs); // ✅ 추가

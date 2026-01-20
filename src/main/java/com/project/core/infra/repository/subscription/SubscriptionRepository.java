@@ -13,7 +13,9 @@ import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
     List<Subscription> findByCustomer_CustomerId(Long customerId);
 
-    @Query("SELECT s FROM Subscription s LEFT JOIN FETCH s.planHistory ph LEFT JOIN FETCH ph.plan WHERE s.customer.customerId = :customerId")
+    @Query(
+            "SELECT s FROM Subscription s LEFT JOIN FETCH s.planHistory ph LEFT JOIN FETCH ph.plan"
+                    + " WHERE s.customer.customerId = :customerId")
     List<Subscription> findAllByCustomer_CustomerIdWithPlan(@Param("customerId") Long customerId);
 
     long countByCustomerAndStatus(Customer customer, SubscriptionStatus status);

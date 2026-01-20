@@ -1,11 +1,11 @@
 package com.project.core.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,7 +41,8 @@ public class CustomerController {
     @GetMapping
     public ResponseEntity<Page<CustomerListResponse>> getAllCustomers(
             @RequestParam(name = "search", required = false) String search,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+                    Pageable pageable) {
         Page<CustomerListResponse> response = customerService.getAllCustomers(search, pageable);
         return ResponseEntity.ok(response);
     }
@@ -62,7 +63,8 @@ public class CustomerController {
 
     /** 고객 상세 조회 (ID 기준) */
     @GetMapping("/{customerId}")
-    public ResponseEntity<CustomerListResponse> getCustomerDetail(@PathVariable("customerId") Long customerId) {
+    public ResponseEntity<CustomerListResponse> getCustomerDetail(
+            @PathVariable("customerId") Long customerId) {
         CustomerListResponse response = customerService.getCustomerDetail(customerId);
         return ResponseEntity.ok(response);
     }

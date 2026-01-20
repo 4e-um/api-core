@@ -1,8 +1,10 @@
 package com.project.core.service;
 
-import com.project.core.infra.entity.subscription.Subscription;
-import com.project.core.controller.dto.response.CustomerListResponse;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,8 +13,10 @@ import com.project.core.controller.dto.request.ChangeEmailRequest;
 import com.project.core.controller.dto.request.ChangeGradeRequest;
 import com.project.core.controller.dto.response.ChangeEmailResponse;
 import com.project.core.controller.dto.response.ChangeGradeResponse;
+import com.project.core.controller.dto.response.CustomerListResponse;
 import com.project.core.controller.dto.response.MaskingUtil;
 import com.project.core.infra.entity.customer.Customer;
+import com.project.core.infra.entity.subscription.Subscription;
 import com.project.core.infra.repository.customer.CustomerRepository;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
@@ -21,10 +25,6 @@ import com.project.global.util.ContactHashUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
-import java.util.Optional;
-import org.springframework.data.domain.PageImpl;
 
 // ... (기존 import 유지)
 
@@ -44,12 +44,11 @@ public class CustomerService {
             try {
                 String searchHash = contactHashUtil.hmacSha256Base64(search);
                 Optional<Customer> customerOpt = customerRepository.findByContactHash(searchHash);
-                
+
                 if (customerOpt.isPresent()) {
                     Customer customer = customerOpt.get();
                     // 단건 결과를 Page로 변환 (DTO 변환 로직 재사용 필요하므로 아래 로직 태움)
-                    return new PageImpl<>(List.of(customer), pageable, 1)
-                            .map(c -> convertToDto(c));
+                    return new PageImpl<>(List.of(customer), pageable, 1).map(c -> convertToDto(c));
                 } else {
                     return Page.empty(pageable);
                 }
@@ -60,8 +59,7 @@ public class CustomerService {
         }
 
         // 전체 조회
-        return customerRepository.findAll(pageable)
-                .map(this::convertToDto);
+        return customerRepository.findAll(pageable).map(this::convertToDto);
     }
 
     private CustomerListResponse convertToDto(Customer customer) {
@@ -70,11 +68,15 @@ public class CustomerService {
         String decryptedEmail = safeDecrypt(customer.getEmailEnc());
 
         // 2. 대표 회선 찾기
-        Subscription sub = customer.getSubscriptionHistory().stream()
-                .filter(s -> "ACTIVE".equals(s.getStatus().name()))
-                .reduce((first, second) -> second)
-                .orElse(customer.getSubscriptionHistory().isEmpty() ? null :
-                        customer.getSubscriptionHistory().get(customer.getSubscriptionHistory().size() - 1));
+        Subscription sub =
+                customer.getSubscriptionHistory().stream()
+                        .filter(s -> "ACTIVE".equals(s.getStatus().name()))
+                        .reduce((first, second) -> second)
+                        .orElse(
+                                customer.getSubscriptionHistory().isEmpty()
+                                        ? null
+                                        : customer.getSubscriptionHistory()
+                                                .get(customer.getSubscriptionHistory().size() - 1));
 
         // 3. 회선 전화번호 복호화
         String decryptedSubPhone = null;
@@ -83,11 +85,14 @@ public class CustomerService {
         }
 
         // 4. DTO 생성
-        return CustomerListResponse.of(customer, sub, decryptedContact, decryptedEmail, decryptedSubPhone);
+        return CustomerListResponse.of(
+                customer, sub, decryptedContact, decryptedEmail, decryptedSubPhone);
     }
 
     private String safeDecrypt(String encrypted) {
-        if (encrypted == null) return null;
+        if (encrypted == null) {
+            return null;
+        }
         try {
             return aesUtil.decrypt(encrypted);
         } catch (Exception e) {
@@ -108,8 +113,13 @@ public class CustomerService {
 
     @Transactional(readOnly = true)
     public CustomerListResponse getCustomerDetail(Long customerId) {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.CUSTOMER_NOT_FOUND));
+        Customer customer =
+                customerRepository
+                        .findById(customerId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                CoreErrorCode.CUSTOMER_NOT_FOUND));
         return convertToDto(customer);
     }
 

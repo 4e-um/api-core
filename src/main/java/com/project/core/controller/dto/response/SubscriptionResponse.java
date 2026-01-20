@@ -1,6 +1,5 @@
 package com.project.core.controller.dto.response;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
@@ -13,13 +12,13 @@ public record SubscriptionResponse(
         Long subId,
         String maskedPhoneNumber,
         String startDate, // yyyy-MM-dd
-        String endDate,   // yyyy-MM-dd
+        String endDate, // yyyy-MM-dd
         SubscriptionStatus status,
         Integer sendDay,
         String planName,
         long dataUsed, // Byte
         long dataLimit // Byte
-        ) {
+) {
     public static SubscriptionResponse from(Subscription subscription, AesUtil aesUtil) {
         String decryptedPhone = aesUtil.decrypt(subscription.getPhoneNumber());
         String currentPlan = "N/A";
@@ -30,9 +29,11 @@ public record SubscriptionResponse(
         Random random = new Random(subscription.getSubId());
 
         if (subscription.getPlanHistory() != null && !subscription.getPlanHistory().isEmpty()) {
-            Plan plan = subscription.getPlanHistory()
-                    .get(subscription.getPlanHistory().size() - 1)
-                    .getPlan();
+            Plan plan =
+                    subscription
+                            .getPlanHistory()
+                            .get(subscription.getPlanHistory().size() - 1)
+                            .getPlan();
             currentPlan = plan.getPlanName();
 
             long allotmentMB = plan.getAllotmentAmount();
@@ -47,7 +48,10 @@ public record SubscriptionResponse(
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedStart = subscription.getStartDate().format(formatter);
-        String formattedEnd = subscription.getEndDate() != null ? subscription.getEndDate().format(formatter) : null;
+        String formattedEnd =
+                subscription.getEndDate() != null
+                        ? subscription.getEndDate().format(formatter)
+                        : null;
 
         return new SubscriptionResponse(
                 subscription.getSubId(),

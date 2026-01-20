@@ -36,14 +36,13 @@ public record CustomerListResponse(
         String planName = "N/A";
         long dataLimit = 0;
         long dataUsed = 0;
-        
+
         // 1. 데이터 사용량 계산 (회선 ID 기준 시드)
         if (sub != null && !sub.getPlanHistory().isEmpty()) {
-            Plan currentPlan =
-                    sub.getPlanHistory().get(sub.getPlanHistory().size() - 1).getPlan();
+            Plan currentPlan = sub.getPlanHistory().get(sub.getPlanHistory().size() - 1).getPlan();
             planName = currentPlan.getPlanName();
             long allotmentMB = currentPlan.getAllotmentAmount();
-            
+
             // 상세 보기와 동일한 값을 위해 subId만을 시드로 사용
             Random subRandom = new Random(sub.getSubId());
 
@@ -67,16 +66,18 @@ public record CustomerListResponse(
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
         String formattedCreatedAt = customer.getCreatedAt().format(dateFormatter);
-        
+
         // 2. 최근 활동 계산 (고객 ID 기준 시드) - 목록/상세 어디서든 고객 기준이면 동일하게 나오도록
         Random customerRandom = new Random(customer.getCustomerId());
         long randomDays = (long) (customerRandom.nextDouble() * 60);
         long randomHours = (long) (customerRandom.nextDouble() * 24);
         long randomMinutes = (long) (customerRandom.nextDouble() * 60);
-        
-        LocalDateTime randomActivity = LocalDateTime.now().minusDays(randomDays)
-                                            .minusHours(randomHours)
-                                            .minusMinutes(randomMinutes);
+
+        LocalDateTime randomActivity =
+                LocalDateTime.now()
+                        .minusDays(randomDays)
+                        .minusHours(randomHours)
+                        .minusMinutes(randomMinutes);
         String formattedLastActivity = randomActivity.format(dateTimeFormatter);
 
         return CustomerListResponse.builder()
@@ -97,10 +98,12 @@ public record CustomerListResponse(
     }
 
     private static String maskEmail(String email) {
-        if (email == null || email.isBlank()) return "N/A";
+        if (email == null || email.isBlank()) {
+            return "N/A";
+        }
         int atIndex = email.indexOf('@');
-        if (atIndex <= 2) { 
-            return email; 
+        if (atIndex <= 2) {
+            return email;
         }
         // te***@domain.com (앞 2글자 노출)
         return email.substring(0, 2) + "***" + email.substring(atIndex);
