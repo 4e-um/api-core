@@ -14,6 +14,7 @@ import lombok.Builder;
 @Builder
 public record SubscriptionListResponse(
         Long subId,
+        String representativeSubId, // 포맷팅됨: SUB-0000001
         String customerName,
         String email, // 마스킹됨
         String phoneNumber, // 마스킹됨
@@ -54,6 +55,12 @@ public record SubscriptionListResponse(
             }
         }
 
+        // 회선 ID 포맷팅 (SUB-0000001)
+        String formattedSubId = null;
+        if (sub != null) {
+            formattedSubId = String.format("SUB-%07d", sub.getSubId());
+        }
+
         // 날짜 포맷팅
         String formattedStartDate = sub.getStartDate().format(DATE_FORMATTER);
 
@@ -68,6 +75,7 @@ public record SubscriptionListResponse(
 
         return SubscriptionListResponse.builder()
                 .subId(sub.getSubId())
+                .representativeSubId(formattedSubId)
                 .customerName(sub.getCustomer().getName())
                 .email(MaskingUtil.maskEmail(decryptedEmail))
                 .phoneNumber(MaskingUtil.maskPhone(decryptedPhone))

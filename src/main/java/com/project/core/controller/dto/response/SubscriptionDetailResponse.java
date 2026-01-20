@@ -5,6 +5,7 @@ import lombok.Builder;
 @Builder
 public record SubscriptionDetailResponse(
         Long subId,
+        String representativeSubId,
         String customerName,
         String email, // 마스킹됨
         String phoneNumber, // 마스킹됨
@@ -18,6 +19,7 @@ public record SubscriptionDetailResponse(
     public static SubscriptionDetailResponse from(SubscriptionListResponse baseInfo) {
         return new SubscriptionDetailResponse(
                 baseInfo.subId(),
+                baseInfo.representativeSubId(),
                 baseInfo.customerName(),
                 baseInfo.email(),
                 baseInfo.phoneNumber(),
