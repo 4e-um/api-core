@@ -35,7 +35,7 @@ public class SubscriptionDiscountResponse {
         return SubscriptionDiscountResponse.builder()
                 .sdId(sd.getSdId())
                 .subId(sd.getSubscription().getSubId())
-                .maskedPhoneNumber(maskPhone(phone))
+                .maskedPhoneNumber(MaskingUtil.maskPhone(phone))
                 .discountId(sd.getDiscountPolicy().getDiscountId())
                 .discountType(sd.getDiscountType())
                 .value(sd.getValue())
@@ -44,28 +44,5 @@ public class SubscriptionDiscountResponse {
                 .endDate(sd.getEndDate())
                 .status(sd.getStatus())
                 .build();
-    }
-
-    /** 010-1234-1212 -> 010-**12-**12 01012341212 -> 010-**12-**12 */
-    private static String maskPhone(String phone) {
-        if (phone == null || phone.isBlank()) {
-            return null;
-        }
-
-        // 숫자만 추출
-        String digits = phone.replaceAll("\\D", "");
-        if (digits.length() != 11) {
-            return "****"; // 예상 못 한 형식은 전체 마스킹
-        }
-
-        String p1 = digits.substring(0, 3); // 010
-        String p2 = digits.substring(3, 7); // 1234
-        String p3 = digits.substring(7, 11); // 1212
-
-        // **12 / **12
-        String masked2 = "**" + p2.substring(2);
-        String masked3 = "**" + p3.substring(2);
-
-        return String.format("%s-%s-%s", p1, masked2, masked3);
     }
 }

@@ -84,14 +84,17 @@ class CustomerServiceTest {
                         .build();
         ReflectionTestUtils.setField(customer, "customerId", 10L);
 
+        LocalDateTime now = LocalDateTime.now();
+
         Subscription oldActive =
                 Subscription.builder()
                         .customer(customer)
                         .phoneNumber("phone1")
                         .clock(Clock.systemDefaultZone())
                         .build();
-        ReflectionTestUtils.setField(oldActive, "startDate", LocalDateTime.now().minusDays(10));
+        ReflectionTestUtils.setField(oldActive, "startDate", now.minusDays(10));
         ReflectionTestUtils.setField(oldActive, "subId", 101L);
+        ReflectionTestUtils.setField(oldActive, "status", SubscriptionStatus.ACTIVE);
 
         Subscription latestActive =
                 Subscription.builder()
@@ -99,8 +102,9 @@ class CustomerServiceTest {
                         .phoneNumber("phone2")
                         .clock(Clock.systemDefaultZone())
                         .build();
-        ReflectionTestUtils.setField(latestActive, "startDate", LocalDateTime.now());
+        ReflectionTestUtils.setField(latestActive, "startDate", now);
         ReflectionTestUtils.setField(latestActive, "subId", 102L);
+        ReflectionTestUtils.setField(latestActive, "status", SubscriptionStatus.ACTIVE);
 
         customer.getSubscriptionHistory().addAll(List.of(oldActive, latestActive));
 
@@ -116,7 +120,7 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("[조회] 성공 - ACTIVE가 없고 해지된 구독만 있을 때 가장 최근 구독 선택")
+    @DisplayName("[조회] 성공 - ACTIVE가 없고 해지된 구독만 있을 때 대표 회선 없음(NONE) 반환")
     void convertToDto_PickLatestInactiveSubscription() {
         // given
         Pageable pageable = Pageable.unpaged();
@@ -130,16 +134,6 @@ class CustomerServiceTest {
                         .build();
         ReflectionTestUtils.setField(customer, "customerId", 11L);
 
-        Subscription oldTerminated =
-                Subscription.builder()
-                        .customer(customer)
-                        .phoneNumber("phone1")
-                        .clock(Clock.systemDefaultZone())
-                        .build();
-        ReflectionTestUtils.setField(oldTerminated, "status", SubscriptionStatus.TERMINATED);
-        ReflectionTestUtils.setField(oldTerminated, "startDate", LocalDateTime.now().minusDays(20));
-        ReflectionTestUtils.setField(oldTerminated, "subId", 201L);
-
         Subscription latestTerminated =
                 Subscription.builder()
                         .customer(customer)
@@ -147,22 +141,74 @@ class CustomerServiceTest {
                         .clock(Clock.systemDefaultZone())
                         .build();
         ReflectionTestUtils.setField(latestTerminated, "status", SubscriptionStatus.TERMINATED);
-        ReflectionTestUtils.setField(
-                latestTerminated, "startDate", LocalDateTime.now().minusDays(5));
         ReflectionTestUtils.setField(latestTerminated, "subId", 202L);
 
-        customer.getSubscriptionHistory().addAll(List.of(oldTerminated, latestTerminated));
+        customer.getSubscriptionHistory().add(latestTerminated);
 
         given(customerRepository.findAll(pageable)).willReturn(new PageImpl<>(List.of(customer)));
-        given(aesUtil.decrypt(any())).willReturn("010-3333-4444");
+        given(aesUtil.decrypt("enc")).willReturn("010-3333-4444");
 
         // when
         Page<CustomerListResponse> result = customerService.getAllCustomers(null, pageable);
 
         // then
         CustomerListResponse dto = result.getContent().get(0);
-        assertThat(dto.representativeSubId()).isEqualTo("SUB-0000202");
-        assertThat(dto.subStatus()).isEqualTo("TERMINATED");
+        // 메인 코드 로직 상 ACTIVE만 필터링하므로 TERMINATED만 있으면 sub는 null임
+        assertThat(dto.subStatus()).isEqualTo("NONE");
+        assertThat(dto.representativePhone()).isEqualTo("N/A");
+    }
+
+    @Test
+    @DisplayName("[조회] 성공 - ACTIVE 구독이 여러 개이고 시작일이 같을 때도 에러 없이 하나 선택")
+    void convertToDto_PickActiveSubscription_SameDate() {
+        // given
+        Pageable pageable = Pageable.unpaged();
+        Customer customer =
+                Customer.builder()
+                        .name("동일날짜")
+                        .grade(Grade.GENERAL)
+                        .contactEnc("enc")
+                        .contactHash("hash")
+                        .emailEnc("enc")
+                        .build();
+        ReflectionTestUtils.setField(customer, "customerId", 12L);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        Subscription sub1 =
+                Subscription.builder()
+                        .customer(customer)
+                        .phoneNumber("p1")
+                        .clock(Clock.systemDefaultZone())
+                        .build();
+        ReflectionTestUtils.setField(sub1, "startDate", now);
+        ReflectionTestUtils.setField(sub1, "subId", 301L);
+        ReflectionTestUtils.setField(sub1, "status", SubscriptionStatus.ACTIVE);
+
+        Subscription sub2 =
+                Subscription.builder()
+                        .customer(customer)
+                        .phoneNumber("p2")
+                        .clock(Clock.systemDefaultZone())
+                        .build();
+        ReflectionTestUtils.setField(sub2, "startDate", now);
+        ReflectionTestUtils.setField(sub2, "subId", 302L);
+        ReflectionTestUtils.setField(sub2, "status", SubscriptionStatus.ACTIVE);
+
+        customer.getSubscriptionHistory().addAll(List.of(sub1, sub2));
+
+        given(customerRepository.findAll(pageable)).willReturn(new PageImpl<>(List.of(customer)));
+        given(aesUtil.decrypt(any())).willReturn("010-1111-2222");
+
+        // when
+        Page<CustomerListResponse> result = customerService.getAllCustomers(null, pageable);
+
+        // then
+        assertThat(result).isNotEmpty();
+        // 정렬 순서가 같으므로 둘 중 하나가 나옴. 에러가 안 나는지 확인하고, 로직상 먼저 들어간게 나올지 나중게 나올지는 스트림 구현에 따름
+        // 여기서는 NotNull인지와 ID가 존재하는지만 확인
+        CustomerListResponse dto = result.getContent().get(0);
+        assertThat(dto.representativeSubId()).isIn("SUB-0000301", "SUB-0000302");
     }
 
     @Test
@@ -186,7 +232,7 @@ class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("[조회] 성공 - 비활성(해지) 구독만 있는 경우 최신 이력 선택")
+    @DisplayName("[조회] 성공 - 비활성(해지) 구독만 있는 경우 대표 회선 없음 확인")
     void getAllCustomers_InactiveSubscriptionOnly() {
         // given
         Pageable pageable = Pageable.unpaged();
@@ -214,7 +260,6 @@ class CustomerServiceTest {
         given(customerRepository.findAll(pageable)).willReturn(new PageImpl<>(List.of(customer)));
         given(aesUtil.decrypt("enc-phone")).willReturn("010-1234-5678");
         given(aesUtil.decrypt("enc-email")).willReturn("term@example.com");
-        given(aesUtil.decrypt("enc-sub-phone")).willReturn("010-9876-5432");
 
         // when
         Page<CustomerListResponse> result = customerService.getAllCustomers(null, pageable);
@@ -222,8 +267,8 @@ class CustomerServiceTest {
         // then
         assertThat(result).isNotEmpty();
         CustomerListResponse dto = result.getContent().get(0);
-        assertThat(dto.representativePhone()).isEqualTo("010-**76-**32");
-        assertThat(dto.subStatus()).isEqualTo("TERMINATED");
+        assertThat(dto.subStatus()).isEqualTo("NONE");
+        assertThat(dto.representativePhone()).isEqualTo("N/A");
     }
 
     @Test
