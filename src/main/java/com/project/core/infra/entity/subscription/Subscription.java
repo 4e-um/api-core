@@ -14,6 +14,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -23,6 +24,7 @@ import org.hibernate.annotations.BatchSize;
 
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.entity.discount.SubscriptionDiscount;
+import com.project.core.infra.entity.micro.MicroPayment;
 import com.project.core.infra.entity.plan.SubscriptionPlan;
 import com.project.core.infra.entity.subscription.enums.SubscriptionStatus;
 import com.project.core.infra.entity.vas.SubscriptionVas;
@@ -35,7 +37,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "subscription")
+@Table(
+        name = "subscription",
+        indexes = @Index(name = "idx_subscription_start_date", columnList = "start_date"))
 public class Subscription {
 
     private static final int DEFAULT_SEND_DAY = 20;
@@ -51,6 +55,9 @@ public class Subscription {
 
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
+
+    @Column(name = "phone_hash", nullable = false)
+    private String phoneHash;
 
     @Column(name = "start_date", nullable = false)
     private LocalDateTime startDate;
@@ -80,12 +87,17 @@ public class Subscription {
     // 할인 이력 (1:N)
     @BatchSize(size = 100)
     @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
-    private List<SubscriptionDiscount> subHistory = new ArrayList<>();
+    private List<SubscriptionDiscount> discountHistory = new ArrayList<>();
+
+    @BatchSize(size = 100)
+    @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL)
+    private List<MicroPayment> microPaymentHistory = new ArrayList<>();
 
     @Builder
-    public Subscription(Customer customer, String phoneNumber, Clock clock) {
+    public Subscription(Customer customer, String phoneNumber, String phoneHash, Clock clock) {
         this.customer = customer;
         this.phoneNumber = phoneNumber;
+        this.phoneHash = phoneHash;
         this.startDate = LocalDateTime.now(clock);
         this.status = SubscriptionStatus.ACTIVE;
         this.sendDay = DEFAULT_SEND_DAY;

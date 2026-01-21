@@ -17,7 +17,6 @@ public class SubscriptionDiscountResponse {
 
     private Long sdId;
     private Long subId;
-    private String maskedPhoneNumber;
 
     private Long discountId;
     private DiscountType discountType;
@@ -30,12 +29,9 @@ public class SubscriptionDiscountResponse {
 
     public static SubscriptionDiscountResponse from(SubscriptionDiscount sd) {
 
-        String phone = sd.getSubscription().getPhoneNumber();
-
         return SubscriptionDiscountResponse.builder()
                 .sdId(sd.getSdId())
                 .subId(sd.getSubscription().getSubId())
-                .maskedPhoneNumber(MaskingUtil.maskPhone(phone))
                 .discountId(sd.getDiscountPolicy().getDiscountId())
                 .discountType(sd.getDiscountType())
                 .value(sd.getValue())
