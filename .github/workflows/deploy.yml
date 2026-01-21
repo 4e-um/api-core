@@ -222,8 +222,8 @@ jobs:
           done
           sed -i "s|:latest|:${{ needs.prepare.outputs.head_sha }}|g" k8s/deployment.yaml
 
-          # Apply k8s manifests (creates if not exists, updates if exists)
-          # namespace.yaml creates the 'app' namespace first
+          # Apply namespace first, then other resources
+          kubectl apply -f k8s/namespace.yaml
           kubectl apply -f k8s/
 
           # Wait for rollout
