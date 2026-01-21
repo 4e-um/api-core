@@ -50,7 +50,7 @@ public enum CoreErrorCode implements BaseErrorCode {
     HASHING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SEC_004", "해싱에 실패하였습니다."),
 
     // 배치
-    DASHBOARD_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "BATCH_001", "대시보드 로딩에 실패했습니다."),;
+    DASHBOARD_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "BATCH_001", "대시보드 로딩에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String customCode;

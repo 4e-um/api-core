@@ -1,11 +1,13 @@
 package com.project.core.infra.repository.invoice;
 
-import com.project.core.controller.dto.BatchFailureLogDto;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.project.core.controller.dto.BatchFailureLogDto;
+
+import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
@@ -16,20 +18,21 @@ public class BatchFailureQueryRepositoryImpl implements BatchFailureQueryReposit
     @Override
     public List<BatchFailureLogDto> findRecentFailures(int limit) {
 
-        String sql = """
-            SELECT
-                ji.JOB_NAME,
-                je.STATUS,
-                je.EXIT_CODE,
-                je.EXIT_MESSAGE,
-                je.END_TIME
-            FROM BATCH_JOB_INSTANCE ji
-            JOIN BATCH_JOB_EXECUTION je
-              ON ji.JOB_INSTANCE_ID = je.JOB_INSTANCE_ID
-            WHERE je.STATUS = 'FAILED'
-            ORDER BY je.END_TIME DESC
-            LIMIT ?
-        """;
+        String sql =
+                """
+                    SELECT
+                        ji.JOB_NAME,
+                        je.STATUS,
+                        je.EXIT_CODE,
+                        je.EXIT_MESSAGE,
+                        je.END_TIME
+                    FROM BATCH_JOB_INSTANCE ji
+                    JOIN BATCH_JOB_EXECUTION je
+                      ON ji.JOB_INSTANCE_ID = je.JOB_INSTANCE_ID
+                    WHERE je.STATUS = 'FAILED'
+                    ORDER BY je.END_TIME DESC
+                    LIMIT ?
+                """;
 
         return jdbcTemplate.query(
                 sql,
@@ -40,8 +43,6 @@ public class BatchFailureQueryRepositoryImpl implements BatchFailureQueryReposit
                                 rs.getString("STATUS"),
                                 rs.getString("EXIT_CODE"),
                                 rs.getString("EXIT_MESSAGE"),
-                                rs.getTimestamp("END_TIME").toLocalDateTime()
-                        )
-        );
+                                rs.getTimestamp("END_TIME").toLocalDateTime()));
     }
 }

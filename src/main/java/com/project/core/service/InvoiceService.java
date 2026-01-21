@@ -1,5 +1,7 @@
 package com.project.core.service;
 
+import org.springframework.stereotype.Service;
+
 import com.project.core.controller.dto.GrafanaInfoDto;
 import com.project.core.controller.dto.response.BillingDashboardResponse;
 import com.project.core.infra.repository.invoice.BatchFailureQueryRepository;
@@ -7,9 +9,9 @@ import com.project.core.infra.repository.invoice.BatchJobQueryRepository;
 import com.project.global.config.BillingProperties;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +31,7 @@ public class InvoiceService {
                             GrafanaInfoDto.builder()
                                     .iframeUrl(billingProperties.getIframeUrl())
                                     .refreshInterval(billingProperties.getRefreshInterval())
-                                    .build()
-                    )
+                                    .build())
                     .recentFailures(batchFailureQueryRepository.findRecentFailures(10))
                     .build();
 
