@@ -1,7 +1,8 @@
 package com.project.global.config;
 
-import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter

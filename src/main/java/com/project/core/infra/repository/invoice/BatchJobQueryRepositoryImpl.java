@@ -31,11 +31,13 @@ public class BatchJobQueryRepositoryImpl implements BatchJobQueryRepository {
                             FROM BATCH_JOB_INSTANCE ji
                             JOIN BATCH_JOB_EXECUTION je
                               ON ji.JOB_INSTANCE_ID = je.JOB_INSTANCE_ID
-                            WHERE je.JOB_EXECUTION_ID IN (
+                            WHERE ji.JOB_NAME IN ('invoice', 'invoice_item')
+                            AND je.JOB_EXECUTION_ID IN (
                                 SELECT MAX(je2.JOB_EXECUTION_ID)
                                 FROM BATCH_JOB_EXECUTION je2
                                 JOIN BATCH_JOB_INSTANCE ji2
                                   ON ji2.JOB_INSTANCE_ID = je2.JOB_INSTANCE_ID
+                                WHERE ji2.JOB_NAME IN ('invoice', 'invoice_item')
                                 GROUP BY ji2.JOB_NAME
                             )
                             ORDER BY ji.JOB_NAME
