@@ -216,10 +216,12 @@ jobs:
 
       - name: Deploy to GKE
         run: |
-          # Update image tag in deployment
-          kubectl set image deployment/${{ env.SERVICE_NAME }} \
-            ${{ env.SERVICE_NAME }}=${{ needs.build-image.outputs.image_url }}:${{ needs.prepare.outputs.head_sha }} \
-            -n ${{ vars.K8S_NAMESPACE }}
+          # Replace placeholders in k8s manifests
+          sed -i "s|PROJECT_ID|${{ vars.GCP_PROJECT_ID }}|g" k8s/deployment.yaml
+          sed -i "s|:latest|:${{ needs.prepare.outputs.head_sha }}|g" k8s/deployment.yaml
+
+          # Apply k8s manifests (creates if not exists, updates if exists)
+          kubectl apply -f k8s/ -n ${{ vars.K8S_NAMESPACE }}
 
           # Wait for rollout
           kubectl rollout status deployment/${{ env.SERVICE_NAME }} \
