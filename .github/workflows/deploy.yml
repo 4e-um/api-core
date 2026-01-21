@@ -236,6 +236,12 @@ jobs:
             # ESO가 준비될 때까지 대기
             kubectl wait --for=condition=available deployment/external-secrets \
               -n external-secrets --timeout=120s
+
+            # CRD 등록 완료 대기
+            echo "Waiting for CRDs to be fully registered..."
+            kubectl wait --for=condition=established crd/externalsecrets.external-secrets.io --timeout=60s
+            kubectl wait --for=condition=established crd/secretstores.external-secrets.io --timeout=60s
+            kubectl wait --for=condition=established crd/clustersecretstores.external-secrets.io --timeout=60s
           else
             echo "External Secrets Operator already installed"
           fi
@@ -248,9 +254,31 @@ jobs:
           done
           sed -i "s|:latest|:${{ needs.prepare.outputs.head_sha }}|g" k8s/deployment.yaml
 
-          # Apply namespace first, then other resources
+          # 1. 기본 리소스 먼저 적용 (namespace, serviceaccount)
           kubectl apply -f k8s/namespace.yaml
-          kubectl apply -f k8s/
+          kubectl apply -f k8s/serviceaccount.yaml
+
+          # 2. ESO 리소스 적용 (SecretStore -> ExternalSecret 순서)
+          kubectl apply -f k8s/secret-store.yaml
+          kubectl apply -f k8s/external-secret.yaml
+
+          # 3. Secret 동기화 대기 (최대 60초)
+          echo "Waiting for secret sync..."
+          for i in {1..12}; do
+            if kubectl get secret ${{ env.SERVICE_NAME }}-secrets -n ${{ vars.K8S_NAMESPACE }} &>/dev/null; then
+              echo "Secret synced successfully"
+              break
+            fi
+            echo "Waiting for secret... ($i/12)"
+            sleep 5
+          done
+
+          # 4. 나머지 리소스 적용
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/ingress.yaml
+          kubectl apply -f k8s/hpa.yaml
+          kubectl apply -f k8s/backend-config.yaml
 
           # Wait for rollout
           kubectl rollout status deployment/${{ env.SERVICE_NAME }} \
