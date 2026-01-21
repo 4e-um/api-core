@@ -1,7 +1,7 @@
 package com.project.core.controller;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +25,13 @@ public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
-    /** 전체 회선 목록 조회 (페이징) 125만 건의 데이터를 고려하여 페이징 적용 및 BatchSize 최적화 활용 */
+    /** 전체 회선 목록 조회 (슬라이스) 125만 건의 데이터를 고려하여 슬라이스 적용 및 BatchSize 최적화 활용 */
     @GetMapping
-    public ResponseEntity<Page<SubscriptionListResponse>> getAllSubscriptions(
+    public ResponseEntity<Slice<SubscriptionListResponse>> getAllSubscriptions(
             @PageableDefault(size = 20, sort = "startDate", direction = Sort.Direction.DESC)
                     Pageable pageable) {
-        Page<SubscriptionListResponse> response = subscriptionService.getAllSubscriptions(pageable);
+        Slice<SubscriptionListResponse> response =
+                subscriptionService.getAllSubscriptions(pageable);
         return ResponseEntity.ok(response);
     }
 

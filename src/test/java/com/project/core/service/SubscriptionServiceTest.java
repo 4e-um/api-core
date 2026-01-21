@@ -17,9 +17,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.project.core.controller.dto.response.SubscriptionDetailResponse;
@@ -56,21 +56,21 @@ class SubscriptionServiceTest {
                         .build();
 
         Subscription sub = newInstanceSubscription(1L, customer);
-        Page<Subscription> page = new PageImpl<>(List.of(sub));
+        Slice<Subscription> slice = new SliceImpl<>(List.of(sub));
 
-        given(subscriptionRepository.findAll(pageable)).willReturn(page);
+        given(subscriptionRepository.findAllSlice(pageable)).willReturn(slice);
         given(aesUtil.decrypt("enc-email")).willReturn("test@example.com");
         given(aesUtil.decrypt("010-1234-5678")).willReturn("010-1234-5678");
 
         // when
-        Page<SubscriptionListResponse> result = subscriptionService.getAllSubscriptions(pageable);
+        Slice<SubscriptionListResponse> result = subscriptionService.getAllSubscriptions(pageable);
 
         // then
         assertThat(result).isNotEmpty();
         assertThat(result.getContent().get(0).customerName()).isEqualTo("홍길동");
         assertThat(result.getContent().get(0).phoneNumber()).isEqualTo("010-**34-**78");
 
-        verify(subscriptionRepository).findAll(pageable);
+        verify(subscriptionRepository).findAllSlice(pageable);
     }
 
     @Test

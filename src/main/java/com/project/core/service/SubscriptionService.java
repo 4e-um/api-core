@@ -2,8 +2,8 @@ package com.project.core.service;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,11 +29,11 @@ public class SubscriptionService {
     private final AesUtil aesUtil;
     private final ContactHashUtil contactHashUtil;
 
-    /** 전체 회선 목록 조회 (페이징) */
+    /** 전체 회선 목록 조회 (슬라이스) */
     @Transactional(readOnly = true)
-    public Page<SubscriptionListResponse> getAllSubscriptions(Pageable pageable) {
+    public Slice<SubscriptionListResponse> getAllSubscriptions(Pageable pageable) {
         return subscriptionRepository
-                .findAll(pageable)
+                .findAllSlice(pageable)
                 .map(
                         sub -> {
                             String decryptedEmail = safeDecrypt(sub.getCustomer().getEmailEnc());
