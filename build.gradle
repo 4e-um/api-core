@@ -63,6 +63,9 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    // JSON
+    implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.9.5'
+
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
