@@ -216,15 +216,23 @@ jobs:
 
       - name: Install External Secrets Operator
         run: |
-          # ESO가 없으면 설치
-          if ! kubectl get namespace external-secrets &>/dev/null; then
+          # CRD 존재 여부로 ESO 설치 확인
+          if ! kubectl get crd externalsecrets.external-secrets.io &>/dev/null; then
             echo "Installing External Secrets Operator..."
             helm repo add external-secrets https://charts.external-secrets.io
             helm repo update
+
+            # 기존 실패한 설치가 있으면 삭제
+            if kubectl get namespace external-secrets &>/dev/null; then
+              echo "Cleaning up failed installation..."
+              helm uninstall external-secrets -n external-secrets --ignore-not-found || true
+            fi
+
             helm install external-secrets external-secrets/external-secrets \
               -n external-secrets \
               --create-namespace \
               --set installCRDs=true
+
             # ESO가 준비될 때까지 대기
             kubectl wait --for=condition=available deployment/external-secrets \
               -n external-secrets --timeout=120s
