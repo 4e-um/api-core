@@ -214,6 +214,24 @@ jobs:
           location: ${{ vars.GCP_ZONE }}
           project_id: ${{ vars.GCP_PROJECT_ID }}
 
+      - name: Install External Secrets Operator
+        run: |
+          # ESO가 없으면 설치
+          if ! kubectl get namespace external-secrets &>/dev/null; then
+            echo "Installing External Secrets Operator..."
+            helm repo add external-secrets https://charts.external-secrets.io
+            helm repo update
+            helm install external-secrets external-secrets/external-secrets \
+              -n external-secrets \
+              --create-namespace \
+              --set installCRDs=true
+            # ESO가 준비될 때까지 대기
+            kubectl wait --for=condition=available deployment/external-secrets \
+              -n external-secrets --timeout=120s
+          else
+            echo "External Secrets Operator already installed"
+          fi
+
       - name: Deploy to GKE
         run: |
           # Replace placeholders in all k8s manifests
