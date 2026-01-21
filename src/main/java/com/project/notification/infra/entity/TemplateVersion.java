@@ -1,8 +1,7 @@
 package com.project.notification.infra.entity;
 
-import com.project.notification.infra.entity.enums.Channel;
-import com.project.notification.infra.entity.enums.TemplateStatus;
-import io.hypersistence.utils.hibernate.type.json.JsonType;
+import java.util.Map;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,18 +15,27 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
+import org.hibernate.annotations.Type;
+
+import com.project.notification.infra.entity.enums.Channel;
+import com.project.notification.infra.entity.enums.TemplateStatus;
+
+import io.hypersistence.utils.hibernate.type.json.JsonType;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
-
-import java.util.Map;
 
 @Entity
-@Table(name = "template_version", uniqueConstraints = {
-        @UniqueConstraint(name = "uq_tpl_group_ver_channel", columnNames = {"group_id", "channel", "version"})
-})
+@Table(
+        name = "template_version",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uq_tpl_group_ver_channel",
+                    columnNames = {"group_id", "channel", "version"})
+        })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TemplateVersion {
@@ -66,7 +74,13 @@ public class TemplateVersion {
 
     // Builder 패턴 권장
     @Builder
-    public TemplateVersion(TemplateGroup templateGroup, int version, Channel channel, String subject, String body, Map<String, Object> variables) {
+    public TemplateVersion(
+            TemplateGroup templateGroup,
+            int version,
+            Channel channel,
+            String subject,
+            String body,
+            Map<String, Object> variables) {
         this.templateGroup = templateGroup;
         this.version = version;
         this.channel = channel;

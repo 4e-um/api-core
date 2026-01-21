@@ -1,4 +1,3 @@
 package com.project.notification.infra.entity;
 
-public class MessageLog {
-}
+public class MessageLog {}
