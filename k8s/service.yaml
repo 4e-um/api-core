@@ -5,6 +5,8 @@ metadata:
   namespace: app
   labels:
     app: api-core
+  annotations:
+    cloud.google.com/backend-config: '{"default": "api-backend-config"}'
 spec:
   type: ClusterIP
   ports:

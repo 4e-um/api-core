@@ -1,0 +1,61 @@
+# =============================================================================
+# Shared Ingress for all API services
+# =============================================================================
+# Managed by api-core, routes traffic to all API services
+# STATIC_IP_NAME is replaced by CI/CD (from terraform output)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-ingress
+  namespace: app
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "telecom-app-lb-ip"
+    kubernetes.io/ingress.allow-http: "true"
+spec:
+  rules:
+    - http:
+        paths:
+          # api-core routes
+          - path: /api/v1/core/*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: api-core
+                port:
+                  number: 80
+
+          # api-usage routes
+          - path: /api/v1/usage/*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: api-usage
+                port:
+                  number: 80
+
+          # api-message routes
+          - path: /api/v1/message/*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: api-message
+                port:
+                  number: 80
+
+          - path: /api/v1/notification/*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: api-message
+                port:
+                  number: 80
+
+          # Health check / default route
+          - path: /*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: api-core
+                port:
+                  number: 80

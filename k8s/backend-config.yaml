@@ -1,0 +1,20 @@
+# =============================================================================
+# Shared BackendConfig for GKE Ingress
+# =============================================================================
+# GKE-specific CRD for Load Balancer configuration
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: api-backend-config
+  namespace: app
+spec:
+  healthCheck:
+    checkIntervalSec: 30
+    timeoutSec: 10
+    healthyThreshold: 1
+    unhealthyThreshold: 3
+    type: HTTP
+    requestPath: /actuator/health
+    port: 8080
+  connectionDraining:
+    drainingTimeoutSec: 30
