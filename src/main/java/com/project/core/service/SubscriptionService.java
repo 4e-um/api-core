@@ -22,7 +22,7 @@ public class SubscriptionService {
     @Transactional(readOnly = true)
     public List<SubscriptionResponse> findSubscriptionResponses(Long customerId) {
         List<Subscription> subscriptions =
-                subscriptionRepository.findByCustomer_CustomerId(customerId);
+                subscriptionRepository.findAllByCustomer_CustomerIdWithPlan(customerId);
 
         // ✅ 구독이 없으면 빈 리스트 반환 (예외 없음)
         return subscriptions.stream().map(sub -> SubscriptionResponse.from(sub, aesUtil)).toList();

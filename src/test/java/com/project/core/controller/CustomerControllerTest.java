@@ -4,18 +4,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -27,6 +30,7 @@ import com.project.core.controller.dto.request.ChangeGradeRequest;
 import com.project.core.controller.dto.request.PhoneSearchRequest;
 import com.project.core.controller.dto.response.ChangeEmailResponse;
 import com.project.core.controller.dto.response.ChangeGradeResponse;
+import com.project.core.controller.dto.response.CustomerListResponse;
 import com.project.core.controller.dto.response.SubscriptionResponse;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.entity.customer.enums.Grade;
@@ -46,6 +50,63 @@ class CustomerControllerTest {
     @MockitoBean private SubscriptionService subscriptionService; // ✅ 추가
 
     @Test
+    @DisplayName("[조회/성공] 전체 고객 목록 조회 성공")
+    void getAllCustomersSuccess() throws Exception {
+        // given
+        CustomerListResponse customerResponse =
+                CustomerListResponse.builder()
+                        .customerId(1L)
+                        .name("홍길동")
+                        .contact("010-1234-5678")
+                        .email("test@example.com")
+                        .grade(Grade.GENERAL.name())
+                        .createdAt("2024-01-01")
+                        .build();
+
+        Page<CustomerListResponse> pageResponse = new PageImpl<>(List.of(customerResponse));
+
+        when(customerService.getAllCustomers(any(), any(Pageable.class))).thenReturn(pageResponse);
+
+        // when & then
+        mockMvc.perform(
+                        get("/customer")
+                                .param("page", "0")
+                                .param("size", "20")
+                                .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[0].name").value("홍길동"));
+    }
+
+    @Test
+    @DisplayName("[조회/성공] 고객 상세 조회 성공")
+    void getCustomerDetailSuccess() throws Exception {
+        // given
+        Long customerId = 1L;
+        CustomerListResponse customerResponse =
+                CustomerListResponse.builder()
+                        .customerId(customerId)
+                        .name("홍길동")
+                        .contact("010-1234-5678")
+                        .email("test@example.com")
+                        .grade(Grade.GENERAL.name())
+                        .createdAt("2024-01-01")
+                        .build();
+
+        when(customerService.getCustomerDetail(customerId)).thenReturn(customerResponse);
+
+        // when & then
+        mockMvc.perform(
+                        get("/customer/{customerId}", customerId)
+                                .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.customerId").value(customerId))
+                .andExpect(jsonPath("$.name").value("홍길동"));
+    }
+
+    @Test
     @DisplayName("[조회/성공] 전화번호 기반 유저 조회 성공")
     void searchByPhoneSuccess() throws Exception {
         // given
@@ -62,16 +123,18 @@ class CustomerControllerTest {
 
         ReflectionTestUtils.setField(customer, "customerId", 1L);
 
-        LocalDateTime fixedTime = LocalDateTime.of(2024, 1, 1, 0, 0);
         List<SubscriptionResponse> subs =
                 List.of(
                         new SubscriptionResponse(
                                 10L,
                                 "010-****-5678",
-                                fixedTime.minusDays(1),
-                                fixedTime.plusDays(30),
+                                "2024-01-01",
+                                "2024-12-31",
                                 SubscriptionStatus.ACTIVE,
-                                15));
+                                15,
+                                "프리미엄 플랜",
+                                5000,
+                                10000));
 
         when(customerService.loadByPhone("01012345678")).thenReturn(customer);
         when(subscriptionService.findSubscriptionResponses(1L)).thenReturn(subs); // ✅ 추가

@@ -1,11 +1,11 @@
 # ============================================================================
-# Backend Deploy Workflow
+# Backend Deploy Workflow (GCP/GKE)
 # ============================================================================
 # 역할:
 #   - Integrate workflow 성공 후 자동 실행
 #   - integrate에서 생성된 JAR artifact 사용 (빌드 재수행 없음)
-#   - Docker 이미지 빌드 및 ECR 푸시
-#   - ECS 서비스 배포
+#   - Docker 이미지 빌드 및 Artifact Registry 푸시
+#   - GKE 클러스터에 배포
 #
 # Job 구조:
 #   prepare ──> build-image ──> deploy
@@ -15,16 +15,22 @@
 #   - 수동 실행 (workflow_dispatch) - 최근 성공한 integrate run의 artifact 사용
 #
 # GitHub Secrets (Settings > Secrets and variables > Actions > Secrets):
-#   - AWS_ACCESS_KEY_ID: AWS IAM Access Key
-#   - AWS_SECRET_ACCESS_KEY: AWS IAM Secret Key
+#   - GCP_WORKLOAD_IDENTITY_PROVIDER: Workload Identity Provider (projects/.../providers/...)
+#   - GCP_SERVICE_ACCOUNT: GCP Service Account 이메일
 #
 # GitHub Variables (Settings > Secrets and variables > Actions > Variables):
-#   - ECR_REPOSITORY: ECR 레포지토리 이름
-#   - ECS_CLUSTER: ECS 클러스터 이름
-#   - ECS_SERVICE: ECS 서비스 이름
+#   - GCP_PROJECT_ID: GCP 프로젝트 ID
+#   - GCP_REGION: GCP 리전 (예: asia-northeast3)
+#   - GKE_CLUSTER: GKE 클러스터 이름
+#   - K8S_NAMESPACE: Kubernetes 네임스페이스 (예: app)
 # ============================================================================
 
-name: Deploy Backend to ECS
+name: Deploy Backend to GKE
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
 
 on:
   workflow_run:
@@ -32,11 +38,11 @@ on:
     types:
       - completed
     branches:
-      - main
+      - develop
   workflow_dispatch:
 
 env:
-  AWS_REGION: ap-northeast-2
+  SERVICE_NAME: api-core
 
 jobs:
   # ==========================================================================
@@ -45,7 +51,6 @@ jobs:
   prepare:
     name: Prepare
     runs-on: ubuntu-latest
-    # workflow_run 트리거일 경우 integrate 성공 및 push 이벤트일 때만 실행
     if: >
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
@@ -54,6 +59,7 @@ jobs:
     outputs:
       run_id: ${{ steps.get-run-info.outputs.run_id }}
       head_sha: ${{ steps.get-run-info.outputs.head_sha }}
+      short_sha: ${{ steps.get-run-info.outputs.short_sha }}
 
     steps:
       - name: Checkout code
@@ -67,7 +73,6 @@ jobs:
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "Manual trigger detected. Finding latest successful integrate run..."
 
-            # 최근 성공한 Integrate Backend workflow run 조회
             RUN_INFO=$(gh run list \
               --workflow "Integrate Backend" \
               --branch main \
@@ -91,8 +96,11 @@ jobs:
             HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
           fi
 
+          SHORT_SHA=${HEAD_SHA:0:7}
+
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
           echo "head_sha=$HEAD_SHA" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
 
       - name: Download artifact from Integrate workflow
         uses: actions/download-artifact@v4
@@ -117,15 +125,20 @@ jobs:
           retention-days: 1
 
   # ==========================================================================
-  # Build Image Job - Docker 빌드 및 ECR 푸시
+  # Build Image Job - Docker 빌드 및 Artifact Registry 푸시
   # ==========================================================================
   build-image:
     name: Build Image
     runs-on: ubuntu-latest
     needs: [prepare]
 
+    permissions:
+      contents: read
+      id-token: write
+
     outputs:
       image_tag: ${{ needs.prepare.outputs.head_sha }}
+      image_url: ${{ steps.build.outputs.image_url }}
 
     steps:
       - name: Checkout code
@@ -137,69 +150,96 @@ jobs:
           name: deploy-artifact
           path: build/libs
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+      - name: Login to Artifact Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.GCP_REGION }}-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: Dockerfile.deploy
-          push: true
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ needs.prepare.outputs.head_sha }}
-            ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        id: build
+        env:
+          IMAGE_URL: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/telecom-app-repo/${{ env.SERVICE_NAME }}
+        run: |
+          docker buildx build \
+            --file Dockerfile.deploy \
+            --tag $IMAGE_URL:${{ needs.prepare.outputs.head_sha }} \
+            --tag $IMAGE_URL:${{ needs.prepare.outputs.short_sha }} \
+            --tag $IMAGE_URL:latest \
+            --push \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            .
+
+          echo "image_url=$IMAGE_URL" >> $GITHUB_OUTPUT
 
   # ==========================================================================
-  # Deploy Job - ECS 배포
+  # Deploy Job - GKE 배포
   # ==========================================================================
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
     needs: [prepare, build-image]
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-      - name: Deploy to ECS
-        run: |
-          aws ecs update-service \
-            --cluster ${{ vars.ECS_CLUSTER }} \
-            --service ${{ vars.ECS_SERVICE }} \
-            --force-new-deployment
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ vars.GKE_CLUSTER }}
+          location: ${{ vars.GCP_REGION }}
+          project_id: ${{ vars.GCP_PROJECT_ID }}
 
-      - name: Wait for deployment to stabilize
+      - name: Deploy to GKE
         run: |
-          echo "Waiting for ECS service to stabilize..."
-          aws ecs wait services-stable \
-            --cluster ${{ vars.ECS_CLUSTER }} \
-            --services ${{ vars.ECS_SERVICE }}
-          echo "Deployment completed successfully!"
+          # Update image tag in deployment
+          kubectl set image deployment/${{ env.SERVICE_NAME }} \
+            ${{ env.SERVICE_NAME }}=${{ needs.build-image.outputs.image_url }}:${{ needs.prepare.outputs.head_sha }} \
+            -n ${{ vars.K8S_NAMESPACE }}
+
+          # Wait for rollout
+          kubectl rollout status deployment/${{ env.SERVICE_NAME }} \
+            -n ${{ vars.K8S_NAMESPACE }} \
+            --timeout=300s
+
+      - name: Verify deployment
+        run: |
+          echo "Checking deployment status..."
+          kubectl get deployment ${{ env.SERVICE_NAME }} -n ${{ vars.K8S_NAMESPACE }}
+          kubectl get pods -l app=${{ env.SERVICE_NAME }} -n ${{ vars.K8S_NAMESPACE }}
 
       - name: Deployment Summary
         run: |
           echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Service**: ${{ env.SERVICE_NAME }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Image Tag**: ${{ needs.prepare.outputs.head_sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Short SHA**: ${{ needs.prepare.outputs.short_sha }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Source Run ID**: ${{ needs.prepare.outputs.run_id }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **ECS Cluster**: ${{ vars.ECS_CLUSTER }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **ECS Service**: ${{ vars.ECS_SERVICE }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Region**: ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **GKE Cluster**: ${{ vars.GKE_CLUSTER }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Namespace**: ${{ vars.K8S_NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Region**: ${{ vars.GCP_REGION }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Triggered by**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
