@@ -1,5 +1,6 @@
 package com.project.notification.infra.entity;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import jakarta.persistence.Column;
@@ -11,7 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -52,13 +52,13 @@ public class TemplateVersion {
     private int version;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10)
     private Channel channel;
 
+    @Column(length = 200)
     private String subject; // Email Only
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String body;
 
     @Type(JsonType.class)
@@ -66,11 +66,17 @@ public class TemplateVersion {
     private Map<String, Object> variables;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "template_status", nullable = false)
+    @Column(name = "template_status", nullable = false, length = 20)
     private TemplateStatus status;
 
-    @Column(nullable = false)
+    @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     // Builder 패턴 권장
     @Builder
