@@ -7,12 +7,10 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class BatchSummaryDto {
+public class BatchFailureLogDto {
     private String jobName;
     private String status;
     private String exitCode;
     private String exitMessage;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private long durationMs;
+    private LocalDateTime failedAt;
 }

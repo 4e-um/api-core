@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class BatchJobDetailDto {
-    // TODO: 배치 목록 관리 DTO
+public class GrafanaInfoDto {
+    private String iframeUrl;
+    private String refreshInterval; // "5s"
 }
