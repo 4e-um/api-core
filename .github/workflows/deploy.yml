@@ -211,7 +211,7 @@ jobs:
         uses: google-github-actions/get-gke-credentials@v2
         with:
           cluster_name: ${{ vars.GKE_CLUSTER }}
-          location: ${{ vars.GCP_REGION }}
+          location: ${{ vars.GCP_ZONE }}
           project_id: ${{ vars.GCP_PROJECT_ID }}
 
       - name: Deploy to GKE
