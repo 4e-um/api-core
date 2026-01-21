@@ -216,8 +216,10 @@ jobs:
 
       - name: Deploy to GKE
         run: |
-          # Replace placeholders in k8s manifests
-          sed -i "s|PROJECT_ID|${{ vars.GCP_PROJECT_ID }}|g" k8s/deployment.yaml
+          # Replace placeholders in all k8s manifests
+          for file in k8s/*.yaml; do
+            sed -i "s|PROJECT_ID|${{ vars.GCP_PROJECT_ID }}|g" "$file"
+          done
           sed -i "s|:latest|:${{ needs.prepare.outputs.head_sha }}|g" k8s/deployment.yaml
 
           # Apply k8s manifests (creates if not exists, updates if exists)
