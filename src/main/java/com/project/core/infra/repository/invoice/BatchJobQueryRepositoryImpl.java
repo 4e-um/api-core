@@ -43,14 +43,17 @@ public class BatchJobQueryRepositoryImpl implements BatchJobQueryRepository {
 
         return jdbcTemplate.query(
                 sql,
-                (rs, rowNum) ->
-                        new BatchSummaryDto(
-                                rs.getString("JOB_NAME"),
-                                rs.getString("STATUS"),
-                                rs.getString("EXIT_CODE"),
-                                rs.getString("EXIT_MESSAGE"),
-                                rs.getTimestamp("START_TIME").toLocalDateTime(),
-                                rs.getTimestamp("END_TIME").toLocalDateTime(),
-                                rs.getLong("DURATION_MS")));
+                (rs, rowNum) -> {
+                    var startTimeStamp = rs.getTimestamp("START_TIME");
+                    var endTimeStamp = rs.getTimestamp("END_TIME");
+                    return new BatchSummaryDto(
+                            rs.getString("JOB_NAME"),
+                            rs.getString("STATUS"),
+                            rs.getString("EXIT_CODE"),
+                            rs.getString("EXIT_MESSAGE"),
+                            startTimeStamp != null ? startTimeStamp.toLocalDateTime() : null,
+                            endTimeStamp != null ? endTimeStamp.toLocalDateTime() : null,
+                            rs.getLong("DURATION_MS"));
+                });
     }
 }

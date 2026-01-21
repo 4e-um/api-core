@@ -1,14 +1,13 @@
 package com.project.global.config;
 
+import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Builder
+@AllArgsConstructor
 @ConfigurationProperties(prefix = "billing.grafana")
 public class BillingProperties {
-    private String iframeUrl;
-    private String refreshInterval;
+    private final String iframeUrl;
+    private final String refreshInterval;
 }
