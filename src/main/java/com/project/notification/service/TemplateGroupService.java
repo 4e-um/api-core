@@ -2,7 +2,10 @@ package com.project.notification.service;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import com.project.notification.infra.entity.TemplateVersion;
+import com.project.notification.infra.entity.enums.TemplateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -68,15 +71,15 @@ public class TemplateGroupService {
                                         new EntityNotFoundException(
                                                 CoreErrorCode.TEMPLATE_GROUP_NOT_FOUND));
 
-        Map<Channel, ActiveTemplateSummary> activeTemplates = new EnumMap<>(Channel.class);
-        for (Channel channel : Channel.values()) {
-            versionRepository
-                    .findActiveVersion(groupId, channel)
-                    .ifPresent(
-                            version ->
-                                    activeTemplates.put(
-                                            channel, ActiveTemplateSummary.from(version)));
-        }
+        Map<Channel, ActiveTemplateSummary> activeTemplates =
+                versionRepository.findAllByTemplateGroupId(groupId).stream()
+                        .filter(v -> v.getStatus() == TemplateStatus.ACTIVE && !v.isDeleted())
+                        .collect(
+                                Collectors.toMap(
+                                        TemplateVersion::getChannel,
+                                        ActiveTemplateSummary::from,
+                                        (v1, v2) -> v1,
+                                        () -> new EnumMap<>(Channel.class)));
 
         return TemplateGroupDetailResponse.from(group, activeTemplates);
     }

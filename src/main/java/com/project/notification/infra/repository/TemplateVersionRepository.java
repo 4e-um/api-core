@@ -45,6 +45,7 @@ public interface TemplateVersionRepository extends JpaRepository<TemplateVersion
             """
             update TemplateVersion v
             set v.isDeleted = true,
+                v.status = 'DRAFT',
                 v.updatedAt = CURRENT_TIMESTAMP
             where v.templateGroup.id = :groupId
             """)
