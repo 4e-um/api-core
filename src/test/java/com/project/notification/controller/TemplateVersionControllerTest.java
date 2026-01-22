@@ -48,7 +48,10 @@ class TemplateVersionControllerTest {
                         false,
                         LocalDateTime.now(),
                         LocalDateTime.now());
-        given(templateVersionService.createVersion(org.mockito.ArgumentMatchers.eq(1L), org.mockito.ArgumentMatchers.any()))
+        given(
+                        templateVersionService.createVersion(
+                                org.mockito.ArgumentMatchers.eq(1L),
+                                org.mockito.ArgumentMatchers.any()))
                 .willReturn(response);
 
         mockMvc.perform(
@@ -99,7 +102,8 @@ class TemplateVersionControllerTest {
                         false,
                         LocalDateTime.now(),
                         LocalDateTime.now());
-        PageImpl<TemplateVersionListResponse> page = new PageImpl<>(java.util.List.of(listResponse));
+        PageImpl<TemplateVersionListResponse> page =
+                new PageImpl<>(java.util.List.of(listResponse));
         given(
                         templateVersionService.getVersions(
                                 org.mockito.ArgumentMatchers.eq(1L),

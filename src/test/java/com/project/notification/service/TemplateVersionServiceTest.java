@@ -84,11 +84,8 @@ class TemplateVersionServiceTest {
                 .willReturn(Optional.of(version));
         given(version.isDeleted()).willReturn(false);
         given(version.getVariables()).willReturn(Map.of("required", List.of("name")));
-        given(version.getSubject()).willReturn("Hi {{name}}");
-        given(version.getBody()).willReturn("Body {{name}}");
 
-        TemplateVersionPreviewRequest request =
-                new TemplateVersionPreviewRequest(Map.of());
+        TemplateVersionPreviewRequest request = new TemplateVersionPreviewRequest(Map.of());
 
         assertThatThrownBy(() -> templateVersionService.preview(1L, 10L, request))
                 .isInstanceOf(InvalidStateException.class)
@@ -106,8 +103,6 @@ class TemplateVersionServiceTest {
                 .willReturn(Optional.of(version));
         given(version.isDeleted()).willReturn(false);
         given(version.getVariables()).willReturn(Map.of("required", "name"));
-        given(version.getSubject()).willReturn("Hi {{name}}");
-        given(version.getBody()).willReturn("Body {{name}}");
 
         TemplateVersionPreviewRequest request =
                 new TemplateVersionPreviewRequest(Map.of("name", "Kim"));
