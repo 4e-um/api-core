@@ -1,17 +1,17 @@
 # ============================================================================
-# Backend Deploy Workflow (GCP/GKE)
+# Backend Deploy Workflow (GCP/Cloud Run)
 # ============================================================================
 # 역할:
 #   - Integrate workflow 성공 후 자동 실행
 #   - integrate에서 생성된 JAR artifact 사용 (빌드 재수행 없음)
 #   - Docker 이미지 빌드 및 Artifact Registry 푸시
-#   - GKE 클러스터에 배포
+#   - Cloud Run 서비스 배포
 #
 # Job 구조:
 #   prepare ──> build-image ──> deploy
 #
 # 트리거:
-#   - Integrate Backend workflow가 main 브랜치에서 성공적으로 완료된 후
+#   - Integrate Backend workflow가 develop 브랜치에서 성공적으로 완료된 후
 #   - 수동 실행 (workflow_dispatch) - 최근 성공한 integrate run의 artifact 사용
 #
 # GitHub Secrets (Settings > Secrets and variables > Actions > Secrets):
@@ -21,11 +21,9 @@
 # GitHub Variables (Settings > Secrets and variables > Actions > Variables):
 #   - GCP_PROJECT_ID: GCP 프로젝트 ID
 #   - GCP_REGION: GCP 리전 (예: asia-northeast3)
-#   - GKE_CLUSTER: GKE 클러스터 이름
-#   - K8S_NAMESPACE: Kubernetes 네임스페이스 (예: app)
 # ============================================================================
 
-name: Deploy Backend to GKE
+name: Deploy Backend to Cloud Run
 
 permissions:
   contents: read
@@ -43,6 +41,7 @@ on:
 
 env:
   SERVICE_NAME: api-core
+  CLOUD_RUN_SERVICE: telecom-app-api-core
 
 jobs:
   # ==========================================================================
@@ -75,7 +74,7 @@ jobs:
 
             RUN_INFO=$(gh run list \
               --workflow "Integrate Backend" \
-              --branch main \
+              --branch develop \
               --status success \
               --event push \
               --limit 1 \
@@ -186,7 +185,7 @@ jobs:
           echo "image_url=$IMAGE_URL" >> $GITHUB_OUTPUT
 
   # ==========================================================================
-  # Deploy Job - GKE 배포
+  # Deploy Job - Cloud Run 배포
   # ==========================================================================
   deploy:
     name: Deploy
@@ -198,112 +197,44 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-      - name: Get GKE credentials
-        uses: google-github-actions/get-gke-credentials@v2
-        with:
-          cluster_name: ${{ vars.GKE_CLUSTER }}
-          location: ${{ vars.GCP_ZONE }}
-          project_id: ${{ vars.GCP_PROJECT_ID }}
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
 
-      - name: Install External Secrets Operator
+      - name: Deploy to Cloud Run
         run: |
-          # 모든 필수 CRD 존재 여부 확인
-          CRDS_OK=true
-          for crd in externalsecrets.external-secrets.io secretstores.external-secrets.io clustersecretstores.external-secrets.io; do
-            if ! kubectl get crd $crd &>/dev/null; then
-              echo "Missing CRD: $crd"
-              CRDS_OK=false
-            fi
-          done
-
-          if [ "$CRDS_OK" = "false" ]; then
-            echo "Installing/Reinstalling External Secrets Operator..."
-            helm repo add external-secrets https://charts.external-secrets.io
-            helm repo update
-
-            # 기존 설치가 있으면 삭제 (부분 설치 포함)
-            if helm list -n external-secrets | grep -q external-secrets; then
-              echo "Cleaning up existing installation..."
-              helm uninstall external-secrets -n external-secrets --wait || true
-            fi
-
-            helm install external-secrets external-secrets/external-secrets \
-              -n external-secrets \
-              --create-namespace \
-              --set installCRDs=true \
-              --wait
-
-            # CRD 등록 완료 대기
-            echo "Waiting for CRDs to be fully registered..."
-            kubectl wait --for=condition=established crd/externalsecrets.external-secrets.io --timeout=60s
-            kubectl wait --for=condition=established crd/secretstores.external-secrets.io --timeout=60s
-            kubectl wait --for=condition=established crd/clustersecretstores.external-secrets.io --timeout=60s
-          else
-            echo "External Secrets Operator already installed with all CRDs"
-          fi
-
-      - name: Deploy to GKE
-        run: |
-          # Replace placeholders in all k8s manifests
-          for file in k8s/*.yaml; do
-            sed -i "s|PROJECT_ID|${{ vars.GCP_PROJECT_ID }}|g" "$file"
-          done
-          sed -i "s|:latest|:${{ needs.prepare.outputs.head_sha }}|g" k8s/deployment.yaml
-
-          # 1. 기본 리소스 먼저 적용 (namespace, serviceaccount)
-          kubectl apply -f k8s/namespace.yaml
-          kubectl apply -f k8s/serviceaccount.yaml
-
-          # 2. ESO 리소스 적용 (SecretStore -> ExternalSecret 순서)
-          kubectl apply -f k8s/secret-store.yaml
-          kubectl apply -f k8s/external-secret.yaml
-
-          # 3. Secret 동기화 대기 (최대 60초)
-          echo "Waiting for secret sync..."
-          for i in {1..12}; do
-            if kubectl get secret ${{ env.SERVICE_NAME }}-secrets -n ${{ vars.K8S_NAMESPACE }} &>/dev/null; then
-              echo "Secret synced successfully"
-              break
-            fi
-            echo "Waiting for secret... ($i/12)"
-            sleep 5
-          done
-
-          # 4. 나머지 리소스 적용
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
-          kubectl apply -f k8s/ingress.yaml
-          kubectl apply -f k8s/hpa.yaml
-          kubectl apply -f k8s/backend-config.yaml
-
-          # Wait for rollout
-          kubectl rollout status deployment/${{ env.SERVICE_NAME }} \
-            -n ${{ vars.K8S_NAMESPACE }} \
-            --timeout=300s
+          gcloud run services update ${{ env.CLOUD_RUN_SERVICE }} \
+            --project=${{ vars.GCP_PROJECT_ID }} \
+            --region=${{ vars.GCP_REGION }} \
+            --image=${{ needs.build-image.outputs.image_url }}:${{ needs.prepare.outputs.head_sha }}
 
       - name: Verify deployment
         run: |
           echo "Checking deployment status..."
-          kubectl get deployment ${{ env.SERVICE_NAME }} -n ${{ vars.K8S_NAMESPACE }}
-          kubectl get pods -l app=${{ env.SERVICE_NAME }} -n ${{ vars.K8S_NAMESPACE }}
+          gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} \
+            --project=${{ vars.GCP_PROJECT_ID }} \
+            --region=${{ vars.GCP_REGION }} \
+            --format="value(status.url)"
 
       - name: Deployment Summary
         run: |
+          SERVICE_URL=$(gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} \
+            --project=${{ vars.GCP_PROJECT_ID }} \
+            --region=${{ vars.GCP_REGION }} \
+            --format="value(status.url)")
+
           echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Service**: ${{ env.SERVICE_NAME }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Image Tag**: ${{ needs.prepare.outputs.head_sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Short SHA**: ${{ needs.prepare.outputs.short_sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Source Run ID**: ${{ needs.prepare.outputs.run_id }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **GKE Cluster**: ${{ vars.GKE_CLUSTER }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Namespace**: ${{ vars.K8S_NAMESPACE }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Region**: ${{ vars.GCP_REGION }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Triggered by**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Service** | \`${{ env.CLOUD_RUN_SERVICE }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Image Tag** | \`${{ needs.prepare.outputs.head_sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Short SHA** | \`${{ needs.prepare.outputs.short_sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Source Run ID** | \`${{ needs.prepare.outputs.run_id }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Region** | \`${{ vars.GCP_REGION }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Service URL** | $SERVICE_URL |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Triggered by** | \`${{ github.event_name }}\` |" >> $GITHUB_STEP_SUMMARY
