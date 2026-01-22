@@ -95,9 +95,15 @@ public class MessageLogRepositoryImpl implements MessageLogRepositoryCustom {
     }
 
     private BooleanExpression sentAtBetween(LocalDateTime from, LocalDateTime to) {
-        if (from == null || to == null) {
-            return null;
+        if (from != null && to != null) {
+            return messageLog.sentAt.between(from, to);
         }
-        return messageLog.sentAt.between(from, to);
+        if (from != null) {
+            return messageLog.sentAt.goe(from);
+        }
+        if (to != null) {
+            return messageLog.sentAt.loe(to);
+        }
+        return null;
     }
 }

@@ -90,7 +90,6 @@ public class MessageLog {
 
     @Builder
     public MessageLog(
-            Long id,
             String traceId,
             Subscription subscription,
             String recipientEnc,
@@ -99,9 +98,7 @@ public class MessageLog {
             MessageStatus status,
             String errorMessage,
             Map<String, Object> requestPayload,
-            Long processingTimeMs,
-            LocalDateTime sentAt) {
-        this.id = id;
+            Long processingTimeMs) {
         this.traceId = traceId;
         this.subscription = subscription;
         this.recipientEnc = recipientEnc;
@@ -111,6 +108,5 @@ public class MessageLog {
         this.errorMessage = errorMessage;
         this.requestPayload = requestPayload;
         this.processingTimeMs = processingTimeMs;
-        this.sentAt = sentAt;
     }
 }

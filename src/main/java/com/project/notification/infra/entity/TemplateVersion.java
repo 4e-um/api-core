@@ -16,7 +16,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import com.project.notification.infra.entity.enums.Channel;
 import com.project.notification.infra.entity.enums.TemplateStatus;
@@ -72,11 +74,13 @@ public class TemplateVersion {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt;
 
     // Builder 패턴 권장
     @Builder
