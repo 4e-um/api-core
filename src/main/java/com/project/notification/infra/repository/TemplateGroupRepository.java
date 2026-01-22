@@ -22,8 +22,8 @@ public interface TemplateGroupRepository extends JpaRepository<TemplateGroup, Lo
               and (:isActive is null or g.isActive = :isActive)
               and (
                     :keyword is null
-                    or g.name = :keyword
-                    or coalesce(g.description, '') = :keyword
+                    or g.name like concat('%', :keyword, '%')
+                    or g.description like concat('%', :keyword, '%')
               )
             """)
     Page<TemplateGroup> search(
