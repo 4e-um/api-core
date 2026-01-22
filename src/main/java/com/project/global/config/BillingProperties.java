@@ -4,8 +4,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @ConfigurationProperties(prefix = "billing.grafana")
 public class BillingProperties {
