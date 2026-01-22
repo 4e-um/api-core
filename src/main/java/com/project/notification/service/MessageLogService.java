@@ -23,7 +23,8 @@ public class MessageLogService {
     private final MessageLogRepository messageLogRepository;
 
     /** 로그 목록 검색 */
-    public Slice<MessageLogResponse> searchLogs(MessageLogSearchRequest condition, Pageable pageable) {
+    public Slice<MessageLogResponse> searchLogs(
+            MessageLogSearchRequest condition, Pageable pageable) {
         return messageLogRepository.searchLogs(condition, pageable).map(MessageLogResponse::from);
     }
 

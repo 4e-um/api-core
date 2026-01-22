@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "template_group")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-// AuditingEntityListener 등을 사용 중이라면 extends BaseEntity
 public class TemplateGroup {
 
     @Id
