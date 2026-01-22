@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,10 +28,7 @@ import com.project.notification.infra.entity.enums.TemplateStatus;
 import com.project.notification.infra.repository.TemplateGroupRepository;
 import com.project.notification.infra.repository.TemplateVersionRepository;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class TemplateVersionService {
 
@@ -38,6 +36,16 @@ public class TemplateVersionService {
 
     private final TemplateGroupRepository groupRepository;
     private final TemplateVersionRepository versionRepository;
+    private final TemplateVersionService self;
+
+    public TemplateVersionService(
+            TemplateGroupRepository groupRepository,
+            TemplateVersionRepository versionRepository,
+            @Lazy TemplateVersionService self) {
+        this.groupRepository = groupRepository;
+        this.versionRepository = versionRepository;
+        this.self = self;
+    }
 
     // 템플릿 버전 생성
     @Transactional
@@ -70,7 +78,7 @@ public class TemplateVersionService {
         TemplateVersion saved = versionRepository.save(version);
 
         if (request.status() == TemplateStatus.ACTIVE) {
-            activateVersion(groupId, saved.getId());
+            self.activateVersion(groupId, saved.getId());
         }
 
         return TemplateVersionResponse.from(saved);
