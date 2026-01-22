@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.notification.controller.dto.request.LogSearchRequest;
+import com.project.notification.controller.dto.request.MessageLogSearchRequest;
 import com.project.notification.controller.dto.response.MessageLogDetailResponse;
 import com.project.notification.controller.dto.response.MessageLogResponse;
 import com.project.notification.service.MessageLogService;
@@ -33,7 +33,7 @@ public class MessageLogController {
      */
     @GetMapping
     public ResponseEntity<Slice<MessageLogResponse>> searchLogs(
-            @ModelAttribute LogSearchRequest condition,
+            @ModelAttribute MessageLogSearchRequest condition,
             @PageableDefault(size = 20, sort = "sentAt", direction = Sort.Direction.DESC)
                     Pageable pageable) {
         Slice<MessageLogResponse> result = messageLogService.searchLogs(condition, pageable);

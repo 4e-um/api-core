@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.project.global.exception.ApplicationException;
 import com.project.global.exception.code.domain.notification.NotificationErrorCode;
-import com.project.notification.controller.dto.request.LogSearchRequest;
+import com.project.notification.controller.dto.request.MessageLogSearchRequest;
 import com.project.notification.controller.dto.response.MessageLogDetailResponse;
 import com.project.notification.controller.dto.response.MessageLogResponse;
 import com.project.notification.infra.entity.MessageLog;
@@ -23,7 +23,7 @@ public class MessageLogService {
     private final MessageLogRepository messageLogRepository;
 
     /** 로그 목록 검색 */
-    public Slice<MessageLogResponse> searchLogs(LogSearchRequest condition, Pageable pageable) {
+    public Slice<MessageLogResponse> searchLogs(MessageLogSearchRequest condition, Pageable pageable) {
         return messageLogRepository.searchLogs(condition, pageable).map(MessageLogResponse::from);
     }
 

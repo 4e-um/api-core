@@ -7,7 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import com.project.notification.infra.entity.enums.Channel;
 import com.project.notification.infra.entity.enums.MessageStatus;
 
-public record LogSearchRequest(
+public record MessageLogSearchRequest(
         String traceId,
         Long subId,
         Channel channel,

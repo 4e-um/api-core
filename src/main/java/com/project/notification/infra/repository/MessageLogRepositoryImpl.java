@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
-import com.project.notification.controller.dto.request.LogSearchRequest;
+import com.project.notification.controller.dto.request.MessageLogSearchRequest;
 import com.project.notification.infra.entity.MessageLog;
 import com.project.notification.infra.entity.enums.Channel;
 import com.project.notification.infra.entity.enums.MessageStatus;
@@ -29,7 +29,7 @@ public class MessageLogRepositoryImpl implements MessageLogRepositoryCustom {
 
     // 목록 조회
     @Override
-    public Slice<MessageLog> searchLogs(LogSearchRequest condition, Pageable pageable) {
+    public Slice<MessageLog> searchLogs(MessageLogSearchRequest condition, Pageable pageable) {
 
         // 데이터 조회 (limit + 1)
         List<MessageLog> content =
