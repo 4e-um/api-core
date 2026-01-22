@@ -125,16 +125,4 @@ public class TemplateVersion {
     public void delete() {
         this.isDeleted = true;
     }
-
-    @PrePersist
-    private void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-    }
-
-    @PreUpdate
-    private void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 }

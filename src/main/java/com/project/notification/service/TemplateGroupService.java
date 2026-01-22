@@ -17,7 +17,6 @@ import com.project.notification.controller.dto.response.TemplateGroupDetailRespo
 import com.project.notification.controller.dto.response.TemplateGroupResponse;
 import com.project.notification.controller.dto.response.TemplateGroupResponse.ActiveTemplateSummary;
 import com.project.notification.infra.entity.TemplateGroup;
-import com.project.notification.infra.entity.TemplateVersion;
 import com.project.notification.infra.entity.enums.Channel;
 import com.project.notification.infra.repository.TemplateGroupRepository;
 import com.project.notification.infra.repository.TemplateVersionRepository;
@@ -109,10 +108,7 @@ public class TemplateGroupService {
                                                 CoreErrorCode.TEMPLATE_GROUP_NOT_FOUND));
 
         group.delete();
-
-        for (TemplateVersion version : versionRepository.findAllByTemplateGroupId(groupId)) {
-            version.delete();
-        }
+        versionRepository.softDeleteByGroupId(groupId);
 
         return TemplateGroupResponse.from(group);
     }

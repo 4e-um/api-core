@@ -264,19 +264,11 @@ public class TemplateVersionService {
         if (template == null) {
             return null;
         }
-        String rendered = template;
-        for (Map.Entry<String, Object> entry : variables.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue() == null ? "" : entry.getValue().toString();
-            rendered = rendered.replace("{{" + key + "}}", value);
-        }
 
-        Matcher matcher = VARIABLE_PATTERN.matcher(rendered);
-        StringBuffer buffer = new StringBuffer();
-        while (matcher.find()) {
-            matcher.appendReplacement(buffer, "");
-        }
-        matcher.appendTail(buffer);
-        return buffer.toString();
+        return VARIABLE_PATTERN.matcher(template).replaceAll(matchResult -> {
+            String key = matchResult.group(1);
+            Object value = variables.get(key);
+            return value != null ? value.toString() : "";
+        });
     }
 }

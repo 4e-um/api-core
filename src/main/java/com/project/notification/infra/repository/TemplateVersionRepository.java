@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -38,6 +39,16 @@ public interface TemplateVersionRepository extends JpaRepository<TemplateVersion
     Optional<TemplateVersion> findByIdAndTemplateGroupId(Long id, Long groupId);
 
     List<TemplateVersion> findAllByTemplateGroupId(Long groupId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(
+            """
+            update TemplateVersion v
+            set v.isDeleted = true,
+                v.updatedAt = CURRENT_TIMESTAMP
+            where v.templateGroup.id = :groupId
+            """)
+    int softDeleteByGroupId(@Param("groupId") Long groupId);
 
     @Query(
             """

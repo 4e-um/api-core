@@ -64,7 +64,10 @@ public enum CoreErrorCode implements BaseErrorCode {
     TEMPLATE_SUBJECT_REQUIRED(HttpStatus.BAD_REQUEST, "TEMPLATE_007", "EMAIL 템플릿은 subject가 필요합니다."),
     TEMPLATE_BODY_REQUIRED(HttpStatus.BAD_REQUEST, "TEMPLATE_008", "템플릿 본문(body)은 필수입니다."),
     TEMPLATE_CHANNEL_REQUIRED(HttpStatus.BAD_REQUEST, "TEMPLATE_009", "템플릿 채널(channel)은 필수입니다."),
-    TEMPLATE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "TEMPLATE_999", "템플릿을 찾을 수 없습니다.");
+    TEMPLATE_NOT_FOUND(HttpStatus.NOT_FOUND, "TEMPLATE_010", "템플릿을 찾을 수 없습니다."),
+
+    // Message Log
+    LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "NOTIFICATION_001", "존재하지 않는 로그입니다.");
 
     private final HttpStatus httpStatus;
     private final String customCode;
