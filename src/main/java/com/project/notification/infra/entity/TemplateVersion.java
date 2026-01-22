@@ -1,5 +1,6 @@
 package com.project.notification.infra.entity;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import jakarta.persistence.Column;
@@ -13,6 +14,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -55,6 +58,7 @@ public class TemplateVersion {
     @Column(nullable = false)
     private Channel channel;
 
+    @Column(length = 200)
     private String subject; // Email Only
 
     @Lob
@@ -69,10 +73,16 @@ public class TemplateVersion {
     @Column(name = "template_status", nullable = false)
     private TemplateStatus status;
 
-    @Column(nullable = false)
+    @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
-    // Builder 패턴 권장
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    // Builder 사용 권장
     @Builder
     public TemplateVersion(
             TemplateGroup templateGroup,
@@ -90,6 +100,18 @@ public class TemplateVersion {
         this.status = TemplateStatus.DRAFT; // 기본값 DRAFT
     }
 
+    public void updateContent(String subject, String body, Map<String, Object> variables) {
+        if (subject != null) {
+            this.subject = subject;
+        }
+        if (body != null) {
+            this.body = body;
+        }
+        if (variables != null) {
+            this.variables = variables;
+        }
+    }
+
     public void activate() {
         this.status = TemplateStatus.ACTIVE;
     }
@@ -102,5 +124,15 @@ public class TemplateVersion {
         this.isDeleted = true;
     }
 
-    // 내용 수정 메서드 등...
+    @PrePersist
+    private void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    private void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }
