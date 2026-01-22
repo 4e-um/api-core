@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import com.project.notification.infra.entity.TemplateGroup;
 import com.project.notification.infra.entity.TemplateVersion;
-import com.project.notification.infra.entity.enums.Channel;
 
 public record TemplateGroupResponse(
         Long id,
