@@ -21,8 +21,7 @@ public enum CoreErrorCode implements BaseErrorCode {
 
     // Plan
     PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "PLAN_001", "존재하지 않는 요금제입니다."),
-    PLAN_ALREADY_SUBSCRIBED(
-            HttpStatus.BAD_REQUEST, "PLAN_002", "이미 가입된 요금제는 동일 요금제로 변경할 수 없습니다."),
+    PLAN_ALREADY_SUBSCRIBED(HttpStatus.BAD_REQUEST, "PLAN_002", "이미 가입된 요금제는 동일 요금제로 변경할 수 없습니다."),
 
     // VAS
     VAS_NOT_FOUND(HttpStatus.NOT_FOUND, "VAS_001", "존재하지 않는 부가서비스입니다."),
@@ -61,18 +60,13 @@ public enum CoreErrorCode implements BaseErrorCode {
             HttpStatus.CONFLICT, "TEMPLATE_004", "ACTIVE인 템플릿 버전은 수정할 수 없습니다."),
     TEMPLATE_VERSION_ACTIVE_CANNOT_DELETE(
             HttpStatus.CONFLICT, "TEMPLATE_005", "ACTIVE인 템플릿 버전은 삭제할 수 없습니다."),
-    TEMPLATE_VARIABLE_MISSING(
-            HttpStatus.BAD_REQUEST, "TEMPLATE_006", "필수 템플릿 변수가 누락되었습니다."),
-    TEMPLATE_SUBJECT_REQUIRED(
-            HttpStatus.BAD_REQUEST, "TEMPLATE_007", "EMAIL 템플릿은 subject가 필요합니다."),
-    TEMPLATE_BODY_REQUIRED(
-            HttpStatus.BAD_REQUEST, "TEMPLATE_008", "템플릿 본문(body)은 필수입니다."),
-    TEMPLATE_CHANNEL_REQUIRED(
-            HttpStatus.BAD_REQUEST, "TEMPLATE_009", "템플릿 채널(channel)은 필수입니다."),
+    TEMPLATE_VARIABLE_MISSING(HttpStatus.BAD_REQUEST, "TEMPLATE_006", "필수 템플릿 변수가 누락되었습니다."),
+    TEMPLATE_SUBJECT_REQUIRED(HttpStatus.BAD_REQUEST, "TEMPLATE_007", "EMAIL 템플릿은 subject가 필요합니다."),
+    TEMPLATE_BODY_REQUIRED(HttpStatus.BAD_REQUEST, "TEMPLATE_008", "템플릿 본문(body)은 필수입니다."),
+    TEMPLATE_CHANNEL_REQUIRED(HttpStatus.BAD_REQUEST, "TEMPLATE_009", "템플릿 채널(channel)은 필수입니다."),
     TEMPLATE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "TEMPLATE_999", "템플릿을 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String customCode;
     private final String message;
 }
-

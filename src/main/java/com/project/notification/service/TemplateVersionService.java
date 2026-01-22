@@ -42,7 +42,8 @@ public class TemplateVersionService {
 
     // 템플릿 버전 생성
     @Transactional
-    public TemplateVersionResponse createVersion(Long groupId, TemplateVersionCreateRequest request) {
+    public TemplateVersionResponse createVersion(
+            Long groupId, TemplateVersionCreateRequest request) {
         TemplateGroup group =
                 groupRepository
                         .findByIdAndIsDeletedFalse(groupId)
