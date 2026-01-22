@@ -230,10 +230,8 @@ public class TemplateVersionService {
         if (channel == null) {
             throw new InvalidStateException(CoreErrorCode.TEMPLATE_CHANNEL_REQUIRED);
         }
-        if (channel == Channel.EMAIL) {
-            if (subject == null || subject.isBlank()) {
-                throw new InvalidStateException(CoreErrorCode.TEMPLATE_SUBJECT_REQUIRED);
-            }
+        if ((channel == Channel.EMAIL) && (subject == null || subject.isBlank())) {
+            throw new InvalidStateException(CoreErrorCode.TEMPLATE_SUBJECT_REQUIRED);
         }
     }
 
