@@ -13,6 +13,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -50,6 +51,16 @@ public class TemplateGroup {
     private LocalDateTime updatedAt;
 
     // 생성자, 비즈니스 메서드 (update, delete 등)
+    @Builder
+    private TemplateGroup(String code, String name, String description, boolean isActive) {
+        this.code = code;
+        this.name = name;
+        this.description = description;
+        this.isActive = isActive;
+        this.isDeleted = false;
+    }
+
+    // 생성 후 비즈니스 메서드 (update, delete 등)
     public void update(String name, String description, Boolean isActive) {
         if (name != null) {
             this.name = name;
@@ -64,5 +75,6 @@ public class TemplateGroup {
 
     public void delete() {
         this.isDeleted = true;
+        this.isActive = false;
     }
 }

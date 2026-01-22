@@ -7,4 +7,8 @@ public class InvalidStateException extends BaseException {
     public InvalidStateException(BaseErrorCode errorCode) {
         super(errorCode);
     }
+
+    public InvalidStateException(BaseErrorCode errorCode, String message) {
+        super(errorCode, message);
+    }
 }

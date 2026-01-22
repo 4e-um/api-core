@@ -100,6 +100,18 @@ public class TemplateVersion {
         this.status = TemplateStatus.DRAFT; // 기본값 DRAFT
     }
 
+    public void updateContent(String subject, String body, Map<String, Object> variables) {
+        if (subject != null) {
+            this.subject = subject;
+        }
+        if (body != null) {
+            this.body = body;
+        }
+        if (variables != null) {
+            this.variables = variables;
+        }
+    }
+
     public void activate() {
         this.status = TemplateStatus.ACTIVE;
     }
@@ -111,6 +123,4 @@ public class TemplateVersion {
     public void delete() {
         this.isDeleted = true;
     }
-
-    // 내용 수정 메서드 등...
 }
