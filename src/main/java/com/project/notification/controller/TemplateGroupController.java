@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 
 @Validated
 @RestController
-@RequestMapping("/notification")
+@RequestMapping("/notification/template-groups")
 @RequiredArgsConstructor
 public class TemplateGroupController {
 

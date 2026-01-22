@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 
 @Validated
 @RestController
-@RequestMapping("/notification/{groupId}/versions")
+@RequestMapping("/notification/template-groups/{groupId}/versions")
 @RequiredArgsConstructor
 public class TemplateVersionController {
 
@@ -55,7 +55,8 @@ public class TemplateVersionController {
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
                     Pageable pageable) {
         Page<TemplateVersionListResponse> response =
-                templateVersionService.getVersions(groupId, channel, status, includeDeleted, pageable);
+                templateVersionService.getVersions(
+                        groupId, channel, status, includeDeleted, pageable);
         return ResponseEntity.ok(response);
     }
 
