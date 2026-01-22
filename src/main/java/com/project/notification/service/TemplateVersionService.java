@@ -217,7 +217,9 @@ public class TemplateVersionService {
             }
         }
         if (!missing.isEmpty()) {
-            throw new InvalidStateException(CoreErrorCode.TEMPLATE_VARIABLE_MISSING);
+            throw new InvalidStateException(
+                    CoreErrorCode.TEMPLATE_VARIABLE_MISSING,
+                    CoreErrorCode.TEMPLATE_VARIABLE_MISSING.getMessage() + " Missing: " + missing);
         }
 
         String renderedSubject = render(version.getSubject(), variables);
@@ -253,6 +255,13 @@ public class TemplateVersionService {
             return Set.of();
         }
         Object required = variables.get("required");
+        if (required != null && !(required instanceof List<?>)) {
+            throw new InvalidStateException(
+                    CoreErrorCode.TEMPLATE_VARIABLE_MISSING,
+                    CoreErrorCode.TEMPLATE_VARIABLE_MISSING.getMessage()
+                            + " Invalid required type: "
+                            + required.getClass().getSimpleName());
+        }
         if (required instanceof List<?> list) {
             Set<String> result = new HashSet<>();
             for (Object item : list) {

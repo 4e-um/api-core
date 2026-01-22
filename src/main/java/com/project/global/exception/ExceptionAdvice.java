@@ -24,11 +24,11 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<Object> handleBaseException(BaseException e, HttpServletRequest request) {
         BaseErrorCode code = e.getCode();
-        log.error("[BaseException] {} - {}", code.name(), code.getMessage());
+        log.error("[BaseException] {} - {}", code.name(), e.getMessage());
 
         ProblemDetail problem = ProblemDetail.forStatus(code.getHttpStatus());
         problem.setTitle(code.name());
-        problem.setDetail(code.getMessage());
+        problem.setDetail(e.getMessage());
         problem.setProperty("code", code.getCustomCode());
 
         return ResponseEntity.status(code.getHttpStatus()).body(problem);

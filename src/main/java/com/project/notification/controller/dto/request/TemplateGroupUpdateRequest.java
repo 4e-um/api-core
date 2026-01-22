@@ -1,3 +1,6 @@
 package com.project.notification.controller.dto.request;
 
-public record TemplateGroupUpdateRequest(String name, String description, Boolean isActive) {}
+import jakarta.validation.constraints.Pattern;
+
+public record TemplateGroupUpdateRequest(
+        @Pattern(regexp = "\\S.*") String name, String description, Boolean isActive) {}

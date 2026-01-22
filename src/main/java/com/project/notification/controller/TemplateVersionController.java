@@ -70,7 +70,7 @@ public class TemplateVersionController {
     public ResponseEntity<TemplateVersionResponse> updateVersion(
             @PathVariable("groupId") Long groupId,
             @PathVariable("versionId") Long versionId,
-            @RequestBody TemplateVersionUpdateRequest request) {
+            @Valid @RequestBody TemplateVersionUpdateRequest request) {
         return ResponseEntity.ok(templateVersionService.updateVersion(groupId, versionId, request));
     }
 

@@ -33,6 +33,4 @@ public record TemplateGroupResponse(
             return new ActiveTemplateSummary(version.getId(), version.getVersion());
         }
     }
-
-    public record ActiveTemplateResponse(Channel channel, ActiveTemplateSummary template) {}
 }

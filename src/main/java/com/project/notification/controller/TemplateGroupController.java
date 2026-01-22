@@ -62,7 +62,7 @@ public class TemplateGroupController {
     @PatchMapping("/{groupId}")
     public ResponseEntity<TemplateGroupResponse> update(
             @PathVariable("groupId") Long groupId,
-            @RequestBody TemplateGroupUpdateRequest request) {
+            @Valid @RequestBody TemplateGroupUpdateRequest request) {
         return ResponseEntity.ok(templateGroupService.update(groupId, request));
     }
 
