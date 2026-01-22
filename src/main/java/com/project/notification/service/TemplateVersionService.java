@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.data.domain.Page;
@@ -265,10 +264,13 @@ public class TemplateVersionService {
             return null;
         }
 
-        return VARIABLE_PATTERN.matcher(template).replaceAll(matchResult -> {
-            String key = matchResult.group(1);
-            Object value = variables.get(key);
-            return value != null ? value.toString() : "";
-        });
+        return VARIABLE_PATTERN
+                .matcher(template)
+                .replaceAll(
+                        matchResult -> {
+                            String key = matchResult.group(1);
+                            Object value = variables.get(key);
+                            return value != null ? value.toString() : "";
+                        });
     }
 }

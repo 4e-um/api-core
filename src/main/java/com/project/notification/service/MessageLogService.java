@@ -1,12 +1,12 @@
 package com.project.notification.service;
 
-import com.project.global.exception.code.domain.core.CoreErrorCode;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.project.global.exception.ApplicationException;
+import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.notification.controller.dto.request.MessageLogSearchRequest;
 import com.project.notification.controller.dto.response.MessageLogDetailResponse;
 import com.project.notification.controller.dto.response.MessageLogResponse;
@@ -33,10 +33,7 @@ public class MessageLogService {
         MessageLog log =
                 messageLogRepository
                         .findDetailById(logId)
-                        .orElseThrow(
-                                () ->
-                                        new ApplicationException(
-                                                CoreErrorCode.LOG_NOT_FOUND));
+                        .orElseThrow(() -> new ApplicationException(CoreErrorCode.LOG_NOT_FOUND));
 
         return MessageLogDetailResponse.from(log);
     }
