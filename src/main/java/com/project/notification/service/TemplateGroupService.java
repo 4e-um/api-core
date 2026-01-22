@@ -4,8 +4,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.project.notification.infra.entity.TemplateVersion;
-import com.project.notification.infra.entity.enums.TemplateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,7 +18,9 @@ import com.project.notification.controller.dto.response.TemplateGroupDetailRespo
 import com.project.notification.controller.dto.response.TemplateGroupResponse;
 import com.project.notification.controller.dto.response.TemplateGroupResponse.ActiveTemplateSummary;
 import com.project.notification.infra.entity.TemplateGroup;
+import com.project.notification.infra.entity.TemplateVersion;
 import com.project.notification.infra.entity.enums.Channel;
+import com.project.notification.infra.entity.enums.TemplateStatus;
 import com.project.notification.infra.repository.TemplateGroupRepository;
 import com.project.notification.infra.repository.TemplateVersionRepository;
 
