@@ -7,6 +7,8 @@
 #   - POSTGRES_DATABASE: 데이터베이스 이름
 #   - POSTGRES_USER: 데이터베이스 사용자
 #   - POSTGRES_PASSWORD: 데이터베이스 비밀번호
+#   - URECA_SECRET_KEY: 암호화 시크릿 키 (application-secret.yml에서 사용)
+#   - URECA_HASH_KEY: 해시 키 (application-secret.yml에서 사용)
 # =============================================================================
 
 spring:
@@ -24,7 +26,15 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: false
+    # DB 연결 실패해도 앱 시작 허용 (디버깅용)
+    defer-datasource-initialization: true
+
+logging:
+  level:
+    # Cloud SQL 연결 디버깅
+    com.google.cloud.sql: DEBUG
+    com.zaxxer.hikari: DEBUG
