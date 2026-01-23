@@ -12,11 +12,11 @@ public interface UsageSummaryDailyRepository extends JpaRepository<UsageSummaryD
 
     @Query(
             """
-    SELECT u
-    FROM UsageSummaryDaily u
-    WHERE u.id.subId = :subId
-      AND u.id.usageDate = :usageDate
-    """)
+            SELECT u
+            FROM UsageSummaryDaily u
+            WHERE u.id.subId = :subId
+              AND u.id.usageDate = :usageDate
+            """)
     Optional<UsageSummaryDaily> findBySubIdAndUsageDate(
             @Param("subId") Long subId, @Param("usageDate") String usageDate);
 }

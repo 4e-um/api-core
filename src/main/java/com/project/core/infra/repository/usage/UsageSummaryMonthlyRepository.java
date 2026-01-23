@@ -12,11 +12,11 @@ public interface UsageSummaryMonthlyRepository extends JpaRepository<UsageSummar
 
     @Query(
             """
-    SELECT u
-    FROM UsageSummaryMonthly u
-    WHERE u.id.subId = :subId
-      AND u.id.period = :period
-    """)
+            SELECT u
+            FROM UsageSummaryMonthly u
+            WHERE u.id.subId = :subId
+               AND u.id.period = :period
+            """)
     Optional<UsageSummaryMonthly> findBySubIdAndPeriod(
             @Param("subId") Long subId, @Param("period") String period);
 }

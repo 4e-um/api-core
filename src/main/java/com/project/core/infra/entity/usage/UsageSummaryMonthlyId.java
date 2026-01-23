@@ -17,10 +17,14 @@ public class UsageSummaryMonthlyId implements Serializable {
     private String period;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof UsageSummaryMonthlyId)) return false;
-        UsageSummaryMonthlyId that = (UsageSummaryMonthlyId) o;
+    public boolean equals(Object ob) {
+        if (this == ob) {
+            return true;
+        }
+        if (!(ob instanceof UsageSummaryMonthlyId)) {
+            return false;
+        }
+        UsageSummaryMonthlyId that = (UsageSummaryMonthlyId) ob;
         return Objects.equals(subId, that.subId) && Objects.equals(period, that.period);
     }
 

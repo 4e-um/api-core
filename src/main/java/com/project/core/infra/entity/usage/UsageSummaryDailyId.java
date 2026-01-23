@@ -17,10 +17,14 @@ public class UsageSummaryDailyId implements Serializable {
     private String usageDate;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof UsageSummaryDailyId)) return false;
-        UsageSummaryDailyId that = (UsageSummaryDailyId) o;
+    public boolean equals(Object ob) {
+        if (this == ob) {
+            return true;
+        }
+        if (!(ob instanceof UsageSummaryDailyId)) {
+            return false;
+        }
+        UsageSummaryDailyId that = (UsageSummaryDailyId) ob;
         return Objects.equals(subId, that.subId) && Objects.equals(usageDate, that.usageDate);
     }
 
