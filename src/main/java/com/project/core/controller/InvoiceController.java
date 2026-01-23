@@ -22,5 +22,4 @@ public class InvoiceController {
 
         return ResponseEntity.ok(invoiceService.getDashboard());
     }
-
 }

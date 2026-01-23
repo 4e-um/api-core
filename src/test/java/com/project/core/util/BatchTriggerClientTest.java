@@ -6,8 +6,6 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
-import com.project.global.config.CloudFunctionProperties;
-import com.project.global.exception.core.OperationFailedException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
@@ -20,18 +18,18 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
+import com.project.global.config.CloudFunctionProperties;
+import com.project.global.exception.core.OperationFailedException;
+
 @RestClientTest(BatchTriggerClient.class)
 @Import(BatchTriggerClientTest.TestConfig.class)
 class BatchTriggerClientTest {
 
-    @Autowired
-    private BatchTriggerClient client;
+    @Autowired private BatchTriggerClient client;
 
-    @Autowired
-    private MockRestServiceServer server;
+    @Autowired private MockRestServiceServer server;
 
-    @MockitoBean
-    private CloudFunctionProperties properties;
+    @MockitoBean private CloudFunctionProperties properties;
 
     @TestConfiguration
     static class TestConfig {
@@ -62,9 +60,8 @@ class BatchTriggerClientTest {
                 .andExpect(method(HttpMethod.PUT))
                 .andRespond(withBadRequest());
 
-        assertThatThrownBy(() ->
-                client.schedule("invoiceJob", "0 0 * * *")
-        ).isInstanceOf(OperationFailedException.class);
+        assertThatThrownBy(() -> client.schedule("invoiceJob", "0 0 * * *"))
+                .isInstanceOf(OperationFailedException.class);
     }
 
     @Test
@@ -75,9 +72,8 @@ class BatchTriggerClientTest {
                 .andExpect(method(HttpMethod.PUT))
                 .andRespond(withServerError());
 
-        assertThatThrownBy(() ->
-                client.schedule("invoiceJob", "0 0 * * *")
-        ).isInstanceOf(OperationFailedException.class);
+        assertThatThrownBy(() -> client.schedule("invoiceJob", "0 0 * * *"))
+                .isInstanceOf(OperationFailedException.class);
     }
 
     @Test
@@ -86,13 +82,12 @@ class BatchTriggerClientTest {
 
         server.expect(requestTo("http://localhost/schedule"))
                 .andExpect(method(HttpMethod.PUT))
-                .andRespond(request -> {
-                    throw new RuntimeException("network down");
-                });
+                .andRespond(
+                        request -> {
+                            throw new RuntimeException("network down");
+                        });
 
-        assertThatThrownBy(() ->
-                client.schedule("invoiceJob", "0 0 * * *")
-        ).isInstanceOf(OperationFailedException.class);
+        assertThatThrownBy(() -> client.schedule("invoiceJob", "0 0 * * *"))
+                .isInstanceOf(OperationFailedException.class);
     }
-
 }
