@@ -41,4 +41,4 @@ out/
 *.env
 
 ### Secret Config ###
-application-secret.yml
+# application-secret.yml - 환경변수 사용으로 git 추적 가능
