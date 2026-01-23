@@ -16,20 +16,18 @@ public class RestTemplateConfig {
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
 
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(Timeout.ofSeconds(5))
-                .setResponseTimeout(Timeout.ofSeconds(5))
-                .build();
+        RequestConfig requestConfig =
+                RequestConfig.custom()
+                        .setConnectTimeout(Timeout.ofSeconds(5))
+                        .setResponseTimeout(Timeout.ofSeconds(5))
+                        .build();
 
-        CloseableHttpClient httpClient = HttpClients.custom()
-                .setDefaultRequestConfig(requestConfig)
-                .build();
+        CloseableHttpClient httpClient =
+                HttpClients.custom().setDefaultRequestConfig(requestConfig).build();
 
         HttpComponentsClientHttpRequestFactory factory =
                 new HttpComponentsClientHttpRequestFactory(httpClient);
 
-        return builder
-                .requestFactory(() -> factory)
-                .build();
+        return builder.requestFactory(() -> factory).build();
     }
 }
