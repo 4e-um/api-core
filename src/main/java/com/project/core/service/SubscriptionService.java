@@ -6,13 +6,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import com.project.core.infra.entity.plan.SubscriptionPlan;
-import com.project.core.infra.entity.plan.enums.AllotmentPeriod;
-import com.project.core.infra.entity.usage.UsageSummaryDaily;
-import com.project.core.infra.entity.usage.UsageSummaryMonthly;
-import com.project.core.infra.repository.plan.SubscriptionPlanRepository;
-import com.project.core.infra.repository.usage.UsageSummaryDailyRepository;
-import com.project.core.infra.repository.usage.UsageSummaryMonthlyRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -21,8 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 import com.project.core.controller.dto.response.SubscriptionDetailResponse;
 import com.project.core.controller.dto.response.SubscriptionListResponse;
 import com.project.core.controller.dto.response.SubscriptionResponse;
+import com.project.core.infra.entity.plan.SubscriptionPlan;
+import com.project.core.infra.entity.plan.enums.AllotmentPeriod;
 import com.project.core.infra.entity.subscription.Subscription;
+import com.project.core.infra.entity.usage.UsageSummaryDaily;
+import com.project.core.infra.entity.usage.UsageSummaryMonthly;
+import com.project.core.infra.repository.plan.SubscriptionPlanRepository;
 import com.project.core.infra.repository.subscription.SubscriptionRepository;
+import com.project.core.infra.repository.usage.UsageSummaryDailyRepository;
+import com.project.core.infra.repository.usage.UsageSummaryMonthlyRepository;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.EntityNotFoundException;
 import com.project.global.util.AesUtil;
@@ -56,13 +56,23 @@ public class SubscriptionService {
                             String decryptedEmail = safeDecrypt(sub.getCustomer().getEmailEnc());
                             String decryptedPhone = safeDecrypt(sub.getPhoneNumber());
 
-                            SubscriptionPlan subPlan = subscriptionPlanRepository
-                                    .findActivePlanBySubId(sub.getSubId())
-                                    .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
+                            SubscriptionPlan subPlan =
+                                    subscriptionPlanRepository
+                                            .findActivePlanBySubId(sub.getSubId())
+                                            .orElseThrow(
+                                                    () ->
+                                                            new EntityNotFoundException(
+                                                                    CoreErrorCode
+                                                                            .SUBSCRIPTION_NOT_FOUND));
 
-                            long totalUsedBytes = getSubscriptionTotalAmount(subPlan) / (1024 * 1024);
-                            return SubscriptionListResponse.of(sub, totalUsedBytes, subPlan.getAllotmentAmount(),
-                                                                decryptedEmail, decryptedPhone);
+                            long totalUsedBytes =
+                                    getSubscriptionTotalAmount(subPlan) / (1024 * 1024);
+                            return SubscriptionListResponse.of(
+                                    sub,
+                                    totalUsedBytes,
+                                    subPlan.getAllotmentAmount(),
+                                    decryptedEmail,
+                                    decryptedPhone);
                         });
     }
 
@@ -82,16 +92,24 @@ public class SubscriptionService {
         String decryptedEmail = safeDecrypt(sub.getCustomer().getEmailEnc());
         String decryptedPhone = safeDecrypt(sub.getPhoneNumber());
 
-        SubscriptionPlan subPlan = subscriptionPlanRepository
-                .findActivePlanBySubId(sub.getSubId())
-                .orElseThrow(() -> new EntityNotFoundException(CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
+        SubscriptionPlan subPlan =
+                subscriptionPlanRepository
+                        .findActivePlanBySubId(sub.getSubId())
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                CoreErrorCode.SUBSCRIPTION_NOT_FOUND));
 
         long totalUsedBytes = getSubscriptionTotalAmount(subPlan) / (1024 * 1024);
 
         // SubscriptionListResponse의 of 로직을 활용하여 기본 정보 추출
         SubscriptionListResponse baseInfo =
-                SubscriptionListResponse.of(sub, totalUsedBytes, subPlan.getAllotmentAmount(),
-                            decryptedEmail, decryptedPhone);
+                SubscriptionListResponse.of(
+                        sub,
+                        totalUsedBytes,
+                        subPlan.getAllotmentAmount(),
+                        decryptedEmail,
+                        decryptedPhone);
 
         return SubscriptionDetailResponse.from(baseInfo);
     }
@@ -126,8 +144,9 @@ public class SubscriptionService {
     }
 
     private Long getDailyTotalAmount(Long subId) {
-        String usageDate = LocalDate.now(ZoneId.of("Asia/Seoul"))
-                            .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String usageDate =
+                LocalDate.now(ZoneId.of("Asia/Seoul"))
+                        .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         return usageSummaryDailyRepository
                 .findBySubIdAndUsageDate(subId, usageDate)
                 .map(UsageSummaryDaily::getTotalUsedBytes)
@@ -135,13 +154,11 @@ public class SubscriptionService {
     }
 
     private Long getMonthlyTotalAmount(Long subId) {
-        String period = LocalDateTime.now(ZoneId.of("Asia/Seoul"))
-                .format(MONTH_FMT);
+        String period = LocalDateTime.now(ZoneId.of("Asia/Seoul")).format(MONTH_FMT);
 
-        return usageSummaryMonthlyRepository.findBySubIdAndPeriod(subId, period)
+        return usageSummaryMonthlyRepository
+                .findBySubIdAndPeriod(subId, period)
                 .map(UsageSummaryMonthly::getTotalUsedBytes)
                 .orElse(0L);
     }
-
-
 }

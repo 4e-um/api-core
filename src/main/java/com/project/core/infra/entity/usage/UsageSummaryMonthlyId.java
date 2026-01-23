@@ -1,11 +1,12 @@
 package com.project.core.infra.entity.usage;
 
-import jakarta.persistence.Embeddable;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
 import java.util.Objects;
+
+import jakarta.persistence.Embeddable;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,8 +21,7 @@ public class UsageSummaryMonthlyId implements Serializable {
         if (this == o) return true;
         if (!(o instanceof UsageSummaryMonthlyId)) return false;
         UsageSummaryMonthlyId that = (UsageSummaryMonthlyId) o;
-        return Objects.equals(subId, that.subId) &&
-                Objects.equals(period, that.period);
+        return Objects.equals(subId, that.subId) && Objects.equals(period, that.period);
     }
 
     @Override

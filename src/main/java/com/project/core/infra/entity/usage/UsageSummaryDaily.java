@@ -1,11 +1,12 @@
 package com.project.core.infra.entity.usage;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "usage_summary_daily")
@@ -13,8 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UsageSummaryDaily {
 
-    @EmbeddedId
-    private UsageSummaryDailyId id;
+    @EmbeddedId private UsageSummaryDailyId id;
 
     @Column(name = "total_used_bytes", nullable = false)
     private Long totalUsedBytes;

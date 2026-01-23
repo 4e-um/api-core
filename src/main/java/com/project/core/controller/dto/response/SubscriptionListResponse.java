@@ -2,11 +2,8 @@ package com.project.core.controller.dto.response;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Random;
 
-import com.project.core.infra.entity.plan.Plan;
-import com.project.core.infra.entity.plan.SubscriptionPlan;
 import com.project.core.infra.entity.subscription.Subscription;
 
 import lombok.Builder;
@@ -31,8 +28,11 @@ public record SubscriptionListResponse(
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public static SubscriptionListResponse of(
-            Subscription sub, long totalUsedAmount, long allotmentAmount,
-            String decryptedEmail, String decryptedPhone) {
+            Subscription sub,
+            long totalUsedAmount,
+            long allotmentAmount,
+            String decryptedEmail,
+            String decryptedPhone) {
         String planName = "N/A";
 
         // 회선 ID 포맷팅 (SUB-0000001)
