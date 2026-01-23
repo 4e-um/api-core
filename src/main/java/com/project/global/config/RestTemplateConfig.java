@@ -21,9 +21,7 @@ public class RestTemplateConfig {
 
         // 1️⃣ TCP 연결 타임아웃
         ConnectionConfig connectionConfig =
-                ConnectionConfig.custom()
-                        .setConnectTimeout(Timeout.ofSeconds(5))
-                        .build();
+                ConnectionConfig.custom().setConnectTimeout(Timeout.ofSeconds(5)).build();
 
         // 2️⃣ 요청/응답 타임아웃
         RequestConfig requestConfig =
@@ -46,8 +44,6 @@ public class RestTemplateConfig {
         HttpComponentsClientHttpRequestFactory factory =
                 new HttpComponentsClientHttpRequestFactory(httpClient);
 
-        return builder
-                .requestFactory(() -> factory)
-                .build();
+        return builder.requestFactory(() -> factory).build();
     }
 }
