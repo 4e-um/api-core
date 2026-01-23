@@ -32,7 +32,7 @@ public enum CoreErrorCode implements BaseErrorCode {
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "MICRO_001", "유효하지 않은 금액입니다."),
     MICRO_PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "MICRO_002", "존재하지 않는 결제 내역입니다."),
     MICRO_PAYMENT_ALREADY_CANCELED(HttpStatus.BAD_REQUEST, "MICRO_003", "이미 취소된 결제 내역입니다."),
-    MICRO_PAYMENT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "MICRO_004", "잘못된 요청입니다."),
+    MICRO_PAYMENT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "MICRO_004", "잘못된 접근입니다."),
 
     // Subscription
     SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "SUB_001", "존재하지 않는 회선입니다."),
