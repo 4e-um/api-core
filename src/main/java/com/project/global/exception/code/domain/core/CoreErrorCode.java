@@ -32,7 +32,7 @@ public enum CoreErrorCode implements BaseErrorCode {
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "MICRO_001", "유효하지 않은 금액입니다."),
     MICRO_PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "MICRO_002", "존재하지 않는 결제 내역입니다."),
     MICRO_PAYMENT_ALREADY_CANCELED(HttpStatus.BAD_REQUEST, "MICRO_003", "이미 취소된 결제 내역입니다."),
-    MICRO_PAYMENT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "MICRO_004", "잘못된 요청입니다."),
+    MICRO_PAYMENT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "MICRO_004", "잘못된 접근입니다."),
 
     // Subscription
     SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "SUB_001", "존재하지 않는 회선입니다."),
@@ -51,6 +51,10 @@ public enum CoreErrorCode implements BaseErrorCode {
 
     // Batch
     DASHBOARD_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "BATCH_001", "대시보드 로딩에 실패했습니다."),
+    BATCH_SCHEDULE_UPDATE_FAILED(
+            HttpStatus.INTERNAL_SERVER_ERROR, "BATCH_002", "배치 스케줄 수정에 실패했습니다."),
+
+    BATCH_TRIGGER_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "BATCH_003", "배치 트리거 호출에 실패했습니다."),
 
     // Template
     TEMPLATE_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "TEMPLATE_001", "템플릿 그룹을 찾을 수 없습니다."),

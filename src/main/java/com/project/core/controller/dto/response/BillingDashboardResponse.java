@@ -12,7 +12,6 @@ import lombok.Getter;
 @Getter
 @Builder
 public class BillingDashboardResponse {
-    // TODO: 배치 대시보드 DTO
     private List<BatchSummaryDto> batchJobs;
     private GrafanaInfoDto grafana;
     private List<BatchFailureLogDto> recentFailures;

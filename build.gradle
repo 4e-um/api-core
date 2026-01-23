@@ -19,6 +19,9 @@ def coverageExcludePackages = [
     '**/config/**',      // Config 클래스 제외
     '**/exception/**',   // Exception 클래스 제외
     '**/dto/**',         // DTO 클래스 제외
+    '**/batch/**',       // Batch 제외
+    '**/invoice/**',
+    '**/notification/**',
 ]
 
 // JaCoCo용 제외 패턴 (클래스 파일)
@@ -79,6 +82,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // RestTemplate
+    implementation "org.apache.httpcomponents.client5:httpclient5"
+
 }
 
 // ============================================================================

@@ -22,7 +22,4 @@ public class InvoiceController {
 
         return ResponseEntity.ok(invoiceService.getDashboard());
     }
-
-    // TODO : Cloud Function 트리거 설정
-
 }

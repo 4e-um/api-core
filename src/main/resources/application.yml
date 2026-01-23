@@ -67,8 +67,3 @@ logging:
     root: INFO
     org.springframework.web: INFO
     org.hibernate.SQL: WARN
-
-billing:
-  grafana:
-    iframe-url: https://grafana.example.com/d/xxx
-    refresh-interval: 5s
