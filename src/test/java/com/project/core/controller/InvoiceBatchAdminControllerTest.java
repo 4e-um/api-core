@@ -50,7 +50,7 @@ class InvoiceBatchAdminControllerTest {
                 .updateSchedule("invoiceJob", "0 0 2 * * ?");
 
         verify(batchTriggerClient)
-                .triggerSchedule("invoiceJob", "0 0 2 * * ?");
+                .schedule("invoiceJob", "0 0 2 * * ?");
     }
 
     @Test

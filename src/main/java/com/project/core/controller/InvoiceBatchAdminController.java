@@ -1,5 +1,6 @@
 package com.project.core.controller;
 
+import com.project.core.controller.dto.request.BatchTriggerRequest;
 import com.project.core.controller.dto.request.UpdateBatchScheduleRequest;
 import com.project.core.service.BatchScheduleService;
 import com.project.core.util.BatchTriggerClient;
@@ -17,10 +18,9 @@ public class InvoiceBatchAdminController {
 
     @PostMapping("/run-now")
     public ResponseEntity<Void> runNow(
-            @RequestParam String jobName,
-            @RequestParam String invMonth
-    ) {
-        batchTriggerClient.trigger(jobName, invMonth);
+            @RequestBody BatchTriggerRequest request
+            ) {
+        batchTriggerClient.trigger(request.job(), request.invMonth());
         return ResponseEntity.accepted().build();
     }
 
@@ -29,10 +29,10 @@ public class InvoiceBatchAdminController {
             @RequestBody UpdateBatchScheduleRequest request
     ) {
         scheduleService.updateSchedule(
-                request.jobName(),
+                request.job(),
                 request.cron()
         );
-        batchTriggerClient.triggerSchedule(request.jobName(), request.cron());
+        batchTriggerClient.schedule(request.job(), request.cron());
         return ResponseEntity.ok().build();
     }
 }
