@@ -13,7 +13,8 @@ public class BatchScheduleRepository {
 
     public void upsert(String jobName, String cron) {
 
-        String sql = """
+        String sql =
+                """
                     INSERT INTO batch_schedule (job_name, cron_expression, updated_at)
                     VALUES (?, ?, now())
                     ON CONFLICT (job_name)

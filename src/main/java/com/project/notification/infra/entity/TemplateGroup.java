@@ -38,9 +38,17 @@ public class TemplateGroup {
 
     // 생성자, 비즈니스 메서드 (update, delete 등)
     public void update(String name, String description, Boolean isActive) {
-        if (name != null) this.name = name;
-        if (description != null) this.description = description;
-        if (isActive != null) this.isActive = isActive;
+        if (name != null) {
+            this.name = name;
+        }
+
+        if (description != null) {
+            this.description = description;
+        }
+
+        if (isActive != null) {
+            this.isActive = isActive;
+        }
     }
 
     public void delete() {

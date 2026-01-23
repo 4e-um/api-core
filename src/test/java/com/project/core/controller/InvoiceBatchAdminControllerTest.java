@@ -18,14 +18,11 @@ import com.project.core.util.BatchTriggerClient;
 @WebMvcTest(InvoiceBatchAdminController.class)
 class InvoiceBatchAdminControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @MockitoBean
-    private BatchTriggerClient batchTriggerClient;
+    @MockitoBean private BatchTriggerClient batchTriggerClient;
 
-    @MockitoBean
-    private BatchScheduleService scheduleService;
+    @MockitoBean private BatchScheduleService scheduleService;
 
     @Test
     @DisplayName("스케줄 수정 트리거 성공")
