@@ -1,5 +1,6 @@
 package com.project.notification.infra.entity;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import jakarta.persistence.Column;
@@ -11,12 +12,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import com.project.notification.infra.entity.enums.Channel;
 import com.project.notification.infra.entity.enums.TemplateStatus;
@@ -52,13 +54,13 @@ public class TemplateVersion {
     private int version;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10)
     private Channel channel;
 
+    @Column(length = 200)
     private String subject; // Email Only
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String body;
 
     @Type(JsonType.class)
@@ -66,11 +68,19 @@ public class TemplateVersion {
     private Map<String, Object> variables;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "template_status", nullable = false)
+    @Column(name = "template_status", nullable = false, length = 20)
     private TemplateStatus status;
 
-    @Column(nullable = false)
+    @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     // Builder 패턴 권장
     @Builder
@@ -90,6 +100,18 @@ public class TemplateVersion {
         this.status = TemplateStatus.DRAFT; // 기본값 DRAFT
     }
 
+    public void updateContent(String subject, String body, Map<String, Object> variables) {
+        if (subject != null) {
+            this.subject = subject;
+        }
+        if (body != null) {
+            this.body = body;
+        }
+        if (variables != null) {
+            this.variables = variables;
+        }
+    }
+
     public void activate() {
         this.status = TemplateStatus.ACTIVE;
     }
@@ -101,6 +123,4 @@ public class TemplateVersion {
     public void delete() {
         this.isDeleted = true;
     }
-
-    // 내용 수정 메서드 등...
 }

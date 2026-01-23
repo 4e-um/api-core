@@ -31,29 +31,22 @@ spec:
               name: http
           env:
             - name: SPRING_PROFILES_ACTIVE
-              value: "prod"
-            # CloudSQL Proxy 사용 시
+              value: "dev"
+            # CloudSQL Proxy 사용
             - name: POSTGRES_HOST
               value: "127.0.0.1"
             - name: POSTGRES_PORT
               value: "5432"
             - name: POSTGRES_DB
               value: "app_db"
-            # OpenTelemetry
+            # OpenTelemetry (optional)
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: "http://alloy.monitoring:4318/v1/traces"
             - name: OTEL_SAMPLING_PROBABILITY
               value: "0.1"
-            # Secret paths (read from mounted Secret Manager files)
-            - name: SECRETS_PATH
-              value: "/secrets"
-          command:
-            - /bin/sh
-            - -c
-            - |
-              export POSTGRES_USER=$(cat /secrets/db-username)
-              export POSTGRES_PASSWORD=$(cat /secrets/db-password)
-              exec java -jar /app.jar
+          envFrom:
+            - secretRef:
+                name: api-core-secrets
           resources:
             requests:
               cpu: "250m"
@@ -84,9 +77,6 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
-            - name: secrets
-              mountPath: /secrets
-              readOnly: true
 
         # Cloud SQL Auth Proxy sidecar
         - name: cloud-sql-proxy
@@ -94,13 +84,13 @@ spec:
           args:
             - "--structured-logs"
             - "--auto-iam-authn"
-            - "$(cat /secrets/db-connection-name)"
-          command:
-            - /bin/sh
-            - -c
-            - |
-              CONNECTION_NAME=$(cat /secrets/db-connection-name)
-              exec /cloud-sql-proxy --structured-logs --auto-iam-authn "$CONNECTION_NAME"
+            - "$(DB_CONNECTION_NAME)"
+          env:
+            - name: DB_CONNECTION_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: api-core-secrets
+                  key: DB_CONNECTION_NAME
           resources:
             requests:
               cpu: "50m"
@@ -112,18 +102,7 @@ spec:
             runAsNonRoot: true
             runAsUser: 65532
             allowPrivilegeEscalation: false
-          volumeMounts:
-            - name: secrets
-              mountPath: /secrets
-              readOnly: true
 
       volumes:
         - name: tmp
           emptyDir: {}
-        - name: secrets
-          csi:
-            driver: secrets-store-gke.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: api-core-secrets
-
