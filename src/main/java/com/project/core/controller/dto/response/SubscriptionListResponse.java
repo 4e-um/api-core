@@ -2,11 +2,8 @@ package com.project.core.controller.dto.response;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Random;
 
-import com.project.core.infra.entity.plan.Plan;
-import com.project.core.infra.entity.plan.SubscriptionPlan;
 import com.project.core.infra.entity.subscription.Subscription;
 
 import lombok.Builder;
@@ -31,29 +28,12 @@ public record SubscriptionListResponse(
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public static SubscriptionListResponse of(
-            Subscription sub, String decryptedEmail, String decryptedPhone) {
+            Subscription sub,
+            long totalUsedAmount,
+            long allotmentAmount,
+            String decryptedEmail,
+            String decryptedPhone) {
         String planName = "N/A";
-        long dataLimit = 0;
-        long dataUsed = 0;
-
-        // 현재 요금제 정보 조회
-        List<SubscriptionPlan> planHistory = sub.getPlanHistory();
-        if (!planHistory.isEmpty()) {
-            // 가장 최근 요금제 (리스트의 마지막 요소가 최신이라고 가정하거나 로직 필요)
-            // 보통 히스토리는 순서대로 쌓임. 마지막 요소 사용.
-            Plan currentPlan = planHistory.get(planHistory.size() - 1).getPlan();
-            planName = currentPlan.getPlanName();
-            long allotmentMB = currentPlan.getAllotmentAmount();
-
-            Random subRandom = new Random(sub.getSubId());
-            if (allotmentMB == -1) {
-                dataLimit = -1; // 무제한
-                dataUsed = (long) (subRandom.nextDouble() * 50L * 1024 * 1024 * 1024);
-            } else {
-                dataLimit = allotmentMB * 1024 * 1024; // MB -> Byte
-                dataUsed = (long) (subRandom.nextDouble() * dataLimit);
-            }
-        }
 
         // 회선 ID 포맷팅 (SUB-0000001)
         String formattedSubId = null;
@@ -80,8 +60,8 @@ public record SubscriptionListResponse(
                 .email(MaskingUtil.maskEmail(decryptedEmail))
                 .phoneNumber(MaskingUtil.maskPhone(decryptedPhone))
                 .planName(planName)
-                .dataUsed(dataUsed)
-                .dataLimit(dataLimit)
+                .dataUsed(totalUsedAmount)
+                .dataLimit(allotmentAmount)
                 .status(sub.getStatus().name())
                 .startDate(formattedStartDate)
                 .lastActivity(formattedLastActivity)
