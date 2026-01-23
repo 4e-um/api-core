@@ -58,7 +58,7 @@ public class BatchTriggerClient {
         HttpEntity<UpdateBatchScheduleRequest> request = new HttpEntity<>(body, headers);
 
         try {
-            restTemplate.postForEntity(url, request, Void.class);
+            restTemplate.put(url, request, Void.class);
 
         } catch (HttpClientErrorException e) {
             // 4xx: 요청 자체 문제 (잘못된 파라미터, validation 등)

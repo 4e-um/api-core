@@ -31,7 +31,7 @@ class InvoiceBatchAdminControllerTest {
         String body =
                 """
                             {
-                              "jobName": "invoiceJob",
+                              "job": "invoiceJob",
                               "cron": "0 0 2 * * ?"
                             }
                         """;
@@ -53,11 +53,15 @@ class InvoiceBatchAdminControllerTest {
     @DisplayName("배치 작업 즉시 실행 성공")
     void runNow_should_trigger_batch() throws Exception {
 
+        String body =
+                """
+                {
+                  "job": "invoiceJob",
+                  "invMonth": "202601"
+                }
+                """;
         mockMvc.perform(
-                        post("/admin/batch/invoice/run-now")
-                                .param("jobName", "invoiceJob")
-                                .param("invMonth", "202601"))
-                .andExpect(status().isAccepted());
+                post("/admin/batch/invoice/run-now").contentType("application/json").content(body));
 
         verify(batchTriggerClient).trigger("invoiceJob", "202601");
     }

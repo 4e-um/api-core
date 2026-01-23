@@ -56,7 +56,6 @@ public enum CoreErrorCode implements BaseErrorCode {
 
     BATCH_TRIGGER_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "BATCH_003", "배치 트리거 호출에 실패했습니다."),
 
-
     // Template
     TEMPLATE_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "TEMPLATE_001", "템플릿 그룹을 찾을 수 없습니다."),
     TEMPLATE_GROUP_CODE_DUPLICATED(HttpStatus.CONFLICT, "TEMPLATE_002", "이미 사용 중인 템플릿 그룹 코드입니다."),
