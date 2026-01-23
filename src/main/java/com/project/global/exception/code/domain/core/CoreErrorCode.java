@@ -52,16 +52,9 @@ public enum CoreErrorCode implements BaseErrorCode {
     // 배치
     DASHBOARD_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "BATCH_001", "대시보드 로딩에 실패했습니다."),
     BATCH_SCHEDULE_UPDATE_FAILED(
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            "BATCH_002",
-            "배치 스케줄 수정에 실패했습니다."
-    ),
+            HttpStatus.INTERNAL_SERVER_ERROR, "BATCH_002", "배치 스케줄 수정에 실패했습니다."),
 
-    BATCH_TRIGGER_FAILED(
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            "BATCH_003",
-            "배치 트리거 호출에 실패했습니다."
-    );
+    BATCH_TRIGGER_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "BATCH_003", "배치 트리거 호출에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String customCode;

@@ -1,12 +1,5 @@
 package com.project.core.util;
 
-import com.project.core.controller.dto.request.BatchTriggerRequest;
-import com.project.core.controller.dto.request.UpdateBatchScheduleRequest;
-import com.project.global.config.CloudFunctionProperties;
-import com.project.global.exception.code.domain.core.CoreErrorCode;
-import com.project.global.exception.core.OperationFailedException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -15,6 +8,14 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.project.core.controller.dto.request.BatchTriggerRequest;
+import com.project.core.controller.dto.request.UpdateBatchScheduleRequest;
+import com.project.global.config.CloudFunctionProperties;
+import com.project.global.exception.code.domain.core.CoreErrorCode;
+import com.project.global.exception.core.OperationFailedException;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
@@ -31,26 +32,17 @@ public class BatchTriggerClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        BatchTriggerRequest body =
-                new BatchTriggerRequest(job, invMonth);
+        BatchTriggerRequest body = new BatchTriggerRequest(job, invMonth);
 
-        HttpEntity<BatchTriggerRequest> request =
-                new HttpEntity<>(body, headers);
+        HttpEntity<BatchTriggerRequest> request = new HttpEntity<>(body, headers);
 
         try {
             restTemplate.postForEntity(url, request, Void.class);
 
         } catch (Exception e) {
-            log.error(
-                    "[BatchTrigger] run-now failed. job={}, invMonth={}",
-                    job,
-                    invMonth,
-                    e
-            );
+            log.error("[BatchTrigger] run-now failed. job={}, invMonth={}", job, invMonth, e);
 
-            throw new OperationFailedException(
-                    CoreErrorCode.BATCH_TRIGGER_FAILED
-            );
+            throw new OperationFailedException(CoreErrorCode.BATCH_TRIGGER_FAILED);
         }
     }
 
@@ -61,11 +53,9 @@ public class BatchTriggerClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        UpdateBatchScheduleRequest body =
-                new UpdateBatchScheduleRequest(job, cron);
+        UpdateBatchScheduleRequest body = new UpdateBatchScheduleRequest(job, cron);
 
-        HttpEntity<UpdateBatchScheduleRequest> request =
-                new HttpEntity<>(body, headers);
+        HttpEntity<UpdateBatchScheduleRequest> request = new HttpEntity<>(body, headers);
 
         try {
             restTemplate.postForEntity(url, request, Void.class);
@@ -78,11 +68,8 @@ public class BatchTriggerClient {
                     cron,
                     e.getStatusCode(),
                     e.getResponseBodyAsString(),
-                    e
-            );
-            throw new OperationFailedException(
-                    CoreErrorCode.BATCH_TRIGGER_FAILED
-            );
+                    e);
+            throw new OperationFailedException(CoreErrorCode.BATCH_TRIGGER_FAILED);
 
         } catch (HttpServerErrorException e) {
             // 5xx: Cloud Function 내부 오류
@@ -92,24 +79,13 @@ public class BatchTriggerClient {
                     cron,
                     e.getStatusCode(),
                     e.getResponseBodyAsString(),
-                    e
-            );
-            throw new OperationFailedException(
-                    CoreErrorCode.BATCH_TRIGGER_FAILED
-            );
+                    e);
+            throw new OperationFailedException(CoreErrorCode.BATCH_TRIGGER_FAILED);
 
         } catch (Exception e) {
             // 그 외 (네트워크, 직렬화 등)
-            log.error(
-                    "[BatchTrigger] schedule failed (unknown). job={}, cron={}",
-                    job,
-                    cron,
-                    e
-            );
-            throw new OperationFailedException(
-                    CoreErrorCode.BATCH_TRIGGER_FAILED
-            );
+            log.error("[BatchTrigger] schedule failed (unknown). job={}, cron={}", job, cron, e);
+            throw new OperationFailedException(CoreErrorCode.BATCH_TRIGGER_FAILED);
         }
     }
-
 }
