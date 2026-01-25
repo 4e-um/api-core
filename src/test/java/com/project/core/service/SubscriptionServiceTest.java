@@ -1,6 +1,7 @@
 package com.project.core.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -27,8 +28,13 @@ import com.project.core.controller.dto.response.SubscriptionListResponse;
 import com.project.core.controller.dto.response.SubscriptionResponse;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.entity.customer.enums.Grade;
+import com.project.core.infra.entity.plan.SubscriptionPlan;
+import com.project.core.infra.entity.plan.enums.AllotmentPeriod;
 import com.project.core.infra.entity.subscription.Subscription;
+import com.project.core.infra.repository.plan.SubscriptionPlanRepository;
 import com.project.core.infra.repository.subscription.SubscriptionRepository;
+import com.project.core.infra.repository.usage.UsageSummaryDailyRepository;
+import com.project.core.infra.repository.usage.UsageSummaryMonthlyRepository;
 import com.project.global.util.AesUtil;
 import com.project.global.util.ContactHashUtil;
 
@@ -38,6 +44,9 @@ class SubscriptionServiceTest {
     @InjectMocks private SubscriptionService subscriptionService;
 
     @Mock private SubscriptionRepository subscriptionRepository;
+    @Mock private SubscriptionPlanRepository subscriptionPlanRepository;
+    @Mock private UsageSummaryDailyRepository usageSummaryDailyRepository;
+    @Mock private UsageSummaryMonthlyRepository usageSummaryMonthlyRepository;
     @Mock private AesUtil aesUtil;
     @Mock private ContactHashUtil contactHashUtil;
 
@@ -58,7 +67,16 @@ class SubscriptionServiceTest {
         Subscription sub = newInstanceSubscription(1L, customer);
         Slice<Subscription> slice = new SliceImpl<>(List.of(sub));
 
+        // SubscriptionPlan Mock 설정 (Mockito mock 사용)
+        SubscriptionPlan subPlan = org.mockito.Mockito.mock(SubscriptionPlan.class);
+        given(subPlan.getSubscription()).willReturn(sub);
+        given(subPlan.getAllotmentPeriod()).willReturn(AllotmentPeriod.MONTH);
+        given(subPlan.getAllotmentAmount()).willReturn(10240L);
+
         given(subscriptionRepository.findAllSlice(pageable)).willReturn(slice);
+        given(subscriptionPlanRepository.findActivePlanBySubId(1L)).willReturn(Optional.of(subPlan));
+        given(usageSummaryMonthlyRepository.findBySubIdAndPeriod(any(), any()))
+                .willReturn(Optional.empty());
         given(aesUtil.decrypt("enc-email")).willReturn("test@example.com");
         given(aesUtil.decrypt("010-1234-5678")).willReturn("010-1234-5678");
 
@@ -90,8 +108,17 @@ class SubscriptionServiceTest {
 
         Subscription sub = newInstanceSubscription(1L, customer);
 
+        // SubscriptionPlan Mock 설정 (Mockito mock 사용)
+        SubscriptionPlan subPlan = org.mockito.Mockito.mock(SubscriptionPlan.class);
+        given(subPlan.getSubscription()).willReturn(sub);
+        given(subPlan.getAllotmentPeriod()).willReturn(AllotmentPeriod.MONTH);
+        given(subPlan.getAllotmentAmount()).willReturn(10240L);
+
         given(contactHashUtil.hmacSha256Base64(phoneRaw)).willReturn(hash);
         given(subscriptionRepository.findByPhoneHash(hash)).willReturn(Optional.of(sub));
+        given(subscriptionPlanRepository.findActivePlanBySubId(1L)).willReturn(Optional.of(subPlan));
+        given(usageSummaryMonthlyRepository.findBySubIdAndPeriod(any(), any()))
+                .willReturn(Optional.empty());
         given(aesUtil.decrypt("enc-email")).willReturn("test@example.com");
         given(aesUtil.decrypt("010-1234-5678")).willReturn("010-1234-5678");
 

@@ -15,9 +15,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -48,9 +48,9 @@ class SubscriptionControllerTest {
                         .status("ACTIVE")
                         .build();
 
-        Page<SubscriptionListResponse> pageResponse = new PageImpl<>(List.of(response));
+        Slice<SubscriptionListResponse> sliceResponse = new SliceImpl<>(List.of(response));
 
-        when(subscriptionService.getAllSubscriptions(any(Pageable.class))).thenReturn(pageResponse);
+        when(subscriptionService.getAllSubscriptions(any(Pageable.class))).thenReturn(sliceResponse);
 
         // when & then
         mockMvc.perform(

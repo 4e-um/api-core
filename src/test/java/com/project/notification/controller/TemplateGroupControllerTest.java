@@ -1,6 +1,7 @@
 package com.project.notification.controller;
 
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -50,6 +51,7 @@ class TemplateGroupControllerTest {
 
         mockMvc.perform(
                         post("/notification/template-groups")
+                                .with(csrf())
                                 .contentType("application/json")
                                 .content(
                                         """
@@ -120,6 +122,7 @@ class TemplateGroupControllerTest {
     void updateGroupBlankNameShouldFail() throws Exception {
         mockMvc.perform(
                         patch("/notification/template-groups/1")
+                                .with(csrf())
                                 .contentType("application/json")
                                 .content(
                                         """
