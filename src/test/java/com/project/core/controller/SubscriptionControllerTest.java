@@ -50,7 +50,8 @@ class SubscriptionControllerTest {
 
         Slice<SubscriptionListResponse> sliceResponse = new SliceImpl<>(List.of(response));
 
-        when(subscriptionService.getAllSubscriptions(any(Pageable.class))).thenReturn(sliceResponse);
+        when(subscriptionService.getAllSubscriptions(any(Pageable.class)))
+                .thenReturn(sliceResponse);
 
         // when & then
         mockMvc.perform(

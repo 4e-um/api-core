@@ -74,7 +74,8 @@ class SubscriptionServiceTest {
         given(subPlan.getAllotmentAmount()).willReturn(10240L);
 
         given(subscriptionRepository.findAllSlice(pageable)).willReturn(slice);
-        given(subscriptionPlanRepository.findActivePlanBySubId(1L)).willReturn(Optional.of(subPlan));
+        given(subscriptionPlanRepository.findActivePlanBySubId(1L))
+                .willReturn(Optional.of(subPlan));
         given(usageSummaryMonthlyRepository.findBySubIdAndPeriod(any(), any()))
                 .willReturn(Optional.empty());
         given(aesUtil.decrypt("enc-email")).willReturn("test@example.com");
@@ -116,7 +117,8 @@ class SubscriptionServiceTest {
 
         given(contactHashUtil.hmacSha256Base64(phoneRaw)).willReturn(hash);
         given(subscriptionRepository.findByPhoneHash(hash)).willReturn(Optional.of(sub));
-        given(subscriptionPlanRepository.findActivePlanBySubId(1L)).willReturn(Optional.of(subPlan));
+        given(subscriptionPlanRepository.findActivePlanBySubId(1L))
+                .willReturn(Optional.of(subPlan));
         given(usageSummaryMonthlyRepository.findBySubIdAndPeriod(any(), any()))
                 .willReturn(Optional.empty());
         given(aesUtil.decrypt("enc-email")).willReturn("test@example.com");
