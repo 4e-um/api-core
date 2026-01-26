@@ -30,6 +30,7 @@ public class BatchFailureQueryRepositoryImpl implements BatchFailureQueryReposit
                     JOIN BATCH_JOB_EXECUTION je
                       ON ji.JOB_INSTANCE_ID = je.JOB_INSTANCE_ID
                     WHERE je.STATUS = 'FAILED'
+                      AND ji.JOB_NAME IN ('invoiceJob', 'invoiceItemJob')
                     ORDER BY je.END_TIME DESC
                     LIMIT ?
                 """;
