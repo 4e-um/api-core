@@ -58,7 +58,7 @@ management:
   otlp:
     metrics:
       export:
-        enabled: true
+        enabled: false
         url: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}/v1/metrics
         connect-timeout: 5s
         read-timeout: 10s
@@ -70,9 +70,9 @@ otel:
       endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}
       protocol: http/protobuf
   logs:
-    exporter: otlp
+    exporter: none
   traces:
-    exporter: otlp
+    exporter: none
   metrics:
     exporter: none  # Use micrometer-registry-otlp instead
   resource:

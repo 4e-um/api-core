@@ -1,5 +1,6 @@
 package com.project.core.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/admin/batch/invoice")
 @RequiredArgsConstructor
+@Slf4j
 public class InvoiceBatchAdminController {
 
     private final BatchTriggerClient batchTriggerClient;
@@ -24,6 +26,7 @@ public class InvoiceBatchAdminController {
 
     @PostMapping("/run-now")
     public ResponseEntity<Void> runNow(@RequestBody BatchTriggerRequest request) {
+        log.info("[run-now] called. job={}, invMonth={}", request.job(), request.invMonth());
         batchTriggerClient.trigger(request.job(), request.invMonth());
         return ResponseEntity.accepted().build();
     }

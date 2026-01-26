@@ -1,6 +1,5 @@
 package com.project.global.config;
 
-import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -19,20 +18,17 @@ public class RestTemplateConfig {
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
 
-        // 1️⃣ TCP 연결 타임아웃
-        ConnectionConfig connectionConfig =
-                ConnectionConfig.custom().setConnectTimeout(Timeout.ofSeconds(5)).build();
-
-        // 2️⃣ 요청/응답 타임아웃
         RequestConfig requestConfig =
                 RequestConfig.custom()
-                        .setResponseTimeout(Timeout.ofSeconds(5))
-                        .setConnectionRequestTimeout(Timeout.ofSeconds(5))
+                        .setConnectTimeout(Timeout.ofSeconds(5))          // TCP 연결
+                        .setResponseTimeout(Timeout.ofSeconds(5))         // 응답 대기
+                        .setConnectionRequestTimeout(Timeout.ofSeconds(5))// 풀 대기
                         .build();
 
         PoolingHttpClientConnectionManager cm =
                 PoolingHttpClientConnectionManagerBuilder.create()
-                        .setDefaultConnectionConfig(connectionConfig)
+                        .setMaxConnTotal(100)
+                        .setMaxConnPerRoute(20)
                         .build();
 
         CloseableHttpClient httpClient =
