@@ -31,5 +31,4 @@ public interface TemplateGroupRepository extends JpaRepository<TemplateGroup, Lo
             @Param("includeDeleted") boolean includeDeleted,
             @Param("keyword") String keyword,
             Pageable pageable);
-
 }
