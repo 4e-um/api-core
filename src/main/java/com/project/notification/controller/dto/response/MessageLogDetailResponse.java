@@ -25,6 +25,10 @@ public record MessageLogDetailResponse(
             String groupId, String groupName, Channel channel, int version) {}
 
     public static MessageLogDetailResponse from(MessageLog log) {
+        return from(log, log.getRecipientEnc());
+    }
+
+    public static MessageLogDetailResponse from(MessageLog log, String recipientMasked) {
         // 템플릿 정보가 있을 경우에만 Snapshot 생성
         TemplateSnapshot snapshot = null;
         TemplateVersion templateVersion = log.getTemplateVersion();
@@ -42,7 +46,7 @@ public record MessageLogDetailResponse(
                 log.getId(),
                 log.getTraceId(),
                 log.getSubscription().getSubId(),
-                log.getRecipientEnc(),
+                recipientMasked,
                 (templateVersion != null) ? templateVersion.getId() : null,
                 log.getChannel(),
                 log.getStatus(),
