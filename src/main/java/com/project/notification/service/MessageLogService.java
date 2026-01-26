@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.project.global.exception.ApplicationException;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
+import com.project.global.exception.core.OperationFailedException;
 import com.project.global.util.AesUtil;
 import com.project.core.controller.dto.response.MaskingUtil;
 import com.project.notification.controller.dto.request.MessageLogSearchRequest;
@@ -16,10 +17,12 @@ import com.project.notification.infra.entity.MessageLog;
 import com.project.notification.infra.repository.MessageLogRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class MessageLogService {
 
     private final MessageLogRepository messageLogRepository;
@@ -50,7 +53,8 @@ public class MessageLogService {
         }
         try {
             return aesUtil.decrypt(encrypted);
-        } catch (Exception e) {
+        } catch (OperationFailedException e) {
+            log.warn("Failed to decrypt recipient. value: {}", encrypted, e);
             return encrypted;
         }
     }
