@@ -69,6 +69,10 @@ class SubscriptionServiceTest {
 
         // SubscriptionPlan Mock 설정 (Mockito mock 사용)
         SubscriptionPlan subPlan = org.mockito.Mockito.mock(SubscriptionPlan.class);
+        com.project.core.infra.entity.plan.Plan plan =
+                org.mockito.Mockito.mock(com.project.core.infra.entity.plan.Plan.class);
+        given(plan.getPlanName()).willReturn("BASIC");
+        given(subPlan.getPlan()).willReturn(plan);
         given(subPlan.getSubscription()).willReturn(sub);
         given(subPlan.getAllotmentPeriod()).willReturn(AllotmentPeriod.MONTH);
         given(subPlan.getAllotmentAmount()).willReturn(10240L);
@@ -111,6 +115,10 @@ class SubscriptionServiceTest {
 
         // SubscriptionPlan Mock 설정 (Mockito mock 사용)
         SubscriptionPlan subPlan = org.mockito.Mockito.mock(SubscriptionPlan.class);
+        com.project.core.infra.entity.plan.Plan plan =
+                org.mockito.Mockito.mock(com.project.core.infra.entity.plan.Plan.class);
+        given(plan.getPlanName()).willReturn("BASIC");
+        given(subPlan.getPlan()).willReturn(plan);
         given(subPlan.getSubscription()).willReturn(sub);
         given(subPlan.getAllotmentPeriod()).willReturn(AllotmentPeriod.MONTH);
         given(subPlan.getAllotmentAmount()).willReturn(10240L);
