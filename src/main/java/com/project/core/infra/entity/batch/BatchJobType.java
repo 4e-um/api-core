@@ -9,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum BatchJobType {
     INVOICE_ITEM_JOB("invoiceItemJob", "INVOICE_ITEM"),
-    INVOICE_JOB("invoiceJob", "INVOICE");
+    INVOICE_JOB("invoiceJob", "INVOICE"),
+    USAGE_AGGREGATION_JOB("usageAggregationJob", "USAGE"),
+    USAGE_NOTIFICATION_JOB("usageNotificationJob", "USAGE");
 
     private final String jobName;
     private final String title;
