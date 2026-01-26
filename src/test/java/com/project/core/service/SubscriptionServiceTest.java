@@ -28,6 +28,7 @@ import com.project.core.controller.dto.response.SubscriptionListResponse;
 import com.project.core.controller.dto.response.SubscriptionResponse;
 import com.project.core.infra.entity.customer.Customer;
 import com.project.core.infra.entity.customer.enums.Grade;
+import com.project.core.infra.entity.plan.Plan;
 import com.project.core.infra.entity.plan.SubscriptionPlan;
 import com.project.core.infra.entity.plan.enums.AllotmentPeriod;
 import com.project.core.infra.entity.subscription.Subscription;
@@ -150,8 +151,7 @@ class SubscriptionServiceTest {
 
     private static SubscriptionPlan setupMockSubscriptionPlan(Subscription sub) {
         SubscriptionPlan subPlan = org.mockito.Mockito.mock(SubscriptionPlan.class);
-        com.project.core.infra.entity.plan.Plan plan =
-                org.mockito.Mockito.mock(com.project.core.infra.entity.plan.Plan.class);
+        Plan plan = org.mockito.Mockito.mock(Plan.class);
         given(plan.getPlanName()).willReturn("BASIC");
         given(subPlan.getPlan()).willReturn(plan);
         given(subPlan.getSubscription()).willReturn(sub);
