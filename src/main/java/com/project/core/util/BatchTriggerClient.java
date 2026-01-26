@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.project.core.controller.dto.request.BatchTriggerRequest;
 import com.project.core.controller.dto.request.UpdateBatchScheduleRequest;
+import com.project.core.infra.entity.batch.BatchJobType;
 import com.project.global.config.CloudFunctionProperties;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.OperationFailedException;
@@ -27,13 +28,14 @@ public class BatchTriggerClient {
 
     public void trigger(String job, String invMonth) {
 
+        String title = BatchJobType.getTitleByJobName(job);
         String url = properties.getBaseUrl() + "/run-now";
         log.info("[BatchTrigger] calling url={}", url);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        BatchTriggerRequest body = new BatchTriggerRequest(job, invMonth);
+        BatchTriggerRequest body = new BatchTriggerRequest(title, invMonth);
 
         HttpEntity<BatchTriggerRequest> request = new HttpEntity<>(body, headers);
 
@@ -49,12 +51,13 @@ public class BatchTriggerClient {
 
     public void schedule(String job, String cron) {
 
+        String title = BatchJobType.getTitleByJobName(job);
         String url = properties.getBaseUrl() + "/schedule";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        UpdateBatchScheduleRequest body = new UpdateBatchScheduleRequest(job, cron);
+        UpdateBatchScheduleRequest body = new UpdateBatchScheduleRequest(title, cron);
 
         HttpEntity<UpdateBatchScheduleRequest> request = new HttpEntity<>(body, headers);
 
