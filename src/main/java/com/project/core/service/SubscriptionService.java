@@ -56,23 +56,30 @@ public class SubscriptionService {
                             String decryptedEmail = safeDecrypt(sub.getCustomer().getEmailEnc());
                             String decryptedPhone = safeDecrypt(sub.getPhoneNumber());
 
-                            SubscriptionPlan subPlan =
-                                    subscriptionPlanRepository
-                                            .findActivePlanBySubId(sub.getSubId())
-                                            .orElseThrow(
-                                                    () ->
-                                                            new EntityNotFoundException(
-                                                                    CoreErrorCode
-                                                                            .SUBSCRIPTION_NOT_FOUND));
-
-                            long totalUsedBytes =
-                                    getSubscriptionTotalAmount(subPlan) / (1024 * 1024);
-                            return SubscriptionListResponse.of(
-                                    sub,
-                                    totalUsedBytes,
-                                    subPlan.getAllotmentAmount(),
-                                    decryptedEmail,
-                                    decryptedPhone);
+                            return subscriptionPlanRepository
+                                    .findActivePlanBySubId(sub.getSubId())
+                                    .map(
+                                            subPlan -> {
+                                                long totalUsedBytes =
+                                                        getSubscriptionTotalAmount(subPlan)
+                                                                / (1024 * 1024);
+                                                return SubscriptionListResponse.of(
+                                                        sub,
+                                                        totalUsedBytes,
+                                                        subPlan.getAllotmentAmount(),
+                                                        subPlan.getPlan().getPlanName(),
+                                                        decryptedEmail,
+                                                        decryptedPhone);
+                                            })
+                                    .orElseGet(
+                                            () ->
+                                                    SubscriptionListResponse.of(
+                                                            sub,
+                                                            0L,
+                                                            0L,
+                                                            null,
+                                                            decryptedEmail,
+                                                            decryptedPhone));
                         });
     }
 
@@ -108,6 +115,7 @@ public class SubscriptionService {
                         sub,
                         totalUsedBytes,
                         subPlan.getAllotmentAmount(),
+                        subPlan.getPlan().getPlanName(),
                         decryptedEmail,
                         decryptedPhone);
 

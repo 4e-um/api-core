@@ -41,6 +41,9 @@ public class SubscriptionPlan {
     @JoinColumn(name = "plan_id", nullable = false)
     private Plan plan;
 
+    @Column(name = "plan_name", nullable = false, length = 30)
+    private String planName;
+
     @Column(name = "cost", nullable = false)
     private Integer cost;
 
@@ -61,6 +64,7 @@ public class SubscriptionPlan {
     public SubscriptionPlan(Subscription subscription, Plan plan) {
         this.subscription = subscription;
         this.plan = plan;
+        this.planName = plan.getPlanName();
         this.cost = plan.getPlanBaseFee(); // 요금제 가격을 스냅샷으로 저장
         this.allotmentAmount = plan.getAllotmentAmount();
         this.allotmentPeriod = plan.getAllotmentPeriod();

@@ -48,10 +48,10 @@ public class CustomerController {
     }
 
     /** 고객 조회 (전화번호 기준) */
-    @PostMapping("/search")
-    public ResponseEntity<CustomerSearchResponse> searchByPhone(
-            @RequestBody PhoneSearchRequest request) {
-        Customer customer = customerService.loadByPhone(request.phoneRaw());
+        @PostMapping("/search")
+        public ResponseEntity<CustomerSearchResponse> searchByPhone(
+                @RequestBody PhoneSearchRequest request) {
+            Customer customer = customerService.loadByPhone(request.phoneRaw());
         Long customerId = customer.getCustomerId();
 
         List<SubscriptionResponse> subscriptions =
