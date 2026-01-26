@@ -86,8 +86,3 @@ logging:
     org.hibernate.SQL: WARN
   pattern:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
-
-billing:
-  grafana:
-    iframe-url: https://grafana.example.com/d/xxx
-    refresh-interval: 5s
