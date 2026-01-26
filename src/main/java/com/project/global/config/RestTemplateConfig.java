@@ -21,7 +21,7 @@ public class RestTemplateConfig {
         RequestConfig requestConfig =
                 RequestConfig.custom()
                         .setConnectTimeout(Timeout.ofSeconds(5))          // TCP 연결
-                        .setResponseTimeout(Timeout.ofSeconds(5))         // 응답 대기
+                        .setResponseTimeout(Timeout.ofSeconds(30))         // 응답 대기
                         .setConnectionRequestTimeout(Timeout.ofSeconds(5))// 풀 대기
                         .build();
 

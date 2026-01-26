@@ -101,19 +101,22 @@ public class InvoiceService {
             // 2️⃣ 타임존 (Cloud Function 기준)
             ZoneId zoneId = ZoneId.of(timeZone);
 
-            // 3️⃣ 다음 실행 시각 계산 (Spring)
+            // ✅ Spring용 크론 보정 (6필드)
+            String springCronStr = cronStr;
+            if (cronStr.split(" ").length == 5) {
+                springCronStr = "0 " + cronStr;
+            }
+
             CronExpression springCron =
-                    CronExpression.parse(cronStr);
+                    CronExpression.parse(springCronStr);
 
             ZonedDateTime nextFire =
                     springCron.next(ZonedDateTime.now(zoneId));
 
-            // 4️⃣ 크론 설명 (cron-utils)
+            // ✅ cron-utils (UNIX)
             CronParser parser = new CronParser(
-                    CronDefinitionBuilder
-                            .instanceDefinitionFor(CronType.SPRING)
+                    CronDefinitionBuilder.instanceDefinitionFor(CronType.UNIX)
             );
-
             Cron cron = parser.parse(cronStr);
 
             String cronDescription =

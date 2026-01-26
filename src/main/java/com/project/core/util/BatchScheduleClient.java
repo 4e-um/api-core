@@ -1,6 +1,7 @@
 package com.project.core.util;
 
 import com.project.core.controller.dto.response.BatchScheduleResponse;
+import com.project.core.infra.entity.batch.BatchJobType;
 import com.project.global.config.CloudFunctionProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,8 @@ public class BatchScheduleClient {
 
     public Optional<BatchScheduleResponse> getSchedule(String jobName) {
 
-        String url = properties.getBaseUrl() + "/schedule?job=" + jobName;
+        String title = BatchJobType.getTitleByJobName(jobName);
+        String url = properties.getBaseUrl() + "/schedule?job=" + title;
 
         try {
             ResponseEntity<BatchScheduleResponse> response =
