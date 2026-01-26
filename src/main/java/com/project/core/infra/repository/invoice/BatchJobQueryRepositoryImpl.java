@@ -1,5 +1,6 @@
 package com.project.core.infra.repository.invoice;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -46,16 +47,25 @@ public class BatchJobQueryRepositoryImpl implements BatchJobQueryRepository {
         return jdbcTemplate.query(
                 sql,
                 (rs, rowNum) -> {
-                    var startTimeStamp = rs.getTimestamp("START_TIME");
-                    var endTimeStamp = rs.getTimestamp("END_TIME");
-                    return new BatchSummaryDto(
-                            rs.getString("JOB_NAME"),
-                            rs.getString("STATUS"),
-                            rs.getString("EXIT_CODE"),
-                            rs.getString("EXIT_MESSAGE"),
-                            startTimeStamp != null ? startTimeStamp.toLocalDateTime() : null,
-                            endTimeStamp != null ? endTimeStamp.toLocalDateTime() : null,
-                            rs.getLong("DURATION_MS"));
+                    var startTimestamp = rs.getTimestamp("START_TIME");
+                    var endTimestamp = rs.getTimestamp("END_TIME");
+
+                    LocalDateTime startTime =
+                            startTimestamp != null ? startTimestamp.toLocalDateTime() : null;
+
+                    LocalDateTime endTime =
+                            endTimestamp != null ? endTimestamp.toLocalDateTime() : null;
+
+                    return BatchSummaryDto.builder()
+                            .jobName(rs.getString("JOB_NAME"))
+                            .status(rs.getString("STATUS"))
+                            .exitCode(rs.getString("EXIT_CODE"))
+                            .exitMessage(rs.getString("EXIT_MESSAGE"))
+                            .startTime(startTime)
+                            .endTime(endTime)
+                            .durationMs(rs.getLong("DURATION_MS"))
+                            // cron 관련 필드는 Service에서 채움
+                            .build();
                 });
     }
 }

@@ -19,20 +19,22 @@ public class RestTemplateConfig {
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
 
-        // 1️⃣ TCP 연결 타임아웃
+        // 1️⃣ Connection-level 설정 (TCP 연결)
         ConnectionConfig connectionConfig =
                 ConnectionConfig.custom().setConnectTimeout(Timeout.ofSeconds(5)).build();
-
-        // 2️⃣ 요청/응답 타임아웃
-        RequestConfig requestConfig =
-                RequestConfig.custom()
-                        .setResponseTimeout(Timeout.ofSeconds(5))
-                        .setConnectionRequestTimeout(Timeout.ofSeconds(5))
-                        .build();
 
         PoolingHttpClientConnectionManager cm =
                 PoolingHttpClientConnectionManagerBuilder.create()
                         .setDefaultConnectionConfig(connectionConfig)
+                        .setMaxConnTotal(100)
+                        .setMaxConnPerRoute(20)
+                        .build();
+
+        // 2️⃣ Request-level 설정 (요청/응답)
+        RequestConfig requestConfig =
+                RequestConfig.custom()
+                        .setResponseTimeout(Timeout.ofSeconds(30)) // 응답 대기
+                        .setConnectionRequestTimeout(Timeout.ofSeconds(5)) // 풀 대기
                         .build();
 
         CloseableHttpClient httpClient =

@@ -12,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.project.core.service.BatchScheduleService;
 import com.project.core.util.BatchTriggerClient;
 
 @WebMvcTest(InvoiceBatchAdminController.class)
@@ -21,8 +20,6 @@ class InvoiceBatchAdminControllerTest {
     @Autowired private MockMvc mockMvc;
 
     @MockitoBean private BatchTriggerClient batchTriggerClient;
-
-    @MockitoBean private BatchScheduleService scheduleService;
 
     @Test
     @DisplayName("스케줄 수정 트리거 성공")
@@ -44,7 +41,6 @@ class InvoiceBatchAdminControllerTest {
                 .andExpect(status().isOk());
 
         // then (행위 검증)
-        verify(scheduleService).updateSchedule("invoiceJob", "0 0 2 * * ?");
 
         verify(batchTriggerClient).schedule("invoiceJob", "0 0 2 * * ?");
     }
@@ -55,11 +51,11 @@ class InvoiceBatchAdminControllerTest {
 
         String body =
                 """
-                {
-                  "job": "invoiceJob",
-                  "invMonth": "202601"
-                }
-                """;
+                        {
+                          "job": "invoiceJob",
+                          "invMonth": "202601"
+                        }
+                        """;
         mockMvc.perform(
                 post("/admin/batch/invoice/run-now").contentType("application/json").content(body));
 

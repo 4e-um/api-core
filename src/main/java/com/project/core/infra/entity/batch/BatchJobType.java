@@ -8,8 +8,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum BatchJobType {
-    INVOICE_ITEM_JOB("invoiceItemJob", "청구 내역 생성"),
-    INVOICE_JOB("invoiceJob", "청구서 생성");
+    INVOICE_ITEM_JOB("invoiceItemJob", "INVOICE_ITEM"),
+    INVOICE_JOB("invoiceJob", "INVOICE");
 
     private final String jobName;
     private final String title;

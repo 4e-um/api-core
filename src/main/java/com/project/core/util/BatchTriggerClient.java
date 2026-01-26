@@ -28,6 +28,7 @@ public class BatchTriggerClient {
     public void trigger(String job, String invMonth) {
 
         String url = properties.getBaseUrl() + "/run-now";
+        log.info("[BatchTrigger] calling url={}", url);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
