@@ -5,11 +5,11 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.project.core.controller.dto.response.MaskingUtil;
 import com.project.global.exception.ApplicationException;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
 import com.project.global.exception.core.OperationFailedException;
 import com.project.global.util.AesUtil;
-import com.project.core.controller.dto.response.MaskingUtil;
 import com.project.notification.controller.dto.request.MessageLogSearchRequest;
 import com.project.notification.controller.dto.response.MessageLogDetailResponse;
 import com.project.notification.controller.dto.response.MessageLogResponse;
