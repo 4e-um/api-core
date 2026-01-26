@@ -139,7 +139,7 @@ public class TemplateVersionService {
             validateBody(request.body());
         }
 
-        String subject = normalizeSubject(version.getChannel(), request.subject());
+        String subject = request.subject();
         version.updateContent(subject, request.body(), request.variables());
 
         return TemplateVersionResponse.from(version);
@@ -241,13 +241,6 @@ public class TemplateVersionService {
         if (body == null || body.isBlank()) {
             throw new InvalidStateException(CoreErrorCode.TEMPLATE_BODY_REQUIRED);
         }
-    }
-
-    private String normalizeSubject(Channel channel, String subject) {
-        if (channel == Channel.SMS) {
-            return null;
-        }
-        return subject;
     }
 
     private Set<String> extractRequiredKeys(Map<String, Object> variables) {
