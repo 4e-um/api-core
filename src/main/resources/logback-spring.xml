@@ -43,11 +43,4 @@
             <appender-ref ref="ASYNC_OTEL"/>
         </root>
     </springProfile>
-
-    <!-- fallback: always on -->
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
-    </root>
-
 </configuration>
-

@@ -67,7 +67,7 @@ public class SubscriptionService {
                                                         sub,
                                                         totalUsedBytes,
                                                         subPlan.getAllotmentAmount(),
-                                                        subPlan.getPlanName(),
+                                                        subPlan.getPlan().getPlanName(),
                                                         decryptedEmail,
                                                         decryptedPhone);
                                             })
@@ -115,7 +115,7 @@ public class SubscriptionService {
                         sub,
                         totalUsedBytes,
                         subPlan.getAllotmentAmount(),
-                        subPlan.getPlanName(),
+                        subPlan.getPlan().getPlanName(),
                         decryptedEmail,
                         decryptedPhone);
 

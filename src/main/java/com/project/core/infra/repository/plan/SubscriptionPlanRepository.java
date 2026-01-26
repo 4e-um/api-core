@@ -13,7 +13,7 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
 
     // 해당 회선이 현재 사용 중인 요금제 조회 (leftDate가 현재보다 미래인 것)
     @Query(
-            "SELECT sp from SubscriptionPlan sp "
+            "SELECT sp from SubscriptionPlan sp JOIN FETCH sp.plan "
                     + "WHERE sp.subscription.subId = :subId AND sp.leftDate > CURRENT_TIMESTAMP")
     Optional<SubscriptionPlan> findActivePlanBySubId(@Param("subId") Long subId);
 
