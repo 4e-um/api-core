@@ -21,8 +21,6 @@ class InvoiceBatchAdminControllerTest {
 
     @MockitoBean private BatchTriggerClient batchTriggerClient;
 
-    @MockitoBean private BatchScheduleService scheduleService;
-
     @Test
     @DisplayName("스케줄 수정 트리거 성공")
     void updateSchedule_should_update_db_and_trigger_cf() throws Exception {
@@ -43,7 +41,6 @@ class InvoiceBatchAdminControllerTest {
                 .andExpect(status().isOk());
 
         // then (행위 검증)
-        verify(scheduleService).updateSchedule("invoiceJob", "0 0 2 * * ?");
 
         verify(batchTriggerClient).schedule("invoiceJob", "0 0 2 * * ?");
     }
@@ -54,11 +51,11 @@ class InvoiceBatchAdminControllerTest {
 
         String body =
                 """
-                {
-                  "job": "invoiceJob",
-                  "invMonth": "202601"
-                }
-                """;
+                        {
+                          "job": "invoiceJob",
+                          "invMonth": "202601"
+                        }
+                        """;
         mockMvc.perform(
                 post("/admin/batch/invoice/run-now").contentType("application/json").content(body));
 

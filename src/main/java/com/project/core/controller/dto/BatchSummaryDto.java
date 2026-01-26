@@ -17,9 +17,9 @@ public class BatchSummaryDto {
     private String exitCode;
     private String exitMessage;
 
-    private String cronExpression;        // 0 0 2 * * *
-    private String cronDescription;       // 매일 오전 2시
-    private LocalDateTime nextFireTime;    // 다음 실행 시각
+    private String cronExpression; // 0 0 2 * * *
+    private String cronDescription; // 매일 오전 2시
+    private LocalDateTime nextFireTime; // 다음 실행 시각
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;

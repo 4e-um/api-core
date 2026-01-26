@@ -44,27 +44,28 @@ public class BatchJobQueryRepositoryImpl implements BatchJobQueryRepository {
                             ORDER BY ji.JOB_NAME
                         """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> {
+                    var startTimestamp = rs.getTimestamp("START_TIME");
+                    var endTimestamp = rs.getTimestamp("END_TIME");
 
-            var startTimestamp = rs.getTimestamp("START_TIME");
-            var endTimestamp = rs.getTimestamp("END_TIME");
+                    LocalDateTime startTime =
+                            startTimestamp != null ? startTimestamp.toLocalDateTime() : null;
 
-            LocalDateTime startTime =
-                    startTimestamp != null ? startTimestamp.toLocalDateTime() : null;
+                    LocalDateTime endTime =
+                            endTimestamp != null ? endTimestamp.toLocalDateTime() : null;
 
-            LocalDateTime endTime =
-                    endTimestamp != null ? endTimestamp.toLocalDateTime() : null;
-
-            return BatchSummaryDto.builder()
-                    .jobName(rs.getString("JOB_NAME"))
-                    .status(rs.getString("STATUS"))
-                    .exitCode(rs.getString("EXIT_CODE"))
-                    .exitMessage(rs.getString("EXIT_MESSAGE"))
-                    .startTime(startTime)
-                    .endTime(endTime)
-                    .durationMs(rs.getLong("DURATION_MS"))
-                    // cron 관련 필드는 Service에서 채움
-                    .build();
-        });
+                    return BatchSummaryDto.builder()
+                            .jobName(rs.getString("JOB_NAME"))
+                            .status(rs.getString("STATUS"))
+                            .exitCode(rs.getString("EXIT_CODE"))
+                            .exitMessage(rs.getString("EXIT_MESSAGE"))
+                            .startTime(startTime)
+                            .endTime(endTime)
+                            .durationMs(rs.getLong("DURATION_MS"))
+                            // cron 관련 필드는 Service에서 채움
+                            .build();
+                });
     }
 }

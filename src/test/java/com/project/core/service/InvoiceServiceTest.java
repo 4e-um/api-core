@@ -37,17 +37,21 @@ class InvoiceServiceTest {
     @DisplayName("[조회] 성공 - 배치 대시보드 조회")
     void getDashboard_success() {
         // given
+        LocalDateTime start = LocalDateTime.of(2026, 1, 26, 2, 0, 0);
+        LocalDateTime end = start.plusSeconds(5);
+
         given(batchJobQueryRepository.findLatestJobSummaries())
                 .willReturn(
                         List.of(
-                                new BatchSummaryDto(
-                                        "invoiceJob",
-                                        "COMPLETED",
-                                        "COMPLETED",
-                                        null,
-                                        LocalDateTime.now().minusSeconds(5),
-                                        LocalDateTime.now(),
-                                        5000L)));
+                                BatchSummaryDto.builder()
+                                        .jobName("invoiceJob")
+                                        .status("COMPLETED")
+                                        .exitCode("COMPLETED")
+                                        .exitMessage(null)
+                                        .startTime(start)
+                                        .endTime(end)
+                                        .durationMs(5000L)
+                                        .build()));
 
         given(batchFailureQueryRepository.findRecentFailures(10)).willReturn(List.of());
 

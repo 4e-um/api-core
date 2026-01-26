@@ -30,7 +30,6 @@ public class BatchTriggerClient {
         String url = properties.getBaseUrl() + "/run-now";
         log.info("[BatchTrigger] calling url={}", url);
 
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 

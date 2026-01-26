@@ -1,16 +1,18 @@
 package com.project.core.util;
 
-import com.project.core.controller.dto.response.BatchScheduleResponse;
-import com.project.core.infra.entity.batch.BatchJobType;
-import com.project.global.config.CloudFunctionProperties;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Optional;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Optional;
+import com.project.core.controller.dto.response.BatchScheduleResponse;
+import com.project.core.infra.entity.batch.BatchJobType;
+import com.project.global.config.CloudFunctionProperties;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
@@ -32,8 +34,11 @@ public class BatchScheduleClient {
             return Optional.ofNullable(response.getBody());
 
         } catch (HttpStatusCodeException e) {
-            log.warn("[BatchSchedule] 조회 실패 job={}, status={}, body={}",
-                    jobName, e.getStatusCode(), e.getResponseBodyAsString());
+            log.warn(
+                    "[BatchSchedule] 조회 실패 job={}, status={}, body={}",
+                    jobName,
+                    e.getStatusCode(),
+                    e.getResponseBodyAsString());
             return Optional.empty();
 
         } catch (Exception e) {
