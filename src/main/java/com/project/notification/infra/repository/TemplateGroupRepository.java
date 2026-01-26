@@ -31,15 +31,4 @@ public interface TemplateGroupRepository extends JpaRepository<TemplateGroup, Lo
             @Param("includeDeleted") boolean includeDeleted,
             @Param("keyword") String keyword,
             Pageable pageable);
-
-    @Query(
-            """
-            select g from TemplateGroup g
-            where (:includeDeleted = true or g.isDeleted = false)
-              and (:isActive is null or g.isActive = :isActive)
-            """)
-    Page<TemplateGroup> searchWithoutKeyword(
-            @Param("isActive") Boolean isActive,
-            @Param("includeDeleted") boolean includeDeleted,
-            Pageable pageable);
 }
