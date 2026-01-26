@@ -115,7 +115,7 @@ public class SubscriptionService {
                         sub,
                         totalUsedBytes,
                         subPlan.getAllotmentAmount(),
-                        subPlan.getPlan().getPlanName(),
+                        subPlan.getPlanName(),
                         decryptedEmail,
                         decryptedPhone);
 
