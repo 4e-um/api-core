@@ -31,9 +31,10 @@ public record SubscriptionListResponse(
             Subscription sub,
             long totalUsedAmount,
             long allotmentAmount,
+            String planName,
             String decryptedEmail,
             String decryptedPhone) {
-        String planName = "N/A";
+        String resolvedPlanName = (planName == null || planName.isBlank()) ? "N/A" : planName;
 
         // 회선 ID 포맷팅 (SUB-0000001)
         String formattedSubId = null;
@@ -59,7 +60,7 @@ public record SubscriptionListResponse(
                 .customerName(sub.getCustomer().getName())
                 .email(MaskingUtil.maskEmail(decryptedEmail))
                 .phoneNumber(MaskingUtil.maskPhone(decryptedPhone))
-                .planName(planName)
+                .planName(resolvedPlanName)
                 .dataUsed(totalUsedAmount)
                 .dataLimit(allotmentAmount)
                 .status(sub.getStatus().name())

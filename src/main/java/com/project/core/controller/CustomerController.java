@@ -52,6 +52,7 @@ public class CustomerController {
     public ResponseEntity<CustomerSearchResponse> searchByPhone(
             @RequestBody PhoneSearchRequest request) {
         Customer customer = customerService.loadByPhone(request.phoneRaw());
+
         Long customerId = customer.getCustomerId();
 
         List<SubscriptionResponse> subscriptions =
