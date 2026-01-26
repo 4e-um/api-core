@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.project.global.exception.ApplicationException;
 import com.project.global.exception.code.domain.core.CoreErrorCode;
+import com.project.global.util.AesUtil;
+import com.project.core.controller.dto.response.MaskingUtil;
 import com.project.notification.controller.dto.request.MessageLogSearchRequest;
 import com.project.notification.controller.dto.response.MessageLogDetailResponse;
 import com.project.notification.controller.dto.response.MessageLogResponse;
@@ -21,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class MessageLogService {
 
     private final MessageLogRepository messageLogRepository;
+    private final AesUtil aesUtil;
 
     /** 로그 목록 검색 */
     public Slice<MessageLogResponse> searchLogs(
@@ -35,6 +38,30 @@ public class MessageLogService {
                         .findDetailById(logId)
                         .orElseThrow(() -> new ApplicationException(CoreErrorCode.LOG_NOT_FOUND));
 
-        return MessageLogDetailResponse.from(log);
+        String decryptedRecipient = safeDecrypt(log.getRecipientEnc());
+        String maskedRecipient = maskRecipient(decryptedRecipient);
+
+        return MessageLogDetailResponse.from(log, maskedRecipient);
+    }
+
+    private String safeDecrypt(String encrypted) {
+        if (encrypted == null) {
+            return null;
+        }
+        try {
+            return aesUtil.decrypt(encrypted);
+        } catch (Exception e) {
+            return encrypted;
+        }
+    }
+
+    private String maskRecipient(String recipient) {
+        if (recipient == null || recipient.isBlank()) {
+            return recipient;
+        }
+        if (recipient.contains("@")) {
+            return MaskingUtil.maskEmail(recipient);
+        }
+        return MaskingUtil.maskPhone(recipient);
     }
 }

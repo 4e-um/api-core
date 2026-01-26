@@ -86,3 +86,7 @@ logging:
     org.hibernate.SQL: WARN
   pattern:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+debug:
+  crypto:
+    enabled: true
