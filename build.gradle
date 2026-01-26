@@ -96,6 +96,9 @@ dependencies {
     // RestTemplate
     implementation "org.apache.httpcomponents.client5:httpclient5"
 
+    // Cron
+    implementation "com.cronutils:cron-utils:9.2.1"
+
 }
 
 // ============================================================================

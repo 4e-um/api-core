@@ -12,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.project.core.service.BatchScheduleService;
 import com.project.core.util.BatchTriggerClient;
 
 @WebMvcTest(InvoiceBatchAdminController.class)

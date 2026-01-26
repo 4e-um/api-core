@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.project.core.controller.dto.request.BatchTriggerRequest;
 import com.project.core.controller.dto.request.UpdateBatchScheduleRequest;
-import com.project.core.service.BatchScheduleService;
 import com.project.core.util.BatchTriggerClient;
 
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 public class InvoiceBatchAdminController {
 
     private final BatchTriggerClient batchTriggerClient;
-    private final BatchScheduleService scheduleService;
 
     @PostMapping("/run-now")
     public ResponseEntity<Void> runNow(@RequestBody BatchTriggerRequest request) {
@@ -33,7 +31,6 @@ public class InvoiceBatchAdminController {
 
     @PutMapping("/schedule")
     public ResponseEntity<Void> updateSchedule(@RequestBody UpdateBatchScheduleRequest request) {
-        scheduleService.updateSchedule(request.job(), request.cron());
         batchTriggerClient.schedule(request.job(), request.cron());
         return ResponseEntity.ok().build();
     }
