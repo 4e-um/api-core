@@ -56,7 +56,7 @@ public class TemplateGroupService {
     // 그룹 목록 조회
     public Page<TemplateGroupResponse> getGroups(
             Boolean isActive, boolean includeDeleted, String keyword, Pageable pageable) {
-        String normalizedKeyword = (keyword == null || keyword.isBlank()) ? null : keyword;
+        String normalizedKeyword = (keyword == null || keyword.isBlank()) ? "" : keyword;
         return groupRepository
                 .search(isActive, includeDeleted, normalizedKeyword, pageable)
                 .map(TemplateGroupResponse::from);
