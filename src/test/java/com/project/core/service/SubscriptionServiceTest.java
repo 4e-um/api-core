@@ -68,14 +68,7 @@ class SubscriptionServiceTest {
         Slice<Subscription> slice = new SliceImpl<>(List.of(sub));
 
         // SubscriptionPlan Mock 설정 (Mockito mock 사용)
-        SubscriptionPlan subPlan = org.mockito.Mockito.mock(SubscriptionPlan.class);
-        com.project.core.infra.entity.plan.Plan plan =
-                org.mockito.Mockito.mock(com.project.core.infra.entity.plan.Plan.class);
-        given(plan.getPlanName()).willReturn("BASIC");
-        given(subPlan.getPlan()).willReturn(plan);
-        given(subPlan.getSubscription()).willReturn(sub);
-        given(subPlan.getAllotmentPeriod()).willReturn(AllotmentPeriod.MONTH);
-        given(subPlan.getAllotmentAmount()).willReturn(10240L);
+        SubscriptionPlan subPlan = setupMockSubscriptionPlan(sub);
 
         given(subscriptionRepository.findAllSlice(pageable)).willReturn(slice);
         given(subscriptionPlanRepository.findActivePlanBySubId(1L))
@@ -114,14 +107,7 @@ class SubscriptionServiceTest {
         Subscription sub = newInstanceSubscription(1L, customer);
 
         // SubscriptionPlan Mock 설정 (Mockito mock 사용)
-        SubscriptionPlan subPlan = org.mockito.Mockito.mock(SubscriptionPlan.class);
-        com.project.core.infra.entity.plan.Plan plan =
-                org.mockito.Mockito.mock(com.project.core.infra.entity.plan.Plan.class);
-        given(plan.getPlanName()).willReturn("BASIC");
-        given(subPlan.getPlan()).willReturn(plan);
-        given(subPlan.getSubscription()).willReturn(sub);
-        given(subPlan.getAllotmentPeriod()).willReturn(AllotmentPeriod.MONTH);
-        given(subPlan.getAllotmentAmount()).willReturn(10240L);
+        SubscriptionPlan subPlan = setupMockSubscriptionPlan(sub);
 
         given(contactHashUtil.hmacSha256Base64(phoneRaw)).willReturn(hash);
         given(subscriptionRepository.findByPhoneHash(hash)).willReturn(Optional.of(sub));
@@ -160,6 +146,18 @@ class SubscriptionServiceTest {
         ReflectionTestUtils.setField(subscription, "subId", subId);
         ReflectionTestUtils.setField(subscription, "startDate", LocalDateTime.now(fixedClock));
         return subscription;
+    }
+
+    private static SubscriptionPlan setupMockSubscriptionPlan(Subscription sub) {
+        SubscriptionPlan subPlan = org.mockito.Mockito.mock(SubscriptionPlan.class);
+        com.project.core.infra.entity.plan.Plan plan =
+                org.mockito.Mockito.mock(com.project.core.infra.entity.plan.Plan.class);
+        given(plan.getPlanName()).willReturn("BASIC");
+        given(subPlan.getPlan()).willReturn(plan);
+        given(subPlan.getSubscription()).willReturn(sub);
+        given(subPlan.getAllotmentPeriod()).willReturn(AllotmentPeriod.MONTH);
+        given(subPlan.getAllotmentAmount()).willReturn(10240L);
+        return subPlan;
     }
 
     @Test
