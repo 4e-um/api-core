@@ -64,7 +64,7 @@ public class TemplateVersionService {
 
         int nextVersion = versionRepository.findMaxVersion(groupId, request.channel()) + 1;
 
-        String subject =  request.subject();
+        String subject = request.subject();
         TemplateVersion version =
                 TemplateVersion.builder()
                         .templateGroup(group)
