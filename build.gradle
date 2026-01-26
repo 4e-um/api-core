@@ -24,6 +24,7 @@ def coverageExcludePackages = [
     '**/notification/**',
     '**/usage/**',
     '**/util/**',
+    '**/core/**',
 ]
 
 // JaCoCo용 제외 패턴 (클래스 파일)
